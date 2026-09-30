@@ -20,7 +20,7 @@ import { RunNumberDto } from '../../dtos/filters/RunNumberDto.js';
 f
  * @param {object} req - The request object.
  * @param {object} res - The response object.
- * @param {Function} next - The next middleware function in the stack.
+ * @param {() => void} next - The next middleware function in the stack.
  * @returns {Promise<void>}
  */
 export const runStatusFilterMiddleware = async (req, res, next) => {

@@ -19,7 +19,7 @@ const { NotFoundError, TimeoutError, UnauthorizedAccessError } = require('@alice
  * The purpose is to translate MySQL errors to native JS errors
  * Source: https://github.com/mariadb-corporation/mariadb-connector-nodejs/blob/c3a9e333243a1d92b22f4ca1e5a574ab0de77cea/lib/const/error-code.js#L1040
  * @param {SqlError} error - the error from a catch or callback
- * @throws throws a native JS error
+ * @throws {Error} throws a native JS error
  */
 const fromSqlToNativeError = (error) => {
   const { code, errno, sqlMessage } = error;

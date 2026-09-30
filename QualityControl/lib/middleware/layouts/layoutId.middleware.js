@@ -21,7 +21,7 @@ import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '
 /**
  * Middleware that checks if the layout id is present in the request
  * @param {LayoutRepository} layoutRepository - repository for getting/setting layout data
- * @returns  {function(req, res, next): Function} - middleware function
+ * @returns  {(req: Express.Request, res: Express.Response, next: Express.Next) => Promise<void>} - middleware function
  */
 export const layoutIdMiddleware = (layoutRepository) =>
 

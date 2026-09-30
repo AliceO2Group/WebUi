@@ -4,19 +4,18 @@ on:
     paths:
       - 'Tokenization/**/*'
       - '.github/workflows/tokenization.yml'
-  push:
-    branches:
-      - 'dev'
-
+concurrency:
+  group: central-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint-check-backend:
     name: Check eslint rules for backend on ubuntu-latest
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '22.x'
       - run: (cd Tokenization/backend/central-system; npm i)
@@ -25,9 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '22.x'
       - run: (cd Tokenization/webapp; npm i )
@@ -40,9 +39,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '22.x'
       - run: (cd Tokenization/webapp; npm run docker:test)
@@ -53,9 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '22.x'
       - run: (cd Tokenization/backend/central-system; npm i; npm run test)

@@ -17,6 +17,7 @@ import { deepStrictEqual } from 'node:assert';
 import { suite, test, before } from 'node:test';
 
 import { StatusService } from './../../../lib/services/Status.service.js';
+import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 
 export const statusServiceTestSuite = async () => {
   suite('`retrieveDataServiceStatus()` tests', () => {
@@ -31,7 +32,12 @@ export const statusServiceTestSuite = async () => {
       const result = await statusService.retrieveDataServiceStatus();
       deepStrictEqual(
         result,
-        { extras: {}, name: 'CCDB', status: { ok: false, message: 'Service is currently unavailable' }, version: '' },
+        {
+          name: 'CCDB',
+          status: { ok: false, category: ServiceStatus.ERROR, message: 'Service is currently unavailable' },
+          version: '',
+          extras: {},
+        },
       );
     });
     test('should successfully return status ok if data connector passed checks', async () => {
@@ -39,7 +45,12 @@ export const statusServiceTestSuite = async () => {
         getVersion: stub().resolves({ version: '0.0.1' }),
       };
       const response = await statusService.retrieveDataServiceStatus();
-      deepStrictEqual(response, { name: 'CCDB', status: { ok: true }, version: '0.0.1', extras: {} });
+      deepStrictEqual(response, {
+        name: 'CCDB',
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+        version: '0.0.1',
+        extras: {},
+      });
     });
   });
 
@@ -47,17 +58,39 @@ export const statusServiceTestSuite = async () => {
     test('should successfully build an object with framework information from all used sources', async () => {
       const statusService = new StatusService();
       statusService.dataService = { getVersion: stub().resolves({ version: '0.0.1-beta' }) };
+      statusService.aliEcsSynchronizer = { status: ServiceStatus.SUCCESS };
 
       const statusInfo = await Promise.all([
         statusService.retrieveServiceStatus('qcg'),
         statusService.retrieveServiceStatus('qc'),
         statusService.retrieveServiceStatus('ccdb'),
+        statusService.retrieveServiceStatus('kafka'),
       ]);
 
       const expectedResults = [
-        { name: 'QCG', version: '', status: { ok: true }, extras: { clients: -1 } },
-        { name: 'QC', status: { ok: true }, version: 'Not part of an FLP deployment', extras: {} },
-        { name: 'CCDB', status: { ok: true }, version: '0.0.1-beta', extras: {} },
+        {
+          name: 'QCG',
+          version: '',
+          status: { ok: true, category: ServiceStatus.SUCCESS },
+          extras: { clients: -1 },
+        },
+        {
+          name: 'QC',
+          status: { ok: false, category: ServiceStatus.NOT_CONFIGURED },
+          version: 'Not part of an FLP deployment',
+          extras: {},
+        },
+        {
+          name: 'CCDB',
+          status: { ok: true, category: ServiceStatus.SUCCESS },
+          version: '0.0.1-beta',
+          extras: {},
+        },
+        {
+          name: 'kafka',
+          status: { ok: true, category: ServiceStatus.SUCCESS },
+          extras: {},
+        },
       ];
 
       deepStrictEqual(statusInfo, expectedResults);
@@ -67,7 +100,12 @@ export const statusServiceTestSuite = async () => {
       test('should return message that is not part of an FLP deployment', async () => {
         const statusService = new StatusService();
         const response = await statusService.retrieveQcVersion();
-        const result = { name: 'QC', status: { ok: true }, version: 'Not part of an FLP deployment', extras: {} };
+        const result = {
+          name: 'QC',
+          status: { ok: false, category: ServiceStatus.NOT_CONFIGURED },
+          version: 'Not part of an FLP deployment',
+          extras: {},
+        };
         deepStrictEqual(response, result);
       });
     });
@@ -80,7 +118,7 @@ export const statusServiceTestSuite = async () => {
 
       deepStrictEqual(result, {
         name: 'QCG',
-        status: { ok: true },
+        status: { ok: true, category: ServiceStatus.SUCCESS },
         version: '0.0.1',
         extras: {
           clients: -1,
@@ -94,9 +132,70 @@ export const statusServiceTestSuite = async () => {
 
       deepStrictEqual(result, {
         name: 'QCG',
-        status: { ok: true },
+        status: { ok: true, category: ServiceStatus.SUCCESS },
         version: '',
         extras: { clients: -1 },
+      });
+    });
+  });
+
+  suite('`retrieveKafkaServiceStatus()` tests', () => {
+    test('marks Kafka service as healthy when synchronizer reports SUCCESS', async () => {
+      const statusService = new StatusService();
+      statusService.aliEcsSynchronizer = { status: ServiceStatus.SUCCESS };
+      const result = statusService.retrieveKafkaServiceStatus();
+
+      deepStrictEqual(result, {
+        name: 'kafka',
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+        extras: {},
+      });
+    });
+
+    test('marks Kafka service as idle when synchronizer has not been queried', async () => {
+      const statusService = new StatusService();
+      statusService.aliEcsSynchronizer = { status: ServiceStatus.NOT_ASKED };
+      const result = statusService.retrieveKafkaServiceStatus();
+
+      deepStrictEqual(result, {
+        name: 'kafka',
+        status: { ok: false, category: ServiceStatus.NOT_ASKED },
+        extras: {},
+      });
+    });
+
+    test('marks Kafka service as unhealthy when synchronizer reports an error', async () => {
+      const statusService = new StatusService();
+      statusService.aliEcsSynchronizer = { status: ServiceStatus.ERROR, extraInfo: { message: 'test error' } };
+      const result = statusService.retrieveKafkaServiceStatus();
+
+      deepStrictEqual(result, {
+        name: 'kafka',
+        status: { ok: false, category: ServiceStatus.ERROR },
+        extras: { message: 'test error' },
+      });
+    });
+
+    test('marks Kafka service as initializing while synchronizer is loading', async () => {
+      const statusService = new StatusService();
+      statusService.aliEcsSynchronizer = { status: ServiceStatus.LOADING };
+      const result = statusService.retrieveKafkaServiceStatus();
+
+      deepStrictEqual(result, {
+        name: 'kafka',
+        status: { ok: false, category: ServiceStatus.LOADING },
+        extras: {},
+      });
+    });
+
+    test('marks Kafka service as not configured when no synchronizer is present', async () => {
+      const statusService = new StatusService();
+      const result = statusService.retrieveKafkaServiceStatus();
+
+      deepStrictEqual(result, {
+        name: 'kafka',
+        status: { ok: false, category: ServiceStatus.NOT_CONFIGURED },
+        extras: {},
       });
     });
   });

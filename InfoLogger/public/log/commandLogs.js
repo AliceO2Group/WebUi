@@ -12,7 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconPerson, iconMediaPlay, iconMediaStop, iconDataTransferDownload } from '/js/src/index.js';
+import { h,
+  iconPerson,
+  iconMediaPlay,
+  iconMediaStop,
+  iconDataTransferDownload,
+  iconMagnifyingGlass,
+  iconPlus,
+  iconMinus,
+} from '/js/src/index.js';
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
 import { setBrowserTabTitle } from '../common/utils.js';
@@ -21,44 +29,123 @@ let queryButtonType = BUTTON.PRIMARY;
 let liveButtonType = BUTTON.DEFAULT;
 let liveButtonIcon = iconMediaPlay();
 
-export default (model) => [
+/**
+ * Component for the command buttons (Query, Live, Clear, navigation between errors and download)
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the command buttons
+ */
+export const commandLogs = (model) => [
   userActionsDropdown(model),
-  h('div.btn-group.mh3', [
-    queryButton(model),
-    liveButton(model),
-  ], ''),
-  h('button.btn.mh3', { onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear'),
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.firstError(),
-    title: 'Go to first error/fatal (ALT + left arrow)',
-  }, '|←'),
-  ' ',
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.previousError(),
-    title: 'Go to previous error/fatal (left arrow)',
-  }, '←'),
-  ' ',
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.nextError(),
-    title: 'Go to next error/fatal (left arrow)',
-  }, '→'),
-  ' ',
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.lastError(),
-    title: 'Go to last error/fatal (ALT + right arrow)',
-  }, '→|'),
-  ' ',
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.goToLastItem(),
-    title: 'Go to last log message (ALT + down arrow)',
-  }, '↓'),
-  downloadButtonGroup(model.log),
+  h('', interactionModesGroupButton(model)),
+  h('', h('button.btn', { onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear')),
+  h('.btn-group', [
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.firstError(),
+      title: 'Go to first error/fatal (ALT + left arrow)',
+    }, '|←'),
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.previousError(),
+      title: 'Go to previous error/fatal (left arrow)',
+    }, '←'),
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.nextError(),
+      title: 'Go to next error/fatal (left arrow)',
+    }, '→'),
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.lastError(),
+      title: 'Go to last error/fatal (ALT + right arrow)',
+    }, '→|'),
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.goToLastItem(),
+      title: 'Go to last log message (ALT + down arrow)',
+    }, '↓'),
+  ]),
+  h('', downloadButtonGroup(model.log)),
+  h('', zoomButtonGroup(model.zoom)),
 ];
+
+/**
+ * Group of buttons for switching between Query and Live modes.
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the interaction mode buttons
+ */
+const interactionModesGroupButton = (model) => {
+  const { frameworkInfo } = model;
+
+  return frameworkInfo.match({
+    NotAsked: () => h('button.btn', { disabled: true }, ''),
+    Loading: () => h('button.btn', { disabled: true, className: 'loading' }, 'Loading'),
+    Failure: () => null,
+    Success: (frameworkInfo) =>
+      h('.btn-group', [
+        queryButton(model, frameworkInfo),
+        liveButton(model, frameworkInfo),
+      ]),
+  });
+};
+
+/**
+ * Query button final state depends on the following states
+ * - services lookup
+ * - services result
+ * - query lookup
+ * @param {Model} model - root model of the application
+ * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
+ * @returns {vnode} - the view of the query button
+ */
+const queryButton = (model, frameworkInfo) => {
+  const { log: logModel } = model;
+  const { queryResult } = logModel;
+  const { mysql: { status: { ok: isDbReady = false } = {} } = {} } = frameworkInfo;
+
+  if (queryResult.isLoading()) {
+    return h('button.btn.bold', {
+      id: 'cancel-query-button',
+      title: 'Cancel ongoing query',
+      className: BUTTON.DANGER,
+      onclick: () => logModel.cancelQuery(),
+    }, 'Cancel');
+  }
+
+  return h('button.btn.bold', {
+    id: 'query-button',
+    title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
+    disabled: !isDbReady || queryResult.isLoading(),
+    className: queryButtonType,
+    onclick: () => toggleButtonStates(model, false),
+  }, 'Query');
+};
+
+/**
+ * Live button final state depends on the following states
+ * - services lookup
+ * - services result
+ * - websocket status
+ * @param {Model} model - root model of the application
+ * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
+ * @returns {vnode} - the view of the live button
+ */
+const liveButton = (model, frameworkInfo) => {
+  const { log: logModel, ws } = model;
+  const { queryResult } = logModel;
+  const { authed: isWsAuthedAndReady = false } = ws;
+  const { infoLoggerServer: { status: { ok: isLiveServiceReady = false } = {} } = {} } = frameworkInfo;
+
+  const isLiveModeReady = isLiveServiceReady && isWsAuthedAndReady;
+  const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
+
+  return h('button.btn.bold', {
+    title,
+    disabled: !isLiveModeReady || queryResult.isLoading(),
+    className: !isLiveModeReady ? 'loading' : liveButtonType,
+    onclick: () => toggleButtonStates(model, true),
+  }, 'Live', ' ', liveButtonIcon);
+};
 
 /**
  * Button dropdown to show current user and logout link
@@ -97,28 +184,6 @@ const saveUserProfileMenuItem = (model) =>
   }, 'Save Profile');
 
 /**
- * Query button final state depends on the following states
- * - services lookup
- * - services result
- * - query lookup
- * @param {Model} model - root model of the application
- * @returns {vnode} - the view of the query button
- */
-const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
-  NotAsked: () => ({ disabled: true }),
-  Loading: () => ({ disabled: true, className: 'loading' }),
-  Success: (frameworkInfo) => ({
-    title: frameworkInfo.mysql && frameworkInfo.mysql.status.ok
-      ? 'Query database with filters (Enter)' : 'Query service not configured',
-    disabled: !frameworkInfo.mysql || !frameworkInfo.mysql.status.ok || model.log.queryResult.isLoading(),
-    className: model.log.queryResult.isLoading() ? 'loading' : queryButtonType,
-    style: 'font-weight: bold',
-    onclick: () => toggleButtonStates(model, false),
-  }),
-  Failure: () => ({ disabled: true, className: 'danger' }),
-}), 'Query');
-
-/**
  * Group of buttons which allow the user to engage with the download functionality
  * * Download queries logs - will create a file containing all logs from the table (visible/hidden)
  * * Download visible logs only - will create a file containing only visible logs from the table
@@ -127,7 +192,7 @@ const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
  */
 const downloadButtonGroup = (logModel) =>
   h('.dropdown', { class: logModel.download.isVisible ? 'dropdown-open' : '' }, [
-    h('button.btn.mh3', {
+    h('button.btn', {
       onclick: () => {
         if (!logModel.download.isVisible) {
           logModel.generateLogDownloadContent();
@@ -151,26 +216,31 @@ const downloadButtonGroup = (logModel) =>
   ]);
 
 /**
- * Live button final state depends on the following states
- * - services lookup
- * - services result
- * - query lookup
- * - websocket status
- * @param {Model} model - root model of the application
- * @returns {vnode} - the view of the live button
+ * Group of buttons for controlling log table zoom level
+ * @param {Zoom} zoom - the zoom model
+ * @returns {vnode} - the view of the zoom button group
  */
-const liveButton = (model) => h('button.btn', model.frameworkInfo.match({
-  NotAsked: () => ({ disabled: true }),
-  Loading: () => ({ disabled: true, className: 'loading' }),
-  Success: (frameworkInfo) => ({
-    title: frameworkInfo.infoLoggerServer.status.ok ? 'Stream logs with filtering' : 'Live service not configured',
-    disabled: !frameworkInfo.infoLoggerServer.status.ok || model.log.queryResult.isLoading(),
-    className: !model.ws.authed ? 'loading' : liveButtonType,
-    style: 'font-weight: bold',
-    onclick: () => toggleButtonStates(model, true),
-  }),
-  Failure: () => ({ disabled: true, className: 'danger' }),
-}), 'Live', ' ', liveButtonIcon);
+const zoomButtonGroup = (zoom) =>
+  h('.btn-group', [
+    h('button.btn', {
+      onclick: () => zoom.zoomOut(),
+      disabled: zoom.level <= zoom.min,
+      id: 'zoom-out-button',
+      title: 'Zoom out (Ctrl/Cmd + -)',
+    }, h('span', { style: 'font-size:0.8em' }, iconMinus())),
+    h('button.btn', {
+      onclick: () => zoom.resetZoom(),
+      disabled: zoom.level === 1,
+      id: 'reset-zoom-button',
+      title: 'Reset zoom',
+    }, h('span', { style: 'font-size:0.9em' }, iconMagnifyingGlass())),
+    h('button.btn', {
+      onclick: () => zoom.zoomIn(),
+      disabled: zoom.level >= zoom.max,
+      id: 'zoom-in-button',
+      title: 'Zoom in (Ctrl/Cmd + +)',
+    }, h('span', { style: 'font-size:0.8em' }, iconPlus())),
+  ]);
 
 /**
  * Method to toggle states of the buttons(Query/Live) depending on the mode the tool is running on

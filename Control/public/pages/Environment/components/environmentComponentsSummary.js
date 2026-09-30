@@ -29,7 +29,7 @@ const UNKNOWN = 'UNKNOWN';
 export const environmentComponentsSummary = (environmentInfo) => {
   const odcState = environmentInfo?.hardware?.epn?.info?.state ?? UNKNOWN;
   const ddsState = environmentInfo?.hardware?.epn?.info?.ddsSessionStatus	 ?? UNKNOWN;
-  const { currentTransition = undefined, state } = environmentInfo;
+  const { currentTransition = undefined, state, firstTaskInError } = environmentInfo;
 
   const odcStateStyle = ODC_STATE_COLOR[odcState] ? `.${ODC_STATE_COLOR[odcState]}` : '';
   const ddsStateStyle = ODC_STATE_COLOR[ddsState] ? `.${ODC_STATE_COLOR[ddsState]}` : '';
@@ -39,11 +39,17 @@ export const environmentComponentsSummary = (environmentInfo) => {
       ? `.${ALIECS_TRANSITION_COLOR[currentTransition] ? ALIECS_TRANSITION_COLOR[currentTransition] : ''}`
       : `.${ALIECS_STATE_COLOR[state] ? ALIECS_STATE_COLOR[state] : ''}`,
   };
-  return miniCard(_getTitle(currentTransition), [
-    h('.flex-column', [
-      h(`${ecsData.style}`, ecsData.info),
-      h(`${odcStateStyle}`, 'ODC state: ', odcState),
-      h(`${ddsStateStyle}`, 'DDS state: ', ddsState),
+
+  return h('.flex-row.g2', [
+    miniCard(_getTitle(currentTransition), [
+      h('.flex-column', [
+        h(`${ecsData.style}`, ecsData.info),
+        h(`${odcStateStyle}`, 'ODC state: ', odcState),
+        h(`${ddsStateStyle}`, 'DDS state: ', ddsState),
+      ]),
+    ]),
+    firstTaskInError && miniCard(h('h5.danger','First Task In Critical Error'), [
+      _firstTaskInErrorDisplay(firstTaskInError)
     ]),
   ]);
 };
@@ -64,3 +70,52 @@ const _getTitle = (currentTransition) =>
       h('h5.flex-column.flex-center', 'Components State')
     ]
   );
+
+/**
+ * @private
+ * Method to get the first task in error display, it checks if the event is an ODC device event or a ECS task event and creates the display accordingly
+ * @param {TaskEvent | OdcDeviceInfoEvent} taskEvent - the task event with error information
+ * @returns {vnode} - display of the task event in case of error
+ */
+const _firstTaskInErrorDisplay = (taskEvent) => {
+  return h('.flex-column.danger',
+    [
+      h('span', `Source: ${taskEvent.source}`),
+      ...(taskEvent?.source === 'ODC' // SourceEventsTypes
+        ? _odcDeviceEventInErrorDisplay(taskEvent)
+        : _ecsTaskEventInErrorDisplay(taskEvent))
+    ]
+  );
+};
+
+/**
+ * @private
+ * Method to create the display of the task event in case of error
+ * @param {TaskEvent} taskEvent - the task event with error information
+ * @returns {vnode} - display of the task event in case of error
+ */
+const _ecsTaskEventInErrorDisplay = (taskEvent = {}) => {
+  const { name, hostname, id, status } = taskEvent;
+  return [
+    h('span', `ID: ${id}`),
+    h('span', `Name: ${name}`),
+    h('span', `Host: ${hostname}`),
+    h('span', `Status: ${status}`),
+  ];
+};
+
+/**
+ * @private
+ * Method to create the display of the ODC device event in case of error
+ * @param {OdcDeviceInfoEvent} odcDeviceEvent - the ODC device event with error information
+ * @returns {vnode} - display of the ODC device event in case of error
+ */
+const _odcDeviceEventInErrorDisplay = (odcDeviceEvent = {}) => {
+  const { id, hostname, path, error } = odcDeviceEvent;
+  return [
+    h('span', `ID: ${id}`),
+    h('span', `Host: ${hostname}`),
+    h('span', `Path: ${path}`),
+    error && h('.danger', `Error: ${error}`)
+  ];
+};

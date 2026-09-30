@@ -390,20 +390,28 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should not select a detector that is not locked', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click()); // second element is for detector, first for lock
+    await page.evaluate(() => document.querySelector('#detectorSelectionButtonForMID').click());
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.ok(selectedDet.length == 0, 'Detector selected without lock');
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
-    await page.locator('.m1 > div:nth-child(1) > div > div:nth-child(1)')
-      .setTimeout(1000)
+    await page.waitForSelector('#detectorLockButtonForMID', {timeout: 5000});
+    await page.locator('#detectorLockButtonForMID')
+      .setTimeout(5000)
       .click();
 
-    await page.locator('.m1 > div:nth-child(1) > div > a:nth-child(2)')
-      .setTimeout(1000)
+    await page.waitForFunction(() => {
+      const detectorButton = document.querySelector('#detectorSelectionButtonForMID');
+      return detectorButton && !detectorButton.classList.contains('disabled-item');
+    }, {timeout: 5000});
+
+    await page.locator('#detectorSelectionButtonForMID')
+      .setTimeout(5000)
       .click();
+
+    await page.waitForFunction(() => window.model.workflow.flpSelection.selectedDetectors.includes('MID'), {timeout: 5000});
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');

@@ -45,6 +45,23 @@ export const CCDB_FILTER_FIELDS = Object.freeze({
   // but under their own each individually key
 });
 
+export const CcdbMetadataFields = Object.freeze({
+  RunNumber: 'RunNumber',
+  RunType: 'RunType',
+  PeriodName: 'PeriodName',
+  PassName: 'PassName',
+  QcVersion: 'qc_version',
+  DetectorName: 'qc_detector_name',
+});
+
+/**
+ * Maps a QCG metadata field to its corresponding CCDB metadata field.
+ * If no mapping exists, returns the original key.
+ * @param {string} key - The QCG metadata field key
+ * @returns {string} - The corresponding CCDB metadata field key or the original key if no mapping exists
+ */
+export const getCcdbMetadataFieldMappingFor = (key) => CcdbMetadataFields[key] || key;
+
 // NodeJS makes the response headers lower case as it is built on the HTTP premise that headers are case insensitive
 export const CCDB_RESPONSE_HEADER_KEYS = Object.freeze({
   PATH: 'path',

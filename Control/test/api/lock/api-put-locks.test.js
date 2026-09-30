@@ -82,7 +82,7 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/MID?token=${ADMIN_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Unauthorized TAKE action for lock of detector MID by user Admin User',
+        message: 'Unauthorized TAKE action for lock MID by Admin User while lock is held by Global User',
         title: 'Unauthorized Access',
         status: 403,
       });
@@ -172,7 +172,7 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.RELEASE}/MID?token=${DET_MID_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Unauthorized RELEASE action for lock of detector MID by user Detector User',
+        message: 'Unauthorized RELEASE action for lock MID by Detector User while lock is held by Admin User',
         status: 403,
         title: 'Unauthorized Access',
       });

@@ -22,12 +22,13 @@ import {DetectorLockAction} from './../common/enums/DetectorLockAction.enum.js';
  * - see who owns the lock
  * 
  * When the user releases a lock, the detector also has to be unselected from the workflow.
- * @param {Model} model - root model of the application
+ * @param {LockModel} lockModel - model of the lock state and actions
  * @param {String} detector - detector name
  * @param {Object} lockState - lock state of the detector
+ * @param {Boolean} isIcon - whether to render as an icon or a button
+ * @param {Boolean} [isActive = false] - whether the detector is active
  */
-export const detectorLockButton = (model, detector, lockState, isIcon = false) => {
-  const lockModel = model.lock;
+export const detectorLockButton = (lockModel, detector, lockState, isIcon = false, isActive = false) => {
   const isDetectorLockTaken = lockModel.isLocked(detector);
 
   let detectorLockHandler = null;
@@ -37,8 +38,12 @@ export const detectorLockButton = (model, detector, lockState, isIcon = false) =
     if (lockModel.isLockedByCurrentUser(detector)) {
       detectorLockButtonClass = '.success';
       detectorLockHandler = () => {
-        lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
-        model.workflow.flpSelection.unselectDetector(detector);
+        if (isActive) {
+          confirm(`Are you sure you want to release the lock for an ACTIVE ${detector}?`)
+            && lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
+        } else {
+          lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
+        }
       };
     } else {
       detectorLockButtonClass = '.warning.disabled.disabled-item';

@@ -110,11 +110,13 @@ describe('websocket', () => {
     const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
 
     connection.on('open', () => {
-      const message = { command: 'filter',
+      const message = {
+        command: 'filter',
         token: token,
-        filter: function () {
+        payload: function () {
           return false;
-        }.toString() };
+        }.toString(),
+      };
       connection.send(JSON.stringify(message));
     });
 
@@ -145,6 +147,34 @@ describe('websocket', () => {
       }
       assert.strictEqual(parsed.code, 200);
       assert.strictEqual(parsed.command, 'broadcast');
+      connection.terminate();
+      done();
+    });
+  });
+
+  it('should not throw by broadcast when a client is in CLOSING state', (done) => {
+    const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
+    // On connnection, server sends auth message which will trigger the 'message' listener
+    connection.on('message', (message) => {
+      const { command, id } = JSON.parse(message);
+      assert.strictEqual(command, 'authed');
+      // Find the server-side socket - it is still in server.clients
+      const serverSideClient = [...ws.server.clients]
+        .find(({ id: clientId }) => clientId === id);
+
+      /**
+       * Function `terminate()` synchronously sets readyState to CLOSING (2) on the server-side socket
+       * but the client is not yet removed from server.clients (removal is async)
+       * Thus, we can test if broadcast will still send a message causing error on the server-side
+       */
+      serverSideClient.terminate();
+
+      // Broadcast() and unfilteredBroadcast() must not throw even though the socket is CLOSING
+      assert.doesNotThrow(() => {
+        ws.broadcast(new WebSocketMessage(200).setCommand('test'));
+        ws.unfilteredBroadcast(new WebSocketMessage(200).setCommand('test'));
+      });
+
       connection.terminate();
       done();
     });

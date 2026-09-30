@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "3.18.0",
+  "version": "3.19.0",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -39,25 +39,25 @@
     "index.js"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.9.0",
-    "joi": "18.0.0",
-    "jsroot": "7.10.1",
-    "kafkajs": "^2.2.4",
-    "mariadb": "^3.4.1",
-    "sequelize": "^6.37.7",
-    "umzug": "^3.8.2"
+    "@aliceo2/web-ui": "2.11.0",
+    "joi": "18.2.6",
+    "jsroot": "7.11.0",
+    "kafkajs": "2.2.4",
+    "mariadb": "3.5.3",
+    "sequelize": "6.37.8",
+    "umzug": "3.8.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@stylistic/eslint-plugin-js": "^4.4.0",
-    "eslint": "^9.39.1",
-    "eslint-plugin-jsdoc": "^61.5.0",
-    "globals": "^17.0.0",
-    "nock": "^15.0.0",
-    "puppeteer": "^24.34.0",
-    "sequelize-cli": "^6.6.2",
-    "sinon": "^21.0.0",
-    "supertest": "^7.1.0"
+    "@eslint/js": "10.0.1",
+    "@stylistic/eslint-plugin-js": "4.4.0",
+    "eslint": "10.11.0",
+    "eslint-plugin-jsdoc": "64.5.4",
+    "globals": "17.12.0",
+    "nock": "15.0.0",
+    "puppeteer": "25.12.0",
+    "sequelize-cli": "6.6.2",
+    "sinon": "22.1.0",
+    "supertest": "7.3.0"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui",

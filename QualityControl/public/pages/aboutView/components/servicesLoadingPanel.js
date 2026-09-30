@@ -14,19 +14,15 @@
 
 import { spinner } from '../../../common/spinner.js';
 import { h } from '/js/src/index.js';
+import { ServiceStatus } from '../../../../library/enums/Status/serviceStatus.enum.js';
 
 /**
  * Build a reusable panel which displays a list of names of service that are currently waiting for their status
- * @param {object} services - Object containing service names as keys and their status
+ * @param {string[]} serviceNames - Object containing service names as keys and their status
  * @returns {vnode} - A virtual node representing the loading panel
  */
-export const servicesLoadingPanel = (services) => {
-  if (Object.keys(services).length > 0) {
-    const namesAsString = Object.keys(services).join(', ');
-    return h('.w-100.flex-row.items-center.p2.shadow-level1', [
-      spinner(2),
-      h('.ph2', `Loading status for: ${namesAsString.toUpperCase()}`),
-    ]);
-  }
-  return null;
-};
+export const servicesLoadingPanel = (serviceNames) =>
+  h('.w-100.flex-row.items-center.p2.shadow-level1', { id: `service-status-${ServiceStatus.LOADING.toLowerCase()}` }, [
+    spinner(2),
+    h('.ph2', `Loading status for: ${serviceNames.join(', ').toUpperCase()}`),
+  ]);

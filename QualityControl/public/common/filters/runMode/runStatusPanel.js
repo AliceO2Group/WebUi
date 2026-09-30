@@ -12,8 +12,8 @@
  */
 
 import { RunStatus } from '../../../../../library/runStatus.enum.js';
-import { h } from '/js/src/index.js';
-import { camelToTitleCase } from '../../utils.js';
+import { h, iconExternalLink } from '/js/src/index.js';
+import { camelToTitleCase, getBkpRunDetailsUrl } from '../../utils.js';
 import { statusBadge } from '../../badge.js';
 
 /**
@@ -59,23 +59,36 @@ export const lastUpdatePanel = (runStatus, lastRefresh, refreshRate = 15000) => 
 /**
  * Renders the run information panel
  * @param {object} cleanRunInformation - The `RunInformation` without `detectorsQualities`
+ * @param {string} runNumber - The current selected filter run number
  * @returns {vnode} - virtual node element
  */
-export const cleanRunInformationPanel = (cleanRunInformation) =>
+export const cleanRunInformationPanel = (cleanRunInformation, runNumber) =>
   cleanRunInformation && Object.keys(cleanRunInformation).length > 0 && h(
     '.flex-row.g4.items-center.f7.gray-darker.text-center.ph4',
     {
       id: 'header-run-information',
       style: 'overflow-x: auto; margin: 0 auto;',
     },
-    Object.entries(cleanRunInformation).map(([key, value]) =>
+    [
       h('.flex-row.g1', {
+        style: 'flex: 0 0 auto;',
+      }, [
+        h('span', 'Open run in Bookkeeping'),
+        h('a', {
+          id: 'openRunInBookkeeping',
+          title: 'Open run in Bookkeeping',
+          href: getBkpRunDetailsUrl(runNumber),
+          target: '_blank',
+        }, iconExternalLink()),
+      ]),
+      Object.entries(cleanRunInformation).map(([key, value]) => h('.flex-row.g1', {
         key: `${key}-${value}`,
         style: 'flex: 0 0 auto;',
       }, [
         h('strong', `${camelToTitleCase(key)}:`),
         h('span', `${value}`),
       ])),
+    ],
   );
 
 /**

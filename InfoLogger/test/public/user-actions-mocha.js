@@ -64,12 +64,30 @@ describe('User Profile test-suite', async () => {
 
     it('successfully save the profile of the user when pressed the "Save Profile" menu-item', async () => {
       await page.evaluate(() => {
+        // clicking on date column header to change its size and visibility
         document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button').click();
+        // saving to profile then saving the profile
         document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)').click();
       });
 
       const actionDropdownClosed = await page.evaluate(() => window.model.accountMenuEnabled);
       assert.ok(!actionDropdownClosed);
+    });
+
+    it('should successfully load profile saved for user when accessing the page', async () => {
+      await page.goto(
+        `${baseUrl}?personid=1&username=test&name=Test&access=admin&token=${testToken}`,
+        { waitUntil: 'networkidle0' },
+      );
+
+      // Wait for the profile to be fully loaded
+      await page.waitForFunction(
+        () => window.model?.userProfile?.payload?.content?.colsHeader?.date !== undefined,
+        { timeout: 5000 },
+      );
+
+      const userProfile = await page.evaluate(() => window.model.userProfile.payload);
+      assert.ok(userProfile.content.colsHeader.date.visible, 'Date column should be visible');
     });
 
     it('should have a button in action dropdown button to view info about the framework', async () => {
@@ -80,22 +98,6 @@ describe('User Profile test-suite', async () => {
       });
       assert.strictEqual(profileMenuItem.title, 'Show/Hide details about the framework');
       assert.strictEqual(profileMenuItem.innerText, 'About');
-    });
-
-    it('should successfully load profile saved for user when accessing the page', async () => {
-      await page.goto(
-        `${baseUrl}?personid=1&username=test&name=Test&access=admin&token=${testToken}`,
-        { waitUntil: 'networkidle0' },
-      );
-      const userProfile = await page.evaluate(() => {
-        window.model.table.colsHeader.date.size = 'cell-xl';
-        document.querySelector('body > div:nth-child(2) > div > header:nth-child(2) > table > tbody > tr > td > button')
-          .click();
-        document.querySelector('body > div:nth-child(2) > div > header > div > div > div > div:nth-child(3)')
-          .click();
-        return window.model.userProfile.payload;
-      });
-      assert.ok(!userProfile.content.colsHeader.date.visible);
     });
   });
 });

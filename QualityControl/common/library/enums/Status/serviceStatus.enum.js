@@ -20,6 +20,7 @@
 export const ServiceStatus = Object.freeze({
   NOT_ASKED: 'NOT_ASKED',
   LOADING: 'LOADING',
-  SUCCESS: 'SUCCESS',
   ERROR: 'ERROR',
+  SUCCESS: 'SUCCESS',
+  NOT_CONFIGURED: 'NOT_CONFIGURED',
 });

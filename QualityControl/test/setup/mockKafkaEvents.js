@@ -13,26 +13,25 @@
  */
 
 import { EmitterKeys } from '../../common/library/enums/emitterKeys.enum.js';
-import { Transition } from '../../common/library/enums/transition.enum.js';
+import { Transition, TransitionStatus } from '../../common/library/enums/transition.enum.js';
+
+export const ONGOING_RUN_NUMBER = 500001;
+export const ONGOING_RUNS_LIST = [ONGOING_RUN_NUMBER, 500002, 500003];
 
 /**
  * Mock Kafka events for testing purposes
  * @param {EventEmitter} eventEmitter - Event emitter to emit mock events
  */
 export const setupMockKafkaEvents = (eventEmitter) => {
-  // Simulate some ongoing runs being started
-  const mockOngoingRuns = ['500001', '500002', '500003'];
-
   // Emit START_ACTIVITY events for mock runs after a short delay
   setTimeout(() => {
-    mockOngoingRuns.forEach((runNumber) => {
+    ONGOING_RUNS_LIST.forEach((runNumber) => {
       eventEmitter.emit(EmitterKeys.RUN_TRACK, {
         runNumber: parseInt(runNumber, 10),
         transition: Transition.START_ACTIVITY,
+        transitionStatus: TransitionStatus.DONE_OK,
         timestamp: Date.now(),
       });
     });
-  }, 100);
-
-  return mockOngoingRuns;
+  }, 200);
 };

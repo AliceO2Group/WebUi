@@ -18,6 +18,7 @@ import {
   iconPencil, iconTrash, iconPlus, iconBadge, iconLayers, iconCheck, iconBan, iconShareBoxed,
 } from '/js/src/icons.js';
 import { filterPanelToggleButton } from '../../common/filters/filterViews.js';
+import { layoutListBadge } from './../../pages/layoutListView/components/LayoutListCard.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
@@ -44,7 +45,17 @@ const toolbarViewMode = (layout, filterModel) => {
   const { isOfficial, owner_id, name } = layoutItem;
 
   return {
-    centerCol: h('b.f4.items-center.flex-grow.text-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
+    centerCol: h('.f4.flex-row.flex-grow.justify-center.items-center.g2', [
+      h('.g1', [
+        isOfficial ? h('span', iconBadge()) : '',
+        h('b', layoutItem.name),
+      ]),
+      h('.f6.flex-row', [
+        '(',
+        layoutListBadge(layoutItem.labels),
+        ')',
+      ]),
+    ]),
     rightCol: h('.w-25.text-right.g2.flex-row.justify-end.flex-wrap', [
       ' ',
       filterPanelToggleButton(filterModel),

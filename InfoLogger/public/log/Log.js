@@ -14,9 +14,10 @@
 
 import { Observable, RemoteData } from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
+import ContextMenu from './ContextMenu.js';
 import { MODE } from '../constants/mode.const.js';
 import { TIME_MS } from '../common/Timezone.js';
-import { ROW_HEIGHT } from '../constants/visual.const.js';
+import { jsonPost } from '../common/jsonPost.js';
 
 /**
  * Model Log, encapsulate all log management and queries
@@ -33,6 +34,7 @@ export default class Log extends Observable {
 
     this.filter = new LogFilter(model);
     this.filter.bubbleTo(this);
+    this.filter.observe(this.onFilterChange.bind(this));
 
     this.focus = { // show date picker on focus
       timestampSince: false,
@@ -44,8 +46,10 @@ export default class Log extends Observable {
 
     this.limit = 100000;
     this.applicationLimit = 500000; // browser can be slow is `list` array is bigger
+    this.limitReached = null;
 
     this.queryResult = RemoteData.notAsked();
+    this.queryAbortController = null;
 
     this.list = [];
     this.item = null;
@@ -70,6 +74,9 @@ export default class Log extends Observable {
     this.dom = {
       table: '',
     };
+
+    this.contextMenu = new ContextMenu();
+    this.contextMenu.bubbleTo(this);
   }
 
   /**
@@ -176,6 +183,12 @@ export default class Log extends Observable {
       this.list.splice(0, this.list.length - limit);
       this.list.forEach((log) => this.addStats(log));
     }
+
+    // Reset limitReached to null on limit changes since only a fresh query knows the true state
+    if (limit !== this.limit) {
+      this.limitReached = null;
+    }
+
     this.limit = limit;
     this.notify();
   }
@@ -316,17 +329,25 @@ export default class Log extends Observable {
   }
 
   /**
-   * Query database according to filters.
-   * Only is service is available and configured on server side.
-   * If live mode is enabled, it is turned off.
-   * `list` is then reset and filled with result.
+   * Method to execute a query with the current filters configuration via button click or "Enter" keypress on filters.
+   * (thus, check of DB status still needed)
+   * If the user has no filters set, a prompt is shown to confirm the execution
+   * If the user is in live mode, first stop live mode and then execute query in order to have a consistent result
+   * Recalculate the stats and go to last log once query is executed
+   * If the query is aborted by user, restore previous query result and do nothing
+   * @returns {Promise<null|object>} null if query is aborted, result of the query otherwise
    */
   async query() {
     if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
       throw new Error('Query service is not available');
     }
-    this.queryResult = RemoteData.loading();
-    this.notify();
+
+    if (!this.filter.hasActiveTextFilters()) {
+      if (!window.confirm('No date or text filters set.'
+        + ' This will return a large amount of data. Execute query anyway?')) {
+        return;
+      }
+    }
 
     if (this.isLiveModeRunning()) {
       this.liveStop(MODE.QUERY);
@@ -334,24 +355,65 @@ export default class Log extends Observable {
       this.activeMode = MODE.QUERY;
     }
 
-    const queryArguments = {
-      criterias: this.filter.criterias,
-      options: { limit: this.limit },
-    };
-    const { result, ok } = await this.model.loader.post('/api/query', queryArguments, true);
-    if (!ok) {
-      this.queryResult = RemoteData.failure(result.message);
-      this.list = [];
-    } else {
+    const previousQueryResult = this.queryResult;
+    this.queryResult = RemoteData.loading();
+    this.notify();
+
+    const abortController = new AbortController();
+    this.queryAbortController = abortController;
+
+    let result = 'Unable to execute query';
+    try {
+      result = await jsonPost('/api/query', {
+        body: {
+          criterias: this.filter.criterias,
+          options: { limit: this.limit },
+        },
+        signal: abortController.signal,
+      });
+      this.resetStats();
       this.queryResult = RemoteData.success(result);
       this.list = result.rows;
+      this.list.forEach((log) => this.addStats(log));
+      this.goToLastItem();
+
+      this.limitReached = result.count === this.limit;
+      if (this.limitReached) {
+        this.model.notification.show(
+          `Matching results reached the buffer size of ${this.limit.toLocaleString('en-US')}.`
+          + ' There might be more logs that match your filters but are not shown, consider refining your filters.',
+          'warning',
+        );
+      }
+    } catch (error) {
+      if (abortController.signal.aborted) {
+        this.queryResult = previousQueryResult;
+      } else {
+        result = { message: error.message || result };
+        this.queryResult = RemoteData.failure(result.message);
+        this.list = [];
+        this.resetStats();
+      }
+    } finally {
+      this.queryAbortController = null;
+    }
+    this.notify();
+  }
+
+  /**
+   * Method to allow for cancellation of ongoing HTTP request for query mode if:
+   * - a query is still ongoing
+   * - an abort controller is present.
+   * If the query is successfully aborted, a notification is shown to user.
+   * @returns {void}
+   */
+  cancelQuery() {
+    if (!this.queryResult.isLoading() || !this.queryAbortController) {
+      return;
     }
 
-    this.resetStats();
-    this.list.forEach((log) => this.addStats(log));
-
-    this.goToLastItem();
-    this.notify();
+    this.queryAbortController.abort();
+    this.model.notification.show('Query cancelled', 'warning', 2000);
   }
 
   /**
@@ -373,17 +435,22 @@ export default class Log extends Observable {
       }
       value = copy.join(' ');
     }
-    if (this.filter.setCriteria(field, operator, value)) {
-      if (this.isLiveModeRunning()) {
-        this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
-        this.model.notification.show(
-          'The current live session has been adapted to the new filter configuration.',
-          'primary',
-          2000,
-        );
-      } else if (this.isActiveModeQuery()) {
-        this.model.notification.show('Filters have changed. Query again for updated results', 'primary', 2000);
-      }
+    this.filter.setCriteria(field, operator, value);
+  }
+
+  /**
+   * Notify the active mode (live or query) that filters have changed.
+   */
+  onFilterChange() {
+    if (this.isLiveModeRunning()) {
+      this.model.ws.setFilter(this.filter.toStringifyFunction());
+      this.model.notification.show(
+        'The current live session has been adapted to the new filter configuration.',
+        'primary',
+        2000,
+      );
+    } else if (this.isActiveModeQuery()) {
+      this.model.notification.show('Filters have changed. Query again for updated results', 'primary', 2000);
     }
   }
 
@@ -406,6 +473,7 @@ export default class Log extends Observable {
       return;
     }
     this.list = [];
+    this.limitReached = null;
     this.resetStats();
     this.queryResult = RemoteData.notAsked(); // empty all data from last query
     this.activeMode = MODE.LIVE.RUNNING;
@@ -468,6 +536,7 @@ export default class Log extends Observable {
    */
   empty() {
     this.list = [];
+    this.limitReached = null;
     this.model.inspectorEnabled = false;
     this.resetStats();
     this.queryResult = RemoteData.notAsked();
@@ -587,8 +656,12 @@ export default class Log extends Observable {
    */
   listLogsInViewportOnly() {
     return this.list.slice(
-      Math.floor(this.scrollTop / ROW_HEIGHT),
-      Math.floor(this.scrollTop / ROW_HEIGHT) + Math.ceil(this.scrollHeight / ROW_HEIGHT) + 1,
+      Math.floor(this.scrollTop / this.rowHeight),
+      Math.floor(this.scrollTop / this.rowHeight) + Math.ceil(this.scrollHeight / this.rowHeight) + 1,
     );
+  }
+
+  get rowHeight() {
+    return this.model.zoom.rowHeightPx;
   }
 }

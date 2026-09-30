@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=framework)](https://codecov.io/gh/AliceO2Group/WebUi)
 [![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)](https://alice.its.cern.ch/jira/projects/OGUI)
 
-- [ALICE O<sup>2</sup> Web UI Framework](#alice-osup2sup-web-ui-framework)
+- [ALICE O2 Web UI Framework](#alice-o2-web-ui-framework)
     - [Overview](#overview)
       - [Server-side features](#server-side-features)
       - [Client-side features](#client-side-features)
@@ -28,7 +28,7 @@ The goal of this UI framework is to identify library and framework sets, provide
 - REST and WebSocket API
 - Authentication via CERN SSO (OpenID Connect), authorization using CERN e-groups
 - Communication integrity ensured by JSON Web Tokens
-- External resource access: MySQL, gRPC, Consul
+- External resource access: gRPC, Consul
 
 #### Client-side features
 - User interface CSS building blocks in accordance with ALICE standards
@@ -69,7 +69,6 @@ npm install --save @aliceo2/web-ui
 * [Logging](./docs/guide/logging.md) - Stores log messages in a file or pushes them to InfoLogger service
 * [SSO - OpenID Connect](./docs/guide/openid.md) - Provides authentication using CERN SSO via OpenID Connect
 * [WebSocket server](./docs/guide/websockets.md) - Provides bi-directional communication between browsers and server using WebSocket protocol
-* [MySQL](./docs/guide/mysql.md) - MySQL client with simple CRUD queries
 * [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
 * [JIRA](./docs/guide/jira.md) - Create JIRA issues
 * [Notification service](./docs/guide/notification.md) - Trigger and receive notification using Kafka cluster

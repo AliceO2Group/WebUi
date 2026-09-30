@@ -34,35 +34,15 @@ class ApricotService {
     assert(grpcClient, 'Missing GrpcServiceClient dependency for Apricot');
     this._grpcClient = grpcClient;
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
-
-    this.detectors = [];
-    this.hostsByDetector = new Map();
   }
 
   /**
-   * Initialize service with static data from AliECS
+   * Retrieve detectors from ECS via Apricot
+   * @returns {Promise<Array<string>>}
    */
-  async init() {
-    try {
-      this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
-      this._logger.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
-        level: 99,
-        system: 'GUI',
-        facility: 'cog/api'
-      });
-      await Promise.allSettled(
-        this.detectors.map(async (detector) => {
-          try {
-            const {hosts} = await this._grpcClient['GetHostInventory']({detector});
-            this.hostsByDetector.set(detector, hosts);
-          } catch (error) {
-            this._logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
-          }
-        })
-      );
-    } catch (error) {
-      this._logger.error('Unable to list detectors');
-    }
+  async _loadDetectors() {
+    const {detectors = []} = await this._grpcClient['ListDetectors']();
+    return detectors;
   }
 
   /**
@@ -87,54 +67,6 @@ class ApricotService {
       }
       throw error;
     }
-  }
-
-  /**
-   * Retrieve an in-memory detectors list
-   * If list does not exist, make a request to Apricot
-   * @param {Request} req
-   * @param {Response} res
-   */
-  async getDetectorList(_, res) {
-    if (this.detectors.length === 0) {
-      try {
-        this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
-      } catch (error) {
-        errorHandler(error, res, 503, 'apricotservice');
-        return;
-      }
-    }
-    res.status(200).json({detectors: this.detectors});
-  }
-
-  /**
-   * Return an in-memory map of hosts grouped by their detector
-   * If map is empty, make a request to Apricot
-   * @param {Request} req
-   * @param {Response} res
-   */
-  async getHostsByDetectorList(_, res) {
-    if (this.hostsByDetector.size === 0) {
-      try {
-        this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
-
-        await Promise.allSettled(
-          this.detectors.map(async (detector) => {
-            try {
-              const {hosts} = await this._grpcClient['GetHostInventory']({detector});
-              this.hostsByDetector.set(detector, hosts);
-            } catch (error) {
-              this._logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
-              this._logger.error(error);
-            }
-          })
-        );
-      } catch (error) {
-        errorHandler(error, res, 503, 'apricotservice');
-        return;
-      }
-    }
-    res.status(200).json({hosts: Object.fromEntries(this.hostsByDetector)});
   }
 
   /**

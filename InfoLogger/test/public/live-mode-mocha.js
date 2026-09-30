@@ -10,24 +10,22 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
-/* eslint-disable max-len */
+ */
 
 const assert = require('assert');
 const test = require('../mocha-index');
 
-describe('Live Mode test-suite', async () => {
-  let baseUrl;
-  let page;
-  before(async () => {
-    baseUrl = test.helpers.baseUrl;
-    page = test.page;
+const isFieldEmpty = (value) => value === undefined || value === null || value === '';
 
+describe('Live Mode test-suite', async () => {
+  let baseUrl = null;
+  let page = null;
+  before(async () => {
+    ({ helpers: { baseUrl }, page } = test);
   });
 
-  it('should successfully go to homepage with predefined filters', async function() {
-    await page.goto(baseUrl, {waitUntil: 'networkidle0'});
+  it('should successfully go to homepage with predefined filters', async () => {
+    await page.goto(baseUrl, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
@@ -55,21 +53,24 @@ describe('Live Mode test-suite', async () => {
     assert.strictEqual(criterias.level.$max, 21);
 
     // Wait for logs and count them (2-3 maybe, it's random)
-    await page.waitForFunction(`window.model.log.list.length > 0`, {timeout: 5000});
+    await page.waitForFunction('window.model.log.list.length > 0', { timeout: 5000 });
     const list = await page.evaluate(() => window.model.log.list);
-    assert.ok(!!list.length);
+    assert.ok(Boolean(list.length));
   });
 
   it('should filter messages based on `hostname` matching `aldaqecs01-v1` from live -> paused -> live', async () => {
     await page.evaluate(() => window.model.log.liveStop('Paused'));
     await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
+      window.model.log.filter.setCriteria('level', 'max', null);
       window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
     });
     await page.evaluate(() => window.model.log.liveStart());
-    await page.waitForFunction(`window.model.log.list.length > 5`, {timeout: 5000});
+    await page.waitForFunction('window.model.log.list.length > 5', { timeout: 10000 });
     const list = await page.evaluate(() => window.model.log.list);
-    const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqecs01-v1');
+    const isHostNameMatching = list
+      .map((element) => element.hostname)
+      .every((hostname) => hostname === 'aldaqecs01-v1');
     assert.ok(list.length > 0);
     assert.ok(isHostNameMatching);
   });
@@ -78,10 +79,11 @@ describe('Live Mode test-suite', async () => {
     await page.evaluate(() => window.model.log.liveStop('Query'));
     await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
+      window.model.log.filter.setCriteria('level', 'max', null);
       window.model.log.filter.setCriteria('hostname', 'exclude', 'aldaqdip01');
     });
     await page.evaluate(() => window.model.log.liveStart());
-    await page.waitForFunction(`window.model.log.list.length > 5`, {timeout: 5000});
+    await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
 
     const list = await page.evaluate(() => window.model.log.list);
     const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname !== 'aldaqdip01');
@@ -90,22 +92,98 @@ describe('Live Mode test-suite', async () => {
     assert.ok(isHostNameMatching);
   });
 
-  it('should filter messages based on SQL Wildcards `hostname` excluding `%ldaqdip%` and username matching `a_iceda_` without changing state of live mode', async () => {
-    await page.evaluate(() => window.model.log.filter.resetCriteria());
+  it('should filter messages based on SQL Wildcards `hostname` excluding `%ldaqdip%` and username matching `a_iceda_`'
+    + ' without changing state of live mode', async () => {
+    await page.evaluate(() => {
+      window.model.log.filter.resetCriteria();
+      window.model.log.filter.setCriteria('level', 'max', null);
+    });
     await page.evaluate(() => {
       window.model.log.setCriteria('hostname', 'exclude', '%ldaqdip%');
       window.model.log.setCriteria('username', 'match', 'a_iceda_');
       window.model.log.empty();
     });
-    await page.waitForFunction(`window.model.log.list.length > 5`, {timeout: 5000});
+    await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
 
     const list = await page.evaluate(() => window.model.log.list);
-    const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
-    const isUserNameMatching = list.map((element) => element.username).every((username) => new RegExp('a.iceda.').test(username));
+    const isHostNameMatching = list
+      .map((element) => element.hostname)
+      .every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
+    const isUserNameMatching = list
+      .map((element) => element.username)
+      .every((username) => new RegExp('a.iceda.').test(username));
 
     assert.ok(list.length > 0);
     assert.ok(isHostNameMatching);
     assert.ok(isUserNameMatching);
+  });
+
+  describe('Empty field filters in live mode', async () => {
+    it('should only receive logs with empty rolename when emptyFor is set to "match"', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.filter.setCriteria('level', 'max', null);
+        window.model.log.filter.setCriteria('rolename', 'emptyFor', 'match');
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+      const list = await page.evaluate(() => window.model.log.list);
+      const allEmpty = list.every((log) => isFieldEmpty(log.rolename));
+      assert.ok(list.length > 0);
+      assert.ok(allEmpty);
+    });
+
+    it('should only receive logs with non-empty rolename when emptyFor is set to "exclude"', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.filter.setCriteria('level', 'max', null);
+        window.model.log.filter.setCriteria('rolename', 'emptyFor', 'exclude');
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+      const list = await page.evaluate(() => window.model.log.list);
+      const allNonEmpty = list.every((log) => !isFieldEmpty(log.rolename));
+      assert.ok(list.length > 0);
+      assert.ok(allNonEmpty);
+    });
+
+    it('should receive matching OR empty logs when match is set and emptyFor is "match"', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.filter.setCriteria('level', 'max', null);
+        window.model.log.filter.setCriteria('rolename', 'match', 'mon-DA-PHS-0');
+        window.model.log.filter.setCriteria('rolename', 'emptyFor', 'match');
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+      const list = await page.evaluate(() => window.model.log.list);
+      const allValid = list.every((log) => isFieldEmpty(log.rolename) || log.rolename === 'mon-DA-PHS-0');
+      assert.ok(list.length > 0);
+      assert.ok(allValid);
+    });
+
+    it('should exclude matching AND empty logs when exclude is set and emptyFor is "exclude"', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.filter.setCriteria('level', 'max', null);
+        window.model.log.filter.setCriteria('rolename', 'exclude', 'mon-DA-PHS-0');
+        window.model.log.filter.setCriteria('rolename', 'emptyFor', 'exclude');
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+      const list = await page.evaluate(() => window.model.log.list);
+      const allValid = list.every((log) => !isFieldEmpty(log.rolename) && log.rolename !== 'mon-DA-PHS-0');
+      assert.ok(list.length > 0);
+      assert.ok(allValid);
+    });
   });
 
   it('should successfully go to mode LIVE in paused state', async () => {
@@ -118,10 +196,17 @@ describe('Live Mode test-suite', async () => {
   });
 
   it('successfully show indicator when user double pressed the log row', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr', {timeout: 5000});
-    const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
-    await tableRow.click({clickCount: 2});
-    await page.waitForSelector('#inspector-sidebar', {timeout: 1000})
+    const tableRowSelector = 'body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr';
+    await page.waitForSelector(tableRowSelector, { timeout: 5000 });
+
+    const tableRow = await page.$(tableRowSelector);
+    await tableRow.click({ count: 2 });
+
+    // Waits for the sidebar animation to finish and the content to be visible
+    await page.waitForFunction(
+      () => document.querySelector('#inspector-sidebar').closest('aside.sidebar').getBoundingClientRect().width > 0,
+      { timeout: 3000 },
+    );
 
     const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
     assert.ok(indicatorOpen);
@@ -147,8 +232,3 @@ describe('Live Mode test-suite', async () => {
     assert.deepStrictEqual(activeMode, 'Query');
   });
 });
-
-
-
-
-

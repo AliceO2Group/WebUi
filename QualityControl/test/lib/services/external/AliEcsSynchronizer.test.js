@@ -16,7 +16,7 @@ import { ok, deepStrictEqual } from 'node:assert';
 import { test, beforeEach, afterEach } from 'node:test';
 import { stub, restore } from 'sinon';
 import { AliEcsSynchronizer } from '../../../../lib/services/external/AliEcsSynchronizer.js';
-import { Transition } from '../../../../common/library/enums/transition.enum.js';
+import { Transition, TransitionStatus } from '../../../../common/library/enums/transition.enum.js';
 import { EmitterKeys } from '../../../../common/library/enums/emitterKeys.enum.js';
 
 export const aliecsSynchronizerTestSuite = async () => {
@@ -50,13 +50,14 @@ export const aliecsSynchronizerTestSuite = async () => {
   test('should emit a run track event when a valid run message is received', () => {
     const runNumber = 123;
     const transition = Transition.START_ACTIVITY;
+    const transitionStatus = TransitionStatus.DONE_OK;
     const fixedTimestamp = Date.now();
     const timestamp = { toNumber: () => fixedTimestamp };
-    aliecsSynchronizer._onRunMessage({ runEvent: { runNumber, transition }, timestamp });
+    aliecsSynchronizer._onRunMessage({ runEvent: { runNumber, transition, transitionStatus }, timestamp });
     ok(eventEmitterMock.emit.called);
     deepStrictEqual(eventEmitterMock.emit.firstCall.args[0], EmitterKeys.RUN_TRACK);
     deepStrictEqual(eventEmitterMock.emit.firstCall.args[1], {
-      runNumber, transition, timestamp: timestamp.toNumber(),
+      runNumber, transition, transitionStatus, timestamp: timestamp.toNumber(),
     });
   });
 };

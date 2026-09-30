@@ -46,6 +46,10 @@ class HttpServer {
 
     this.app = express();
 
+    if (process.env.NODE_ENV === 'production') {
+      this.app.set('trust proxy', true);
+    }
+
     this.configureHelmet(httpConfig);
 
     this.o2TokenService = new O2TokenService(jwtConfig);
@@ -78,6 +82,13 @@ class HttpServer {
       this.listen();
     }
 
+    /**
+     * Map to keep track of similar logs by key
+     * @key {string} - combination of IP address, error name and message
+     * @value {object.count} - count of occurrences of the same error by the same key
+     * @value {object.lastLoggedTimestamp} - timestamp of the last log of the same error by the same key
+     */
+    this._jwtErrorsByIp = new Map();
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/server`);
   }
 
@@ -303,7 +314,7 @@ class HttpServer {
    * Adds POST route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callbacks   - method that handles request and response: function(req, res);
+   * @param {void} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
@@ -318,7 +329,7 @@ class HttpServer {
    * Adds PUT route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callbacks   - method that handles request and response: function(req, res);
+   * @param {void} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
@@ -333,7 +344,7 @@ class HttpServer {
    * Adds PATCH route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callbacks   - method that handles request and response: function(req, res);
+   * @param {void} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
@@ -348,7 +359,7 @@ class HttpServer {
    * Adds DELETE route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callbacks   - method that handles request and response: function(req, res);
+   * @param {void} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
@@ -504,31 +515,59 @@ class HttpServer {
   }
 
   /**
+   * Logs a errors with throttling by IP address every 5 minutes with the first error logged immediately
+   * and rest of occurrences after 5 minutes with number of occurrences.
+   * @param {string} ip - IP address of the request
+   * @param {string} name - Error name
+   * @param {string} message - Error message
+   * @private
+   */
+  _logErrorWithThrottling(ip, name, message) {
+    const now = Date.now();
+    const compositeKey = `${ip}/${name}/${message}`;
+
+    if (!this._jwtErrorsByIp.has(compositeKey)) {
+      this.logger.errorMessage(`${name} : ${message} (IP: ${ip})`);
+      this._jwtErrorsByIp.set(compositeKey, {
+        count: 1,
+        lastLoggedTimestamp: now,
+      });
+    } else {
+      const fiveMinutes = 5 * 60 * 1000;
+      const lastErrorData = this._jwtErrorsByIp.get(compositeKey);
+      const timeSinceLastLog = now - lastErrorData.lastLoggedTimestamp;
+
+      if (timeSinceLastLog >= fiveMinutes) {
+        if (lastErrorData.count > 1) {
+          this.logger.errorMessage(`${name} : ${message} (IP: ${ip}) (occurrences: ${lastErrorData.count})`);
+        } else {
+          this.logger.errorMessage(`${name} : ${message} (IP: ${ip})`);
+        }
+        lastErrorData.count = 1;
+        lastErrorData.lastLoggedTimestamp = now;
+      } else {
+        lastErrorData.count++;
+      }
+    }
+  }
+
+  /**
    * Verifies JWT token synchronously.
    * @todo use promises or generators to call it asynchronously!
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
-   * @param {function} next - passes control to next matching route
+   * @param {void} next - passes control to next matching route
    */
   jwtVerify(req, res, next) {
     try {
       this.jwtAuthenticate(req);
     } catch ({ name, message }) {
-      this.logger.errorMessage(`${name} : ${message}`);
+      this._logErrorWithThrottling(req.ip, name, message);
 
-      const response = { error: '403 - Json Web Token Error' };
-
-      // Allow for a custom message for known error messages
-      switch (message) {
-        case 'jwt must be provided':
-          response.message = 'You must provide a JWT token';
-          break;
-        default:
-          response.message = 'Invalid JWT token provided';
-          break;
-      }
-
-      res.status(403).json(response);
+      res.status(403).json({
+        error: '403 - Json Web Token Error',
+        message,
+      });
       return;
     }
 
@@ -540,6 +579,7 @@ class HttpServer {
    *
    * @param {Request} req - Express Request object
    * @return {void} resolves once the request is filled with authentication, and reject if jwt verification failed
+   * @throws {UnauthorizedAccessError} if token is invalid, expired or secret is wrong
    */
   jwtAuthenticate(req) {
     const data = this.o2TokenService.verify(req.query.token);

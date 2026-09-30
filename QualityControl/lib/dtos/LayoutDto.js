@@ -26,6 +26,7 @@ const ALLOWED_LAYOUT_FIELDS = [
   'owner_id',
   'owner_name',
   'tabs',
+  'labels',
 ];
 
 /**
@@ -71,6 +72,7 @@ export const LayoutDto = Joi.object({
   id: Joi.string().required(),
   name: Joi.string().min(3).max(40).required(),
   tabs: Joi.array().min(1).max(45).items(TabsDto).required(),
+  labels: Joi.array().items(Joi.string()).default([]),
   owner_id: Joi.number().min(0).required(),
   owner_name: Joi.string().required(),
   description: Joi.string().min(0).max(100).optional(),

@@ -13,9 +13,12 @@
  */
 
 const WebSocketServer = require('ws').Server;
-const url = require('url');
 const WebSocketMessage = require('./message.js');
 const { LogManager } = require('../log/LogManager');
+
+const RESERVED_BIND_NAME = 'filter';
+const RESERVED_COMMAND_AUTHEVENT = 'authed';
+const WS_CLOSE_POLICY_VIOLATION = 1008;
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -23,6 +26,8 @@ const { LogManager } = require('../log/LogManager');
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
 class WebSocket {
+  #callbackMap;
+
   /**
    * Starts up the server and binds event handler.
    * @param {object} httpsServer - HTTPS server instance
@@ -34,10 +39,11 @@ class WebSocket {
     this.server.on('connection', (client, request) => this.onconnection(client, request));
 
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
-    this.logger.info('Server started');
+    this.logger.info('WebSocket Server started');
 
-    this.callbackArray = [];
-    this.bind('filter', (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
+    this.#callbackMap = {
+      [RESERVED_BIND_NAME]: (message) => new WebSocketMessage(200).setCommand(message.getCommand()),
+    };
     this.ping();
   }
 
@@ -53,59 +59,58 @@ class WebSocket {
    * Binds callback to websocket message command
    * Name "filter" is reserved for internal use
    * @param {string} name       - command name
-   * @param {function} callback - function that receives message as WebSocketMessage object;
+   * @param {void} callback - function that receives message as WebSocketMessage object;
    *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
-    if (Object.prototype.hasOwnProperty.call(this.callbackArray, name)) {
+    if (name === RESERVED_BIND_NAME) {
+      throw Error(`Name "${RESERVED_BIND_NAME}" is reserved for internal use`);
+    } else if (typeof callback !== 'function') {
+      throw Error('Callback must be a function');
+    } else if (Object.prototype.hasOwnProperty.call(this.#callbackMap, name)) {
       throw Error('Callback already exists.');
     }
-    this.callbackArray[name] = callback;
+    this.#callbackMap[name] = callback;
   }
 
   /**
    * Handles incoming text messages: verifies token and processes request/command.
    * @param {object} req - HTTP Req object
-   * @return {object} message to be send back to the user
+   * @return {WebSocketMessage} message to be sent back to the user
+   * @throws {WebSocketMessage} 401 message if token verification fails
    */
   processRequest(req) {
-    return new Promise((resolve, reject) => {
-      let data;
-      try {
-        data = this.http.o2TokenService.verify(req.getToken());
-      } catch (error) {
-        const message = new WebSocketMessage(401);
-        message.payload = error.message;
-        reject(message);
-        return;
-      }
+    let data;
+    try {
+      data = this.http.o2TokenService.verify(req.getToken());
+    } catch (error) {
+      const message = new WebSocketMessage(401);
+      message.payload = error.message;
+      throw message;
+    }
 
-      // Transfer decoded JWT data to request
-      Object.assign(req, data);
-      // Check whether callback exists
-      if (Object.prototype.hasOwnProperty.call(this.callbackArray, req.getCommand())) {
-        const res = this.callbackArray[req.getCommand()](req);
-        // Verify that response is type of WebSocketMessage
-        if (res && res.constructor.name === 'WebSocketMessage') {
-          if (typeof res.getCommand() !== 'string') {
-            res.setCommand(req.getCommand());
-          }
-          resolve(res);
-        } else {
-          // 500 when callback does not return WebSocketMessage
-          const message = new WebSocketMessage(500);
-          message.payload = 'Internal server error - no websocket message returned';
-          this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
-          resolve(message);
-        }
-      } else {
-        // When callback does not exist return 404
-        const message = new WebSocketMessage(404);
-        message.payload = 'Callback does not exist';
-        this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
-        resolve(message);
-      }
-    });
+    // Transfer decoded JWT data to request
+    Object.assign(req, data);
+
+    if (!Object.prototype.hasOwnProperty.call(this.#callbackMap, req.getCommand())) {
+      const message = new WebSocketMessage(404);
+      message.payload = 'Callback does not exist';
+      this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+      return message;
+    }
+
+    const res = this.#callbackMap[req.getCommand()](req);
+    if (!(res instanceof WebSocketMessage)) {
+      const message = new WebSocketMessage(500);
+      message.payload = 'Internal server error - no websocket message returned';
+      this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+      return message;
+    }
+
+    if (typeof res.getCommand() !== 'string') {
+      res.setCommand(req.getCommand());
+    }
+    return res;
   }
 
   /**
@@ -114,17 +119,19 @@ class WebSocket {
    * @param {object} request - connection request
    */
   onconnection(client, request) {
-    const { token } = url.parse(request.url, true).query;
+    const { searchParams } = new URL(request.url, 'http://localhost');
+    const token = searchParams.get('token');
     let decoded;
     try {
       decoded = this.http.o2TokenService.verify(token);
     } catch (error) {
       this.logger.debug(`${error.name} : ${error.message}`);
-      client.close(1008);
+      client.close(WS_CLOSE_POLICY_VIOLATION);
       return;
     }
     client.id = decoded.id;
-    client.send(JSON.stringify({ command: 'authed', id: client.id }));
+    client.isAlive = true;
+    client.send(JSON.stringify({ command: RESERVED_COMMAND_AUTHEVENT, id: client.id }));
     client.on('message', (message) => this.onmessage(message, client));
     client.on('close', () => this.onclose(client));
     client.on('pong', () => {
@@ -134,43 +141,45 @@ class WebSocket {
   }
 
   /**
-   * Called when a new message arrives
-   * Handles connection with a client
+   * Called when a new message arrives. It is important to check that a client connection is
+   * still OPEN before responding, because the client may be in closing process and still appear in client list
+   * if the response is sent in the case above, it will cause an error on server side.
    * @param {object} message received message
    * @param {object} client TCP socket of the client
    */
-  onmessage(message, client) {
-    // 1. parse message
-    new WebSocketMessage().parse(message)
-      .then((parsed) => {
-        // 2. Check if its message filter (no auth required)
-        if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
-          client.filter = new Function(`return ${parsed.getPayload()}`)();
-        }
-        // 3. Get reply if callback exists
-        this.processRequest(parsed)
-          .then((response) => {
-            // 4. Broadcast if necessary
-            if (response.getBroadcast()) {
-              this.broadcast(response);
-            } else {
-              // 5. Send back to a client
-              client.send(JSON.stringify(response.json));
-            }
-          }, (response) => {
-            // 6. If generating response fails
-            client.send(JSON.stringify(response.json));
-            this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
-            client.close(1008);
-          });
-      }, (failed) => {
-        // 7. If parsing message fails
+  async onmessage(message, client) {
+    let parsed;
+    try {
+      parsed = await new WebSocketMessage().parse(message);
+    } catch (failed) {
+      if (client.readyState === client.OPEN) {
         client.send(JSON.stringify(failed.json));
-      })
-      .catch((error) => {
-        this.logger.warn(`ID ${client.id} ${error.name} : ${error.message}`);
-        client.close(1008);
-      });
+      }
+      return;
+    }
+
+    let response;
+    try {
+      response = this.processRequest(parsed);
+    } catch (authError) {
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(authError.json));
+        this.logger.errorMessage(`ID ${client.id} Processing request failed: ${authError.message}`);
+        client.close(WS_CLOSE_POLICY_VIOLATION);
+      }
+      return;
+    }
+
+    // Set filter only after auth is verified
+    if (parsed.getCommand() === RESERVED_BIND_NAME && parsed.getPayload()) {
+      client.filter = new Function(`return ${parsed.getPayload()}`)();
+    }
+
+    if (response.getBroadcast()) {
+      this.broadcast(response);
+    } else if (client.readyState === client.OPEN) {
+      client.send(JSON.stringify(response.json));
+    }
   }
 
   /**
@@ -221,7 +230,9 @@ class WebSocket {
           return; // Don't send
         }
       }
-      client.send(JSON.stringify(message.json));
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(message.json));
+      }
     });
   }
 
@@ -230,7 +241,11 @@ class WebSocket {
    * @param {WebSocketMessage} message - message to be broadcasted
    */
   unfilteredBroadcast(message) {
-    this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));
+    this.server.clients.forEach((client) => {
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(message.json));
+      }
+    });
   }
 }
 

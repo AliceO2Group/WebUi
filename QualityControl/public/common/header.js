@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconPerson } from '/js/src/index.js';
+import { h, iconPerson, getBrowserNotificationPermission, areBrowserNotificationsGranted,
+  requestBrowserNotificationPermissions, BrowserNotificationPermission } from '/js/src/index.js';
 
 import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
@@ -68,14 +69,17 @@ const headerSpecific = (model) => {
  * @returns {vnode} - virtual node element
  */
 const filterSpecific = (model) => {
-  const { page, filterModel, layout, object, objectViewModel } = model;
-
-  switch (page) {
-    case 'layoutShow': return !layout.editEnabled && filtersPanel(filterModel, layout);
-    case 'objectTree': return filtersPanel(filterModel, object);
-    case 'objectView': return filtersPanel(filterModel, objectViewModel);
-    default: return null;
+  const { page, filterModel, layout } = model;
+  if (page === 'layoutShow' && layout.editEnabled) {
+    return null;
   }
+
+  const viewModel = filterModel.getPageTargetModel();
+  if (!viewModel) {
+    return null;
+  }
+
+  return filtersPanel(filterModel, viewModel);
 };
 
 /**
@@ -110,5 +114,43 @@ const loginButton = (model) =>
       model.session.personid === 0 // Anonymous user has id 0
         ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
         : h('a.menu-item', { onclick: () => alert('Not implemented') }, 'Logout'),
+      notifyOnRunStartSettingComponent(model.notificationRunStartModel),
     ]),
   ]);
+
+/**
+ * Builds the toggle and its functionality of the "notify on run start" setting
+ * @param {NotificationRunStartModel} notificationRunStartModel - the notification run start model
+ * @returns {vnode} - virtual node element
+ */
+const notifyOnRunStartSettingComponent = (notificationRunStartModel) => {
+  const browserNotificationPermission = getBrowserNotificationPermission();
+  const notificationsAvailable = browserNotificationPermission
+    && browserNotificationPermission !== BrowserNotificationPermission.DENIED;
+  const runStartNotificationEnabled = notificationRunStartModel.getBrowserNotificationSetting();
+
+  return h(
+    'label.flex-row.g1.items-center.form-check-label',
+    { style: `cursor: ${notificationsAvailable ? 'pointer' : 'not-allowed'};` },
+    [
+      h('.switch', [
+        h('input', {
+          onchange: async (event) => {
+            let permissionGranted = false;
+            if (event.target.checked) {
+              await requestBrowserNotificationPermissions();
+              permissionGranted = areBrowserNotificationsGranted();
+            }
+            notificationRunStartModel.setBrowserNotificationSetting(permissionGranted);
+          },
+          type: 'checkbox',
+          checked: runStartNotificationEnabled,
+        }),
+        h(`span.slider.round.bg-${runStartNotificationEnabled ? 'primary' : 'gray'}`, {
+          style: `cursor: ${notificationsAvailable ? 'pointer' : 'not-allowed'};`,
+        }),
+      ]),
+      'Notify on run start',
+    ],
+  );
+};

@@ -16,6 +16,7 @@ const assert = require('assert');
 const { QueryController } = require('../../../lib/controller/QueryController');
 const { spy, stub } = require('sinon');
 const { TimeoutError } = require('@aliceo2/web-ui');
+const { AbortError } = require('../../../lib/utils/queryCancellation');
 
 describe('QueryController test suite', () => {
   describe('getQueryStats() - test suite', () => {
@@ -106,11 +107,21 @@ describe('QueryController test suite', () => {
         criterias: { key: 'value' },
         options: { },
       };
+      const callbacks = {};
+      res.on = (event, fn) => {
+        callbacks[event] = fn;
+        return res;
+      };
       queryService.queryFromFilters.resolves(logs);
 
       await queryController.getLogs({ body }, res);
 
-      assert.ok(queryService.queryFromFilters.calledWith(body.criterias, body.options));
+      assert.ok(queryService.queryFromFilters.called);
+      const call = queryService.queryFromFilters.getCall(0);
+      assert.strictEqual(call.args[0], body.criterias);
+      assert.strictEqual(call.args[1], body.options);
+      assert.ok(!call.args[2].aborted); // signal should not have been aborted on success
+      assert.ok(call.args[2] instanceof AbortSignal);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(logs));
     });
@@ -120,12 +131,90 @@ describe('QueryController test suite', () => {
         criterias: { key: 'value' },
         options: {},
       };
+      const callbacks = {};
+      res.on = (event, fn) => {
+        callbacks[event] = fn;
+        return res;
+      };
       queryService.queryFromFilters.rejects(new TimeoutError('QUERY TIMED OUT'));
 
       await queryController.getLogs({ body }, res);
 
       assert.ok(res.status.calledWith(408));
       assert.ok(res.json.calledWith({ title: 'Timeout', message: 'QUERY TIMED OUT', status: 408 }));
+    });
+
+    it('should not send response when client closes connection before query completes', async () => {
+      const body = {
+        criterias: { key: 'value' },
+        options: {},
+      };
+      const callbacks = {};
+      res.on = (event, fn) => {
+        callbacks[event] = fn;
+        return res;
+      };
+
+      // Query that completes after close event
+      queryService.queryFromFilters.callsFake(() => new Promise((resolve) => {
+        setTimeout(() => {
+          resolve([{ id: 1, message: 'log1' }]);
+        }, 50);
+      }));
+
+      const queryPromise = queryController.getLogs({ body }, res);
+      // Simulate client closing connection before query completes
+      await new Promise((r) => setTimeout(r, 10));
+      callbacks.close();
+      await queryPromise;
+
+      // Response should not be sent
+      assert.ok(res.status.notCalled);
+      assert.ok(res.json.notCalled);
+    });
+
+    it('should successfully return logs even if close event fires after finish event', async () => {
+      const logs = [{ id: 1, message: 'log1' }];
+      const body = {
+        criterias: { key: 'value' },
+        options: {},
+      };
+      const callbacks = {};
+      res.on = (event, fn) => {
+        callbacks[event] = fn;
+        return res;
+      };
+
+      queryService.queryFromFilters.resolves(logs);
+
+      const queryPromise = queryController.getLogs({ body }, res);
+      await queryPromise;
+
+      // Simulate normal flow: finish fires, then close
+      callbacks.finish();
+      callbacks.close();
+
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith(logs));
+    });
+
+    it('should handle QUERY_CANCELLED error and not send response', async () => {
+      const body = {
+        criterias: { key: 'value' },
+        options: {},
+      };
+      const callbacks = {};
+      res.on = (event, fn) => {
+        callbacks[event] = fn;
+        return res;
+      };
+      queryService.queryFromFilters.rejects(new AbortError());
+
+      await queryController.getLogs({ body }, res);
+
+      // Should not send any response on cancellation
+      assert.ok(res.status.notCalled);
+      assert.ok(res.json.notCalled);
     });
   });
 });

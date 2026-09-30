@@ -37,6 +37,8 @@ export default class DetectorService extends Observable {
     this.hostsByDetectorRemote = RemoteData.notAsked();
     this._selected = '';
 
+    this._activeDetectors = RemoteData.notAsked();
+
     /**
      * @type {Object<String, Detector>}
      */
@@ -55,9 +57,7 @@ export default class DetectorService extends Observable {
     this._listRemote = await this.getDetectorsAsRemoteData(this._listRemote, this);
     this.notify();
     if (this._listRemote.isSuccess()) {
-      this.hostsByDetectorRemote = await this.getHostsByDetectorsAsRemoteData(
-        this.hostsByDetectorRemote, this._listRemote.payload, this
-      );
+      this.hostsByDetectorRemote = await this.getHostsByDetectorsAsRemoteData(this.hostsByDetectorRemote, this);
       for (const detector of this._listRemote.payload) {
         this._availability[detector] = {
           pfrAvailability: DetectorState.UNDEFINED,
@@ -74,6 +74,14 @@ export default class DetectorService extends Observable {
    */
   isSingleView() {
     return this._selected && this._selected !== 'GLOBAL';
+  }
+
+  /**
+   * Checks if the user selected detector view is GLOBAL
+   * @returns {boolean}
+   */
+  isGlobalView() {
+    return this._selected === 'GLOBAL';
   }
 
   /**
@@ -99,7 +107,7 @@ export default class DetectorService extends Observable {
    * @param {Object} that
    * @returns {RemoteData}
    */
-  async getHostsByDetectorsAsRemoteData(item, detectors, that) {
+  async getHostsByDetectorsAsRemoteData(item, that) {
     item = RemoteData.loading();
     that.notify();
     const {ok, result} = await this.model.loader.get(`/api/core/hostsByDetectors`);
@@ -128,56 +136,20 @@ export default class DetectorService extends Observable {
   }
 
   /**
-   * Fetch detectors and return it as a remoteData object
-   * @param {RemoteData} item
+   * Fetch active detectors from AliECS and update the corresponding RemoteData object
+   * @return {void}
    */
-  async getAndSetDetectorsAsRemoteData() {
-    this._listRemote = RemoteData.loading();
+  async getActiveDetectors() {
+    this._activeDetectors = RemoteData.loading();
     this.notify();
-
-    const {result, ok} = await this.model.loader.get(`/api/core/detectors`);
+    const { result, ok } = await this.model.loader.post('/api/GetActiveDetectors', {});
     if (!ok) {
-      this._listRemote = RemoteData.failure(result.message);
+      this._activeDetectors = RemoteData.failure(result.message);
     } else {
-      this._listRemote = RemoteData.success(result.detectors);
+      const { detectors = []} = result || {};
+      this._activeDetectors = RemoteData.success(detectors);
     }
     this.notify();
-  }
-
-  /**
-   * Fetch detectors and return it as a remoteData object
-   * @param {RemoteData} item
-   */
-  async getActiveDetectorsAsRemoteData(item) {
-    item = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/GetActiveDetectors`);
-    if (!ok) {
-      item = RemoteData.failure(result.message);
-    } else {
-      item = RemoteData.success(result.detectors);
-    }
-    this.notify();
-    return item;
-  }
-
-  /**
-   * Given a detector, it will return a RemoteData objects containing the result of query 'GetHostInventory'
-   * @param {String} detector 
-   * @return {RemoteData}
-   */
-  async getHostsForDetector(detector, item, that) {
-    item = RemoteData.loading();
-    that.notify();
-    const {result, ok} = await this.model.loader.post(`/api/GetHostInventory`, {detector});
-    if (!ok) {
-      item = RemoteData.failure(result.message);
-    } else {
-      item = RemoteData.success(result.hosts);
-    }
-    that.notify();
-    return item;
   }
 
   /**
@@ -197,47 +169,6 @@ export default class DetectorService extends Observable {
       }
     }
     return this._listRemote;
-  }
-
-  /**
-   * Method to return a RemoteData object containing list of detectors fetched from AliECS and their availability
-   * @param {boolean} [restrictToUser = true] - if the list should be restricted to user permissions only
-   * @param {RemoteData} item - item in which data should be loaded and notified
-   * @param {typeof Model} that - model that should be notified after a change in data fetching
-   * @returns {RemoteData<Array<DetectorAvailability>>} - returns the state of the detectors
-   */
-  async getDetectorsAvailabilityAsRemote(restrictToUser = true, item = RemoteData.notAsked(), that = this) {
-    item = RemoteData.loading();
-    that.notify();
-
-    let {result: {detectors}, ok: detectorsOk} = await this.model.loader.get(`/api/core/detectors`);
-    const {
-      result: {detectors: activeDetectors},
-      ok: detectorsActivityOk
-    } = await this.model.loader.post(`/api/GetActiveDetectors`);
-    const isLockDataOk = this.model.lock.padlockState.isSuccess();
-
-    if (detectorsOk && detectorsActivityOk && isLockDataOk) {
-      const padLock = this.model.lock.padlockState.payload;
-      if (restrictToUser && this.isSingleView()) {
-        detectors = detectors.filter((detector) => detector === this._selected);
-      }
-      /**
-       * @type {Array<DetectorAvailability>}
-       */
-      const detectorsAvailability = detectors.map((detector) => ({
-        name: detector,
-        isActive: activeDetectors.includes(detector),
-        isLockedBy: padLock.lockedBy[detector],
-      }));
-      item = RemoteData.success(detectorsAvailability);
-      that.notify();
-      return item;
-    } else {
-      item = RemoteData.failure('Unable to fetch information on detectors state');
-      that.notify();
-      return item;
-    }
   }
 
   /**
@@ -285,6 +216,14 @@ export default class DetectorService extends Observable {
    */
   get availability() {
     return this._availability;
+  }
+
+  /**
+   * Return an instance of the current active detectors as per AliECS
+   * @return {RemoteData<Array<String>>}
+   */
+  get activeDetectors() {
+    return this._activeDetectors;
   }
 
   /**

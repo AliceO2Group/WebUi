@@ -139,7 +139,7 @@ describe('REST API', () => {
       .expect('Content-Type', /json/)
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'Invalid JWT token provided',
+        message: 'Invalid token: jwt malformed',
       }, done);
   });
 
@@ -149,7 +149,7 @@ describe('REST API', () => {
       .expect('Content-Type', /json/)
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'You must provide a JWT token',
+        message: 'Invalid token: jwt must be provided',
       }, done);
   });
 

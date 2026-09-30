@@ -21,8 +21,9 @@ export default class FlpSelection extends Observable {
   /**
    * Initialize FLPs Selection Component
    * @param {Object} workflow
+   * @param {Lock} lockModel - model of the lock state which will be used to automatically unselect detectors that are no longer locked by the current user
    */
-  constructor(workflow) {
+  constructor(workflow, lockModel) {
     super();
     this.loader = workflow.model.loader;
     this.workflow = workflow;
@@ -38,6 +39,9 @@ export default class FlpSelection extends Observable {
     this.unavailableDetectors = []; // detectors which are loaded from configuration but active in AliECS
     this.missingHosts = [];
     this.detectorViewConfigurationError = false;
+
+    // Observe lock changes to automatically unselect detectors when locks are released
+    lockModel.observe(() => this._handleLockChanges());
   }
 
   /**
@@ -54,26 +58,26 @@ export default class FlpSelection extends Observable {
     this.notify();
 
     await this.getAndSetDetectors();
-    /*if (this.workflow.model.detectors.isSingleView()
-           && this.activeDetectors.isSuccess()
-      && !this.activeDetectors.payload.detectors.includes(this.workflow.model.detectors.selected)
-    ) {
-      // if single view preselect detectors and hosts for users
-      this.toggleDetectorSelection(this.workflow.model.detectors.selected);
-    }*/
   }
 
   /**
    * Method to request a list of detectors from AliECS and initialized the user form accordingly
+   * @return {Promise<void>}
    */
   async getAndSetDetectors() {
     this.detectors = this.workflow.model.detectors.listRemote;
+    await this.getActiveDetectors();
+  }
 
+  /**
+   * Method to retrieve the detectors that are active as per AliECS
+   * @return {Promise<void>}
+   */
+  async getActiveDetectors() {
     this.activeDetectors = RemoteData.loading();
     this.notify();
     const {result, ok} = await this.workflow.model.loader.post('/api/GetActiveDetectors', {});
     this.activeDetectors = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
-
     this.notify();
   }
 
@@ -111,13 +115,12 @@ export default class FlpSelection extends Observable {
   }
 
   /**
-   * Toggle selection of a detector. A detector can have one of the 3 states:
-   * * active
-   * * available
-   * * unavailable
+   * Toggle selection of a detector. A detector can have one of the states taken/released:
+   * This toggle will also notify the observer by default unless specified otherwise via shouldNotify
    * @param {String} name
+   * @param {boolean} shouldNotify - specify if the method should trigger a notification at the end of the process. 
    */
-  toggleDetectorSelection(name) {
+  toggleDetectorSelection(name, shouldNotify = true) {
     const indexUnavailable = this.unavailableDetectors.indexOf(name)
     if (indexUnavailable >= 0) {
       this.unavailableDetectors.splice(indexUnavailable, 1);
@@ -131,7 +134,9 @@ export default class FlpSelection extends Observable {
         this.setHostsForDetector(name, true);
       }
     }
-    this.notify();
+    if (shouldNotify) {
+      this.notify();
+    }
   }
 
   /**
@@ -162,15 +167,7 @@ export default class FlpSelection extends Observable {
   isDetectorActive(name) {
     return this.activeDetectors.isSuccess() && this.activeDetectors.payload.detectors.includes(name)
   }
-  /**
-   * Unselects given detector and its FLPs
-   * @param {string} name
-   */
-  unselectDetector(name) {
-    if (this.selectedDetectors.includes(name)) {
-      this.toggleDetectorSelection(name);
-    }
-  }
+
   /**
    * Toggle the selection of an FLP from the form host
    * The user can also use SHIFT key to select between 2 FLP machines, thus
@@ -301,6 +298,26 @@ export default class FlpSelection extends Observable {
         this.hostsByDetectors[detector].forEach((hostname) => this.workflow.form.addHost(hostname));
       }
     }
+    this.notify();
+  }
+
+  /**
+   * Handler for lock state changes so that it automatically unselects detectors that are no longer locked by the current user.
+   * This method will be called either by:
+   * * changes triggered by the user on the lock button of a detector panel/locks page
+   * * changes triggered by a different user and received via websocket subscription to lock changes
+   * In all cases, if a detector is no longer locked by the current user, it will be unselected from the workflow and its hosts will be removed from the form selection.
+   * @private
+   * @returns {void}
+   */
+  _handleLockChanges() {
+    this.selectedDetectors
+      .filter((detector) => !this.workflow.model.lock.isLockedByCurrentUser(detector))
+      .forEach((detector) => {
+        if (this.selectedDetectors.includes(detector)) {
+          this.toggleDetectorSelection(detector, false);
+        }
+      });
     this.notify();
   }
 }

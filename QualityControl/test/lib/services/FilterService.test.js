@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { deepStrictEqual } from 'node:assert';
+import { deepStrictEqual, ok, strictEqual } from 'node:assert';
 import { suite, test, beforeEach, afterEach } from 'node:test';
 import { FilterService } from '../../../lib/services/FilterService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
@@ -24,6 +24,7 @@ export const filterServiceTestSuite = async () => {
   const configMock = {
     bookkeeping: {
       runTypesRefreshInterval: 24 * 60 * 60 * 1000, // 24 hours
+      dataPassesRefreshInterval: 60 * 60 * 1000, // 1 hour
     },
   };
 
@@ -32,6 +33,8 @@ export const filterServiceTestSuite = async () => {
       connect: stub(),
       retrieveRunTypes: stub(),
       retrieveRunInformation: stub(),
+      retrieveDetectorSummaries: stub(),
+      retrieveDataPasses: stub(),
       active: true, // assume the bookkeeping service is active by default
     };
     filterService = new FilterService(bookkeepingServiceMock, configMock);
@@ -57,10 +60,31 @@ export const filterServiceTestSuite = async () => {
       deepStrictEqual(filterServiceWithDefaultConfig._runTypesRefreshInterval, 24 * 60 * 60 * 1000);
     });
 
+    test('should set data passes refresh interval to default if not provided', () => {
+      const filterServiceWithDefaultConfig = new FilterService(bookkeepingServiceMock, { bookkeeping: {} });
+      strictEqual(filterServiceWithDefaultConfig._dataPassesRefreshInterval, 6 * 60 * 60 * 1000);
+    });
+
     test('should set run types refresh interval to the value from config', () => {
       const customConfig = { bookkeeping: { runTypesRefreshInterval: 5000 } };
       const filterServiceWithCustomConfig = new FilterService(bookkeepingServiceMock, customConfig);
       deepStrictEqual(filterServiceWithCustomConfig._runTypesRefreshInterval, 5000);
+    });
+
+    test('should set data passes refresh interval to the value from config', () => {
+      const customConfig = { bookkeeping: { dataPassesRefreshInterval: 5000 } };
+      const filterServiceWithCustomConfig = new FilterService(bookkeepingServiceMock, customConfig);
+      strictEqual(filterServiceWithCustomConfig._dataPassesRefreshInterval, 5000);
+    });
+
+    test('should init _detectors on instantiation', async () => {
+      deepStrictEqual(filterService._detectors, []);
+      ok(Object.isFrozen(filterService._detectors));
+    });
+
+    test('should init _dataPasses on instantiation', async () => {
+      deepStrictEqual(filterService._dataPasses, []);
+      ok(Object.isFrozen(filterService._dataPasses));
     });
 
     test('should init filters on instantiation', async () => {
@@ -71,7 +95,62 @@ export const filterServiceTestSuite = async () => {
   });
 
   suite('initFilters', async () => {
+    test('should call _initializeDetectors', async () => {
+      const initializeDetectorsStub = stub(filterService, '_initializeDetectors');
+      await filterService.initFilters();
+      ok(initializeDetectorsStub.calledOnce);
+    });
 
+    test('should set _detectors on _initializeDetectors call', async () => {
+      const DETECTOR_SUMMARIES = [
+        {
+          name: 'Detector human-readable name',
+          type: 'Detector type identifier',
+        },
+        {
+          name: '',
+          type: 'OTHER',
+        },
+        {
+          name: 'Another Detector',
+          type: '',
+        },
+      ];
+
+      bookkeepingServiceMock.retrieveDetectorSummaries.resolves(DETECTOR_SUMMARIES);
+      await filterService._initializeDetectors();
+
+      deepStrictEqual(filterService._detectors, [DETECTOR_SUMMARIES[0]]);
+      ok(Object.isFrozen(filterService._detectors));
+    });
+
+    test('should call getDataPasses', async () => {
+      const getDataPassesStub = stub(filterService, 'getDataPasses');
+      await filterService.initFilters();
+      ok(getDataPassesStub.calledOnce);
+    });
+
+    test('should set _dataPasses on getDataPasses call', async () => {
+      const DATA_PASSES = [
+        {
+          name: 'Data pass human-readable name 1',
+          isFrozen: false,
+          dummy: 'some dummy data that should be removed',
+        },
+        {
+          name: 'Data pass human-readable name 2',
+          isFrozen: true,
+          dummy: 'some more dummy data that should be removed',
+        },
+      ];
+
+      bookkeepingServiceMock.retrieveDataPasses.resolves(DATA_PASSES);
+      await filterService.getDataPasses();
+
+      const EXPECTED_DATA_PASSES = DATA_PASSES.map(({ name, isFrozen }) => ({ name, isFrozen }));
+      deepStrictEqual(filterService._dataPasses, EXPECTED_DATA_PASSES);
+      ok(Object.isFrozen(filterService._dataPasses));
+    });
   });
 
   suite('getRunTypes', async () => {
@@ -102,6 +181,17 @@ export const filterServiceTestSuite = async () => {
     test('should return -1 if no interval is set', () => {
       const filterServiceWithoutConfig = new FilterService(bookkeepingServiceMock, {});
       deepStrictEqual(filterServiceWithoutConfig.runTypesRefreshInterval, -1);
+    });
+  });
+
+  suite('dataPassesRefreshInterval', async () => {
+    test('should return the data passes refresh interval', () => {
+      strictEqual(filterService.dataPassesRefreshInterval, configMock.bookkeeping.dataPassesRefreshInterval);
+    });
+
+    test('should return -1 if bookkeeping config is not set', () => {
+      const filterServiceWithoutConfig = new FilterService(bookkeepingServiceMock, {});
+      strictEqual(filterServiceWithoutConfig.dataPassesRefreshInterval, -1);
     });
   });
 

@@ -223,7 +223,7 @@ const drawComponent = (model, tabObject) => {
         display: 'flex',
         'flex-direction': 'column',
       },
-    }, draw(
+    }, objectFromQcdbAsRemoteData && draw(
       objectFromQcdbAsRemoteData,
       {},
       toUseDrawingOptions,

@@ -70,7 +70,7 @@ describe(`'LockService' test suite`, () => {
   it('should throw error when a user attempts to take a lock that is already held by another user', () => {
     assert.throws(
       () => lockService.takeLock('ABC', userB),
-      new UnauthorizedAccessError(`Unauthorized TAKE action for lock of detector ABC by user userB`)
+      new UnauthorizedAccessError('Unauthorized TAKE action for lock ABC by userB while lock is held by userA')
     );
   });
 
@@ -98,7 +98,7 @@ describe(`'LockService' test suite`, () => {
     lockService.takeLock('ABC', userA);
     assert.throws(
       () => lockService.releaseLock('ABC', userB),
-      new UnauthorizedAccessError(`Unauthorized RELEASE action for lock of detector ABC by user userB`)
+      new UnauthorizedAccessError('Unauthorized RELEASE action for lock ABC by userB while lock is held by userA')
     );
   });
 

@@ -16,7 +16,7 @@ import { downloadButton } from '../../../common/downloadButton.js';
 import { isOnLeftSideOfViewport } from '../../../common/utils.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
 import { h, iconResizeBoth, info } from '/js/src/index.js';
-import { downloadRootImageButton } from '../../../common/downloadRootImageButton.js';
+import { downloadRootImageDropdown } from '../../../common/downloadRootImageDropdown.js';
 
 /**
  * Builds 2 actionable buttons which are to be placed on top of a JSROOT plot
@@ -40,8 +40,9 @@ export const objectInfoResizePanel = (model, tabObject) => {
   const toUseDrawingOptions = Array.from(new Set(ignoreDefaults
     ? drawingOptions
     : [...drawingOptions, ...displayHints, ...drawOptions]));
+  const visibility = object.getExtraObjectData(tabObject.id)?.saveImageDropdownOpen ? 'visible' : 'hidden';
   return h('.text-right.resize-element.item-action-row.flex-row.g1', {
-    style: 'visibility: hidden; padding: .25rem .25rem 0rem .25rem;',
+    style: `visibility: ${visibility}; padding: .25rem .25rem 0rem .25rem;`,
   }, [
 
     h('.dropdown', { class: isSelectedOpen ? 'dropdown-open' : '',
@@ -69,10 +70,14 @@ export const objectInfoResizePanel = (model, tabObject) => {
       ),
     ]),
     objectRemoteData.isSuccess() && [
-      downloadRootImageButton(
-        `${objectRemoteData.payload.name}.png`,
+      downloadRootImageDropdown(
+        objectRemoteData.payload.name,
         objectRemoteData.payload.qcObject.root,
         toUseDrawingOptions,
+        (isDropdownOpen) => {
+          object.appendExtraObjectData(tabObject.id, { saveImageDropdownOpen: isDropdownOpen });
+        },
+        tabObject.id,
       ),
       downloadButton({
         href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),

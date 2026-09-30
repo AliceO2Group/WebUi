@@ -13,6 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
+import { ServiceStatus } from '../../../../library/enums/Status/serviceStatus.enum.js';
 
 /**
  * Builds a card for an integrated service
@@ -21,18 +22,17 @@ import { h } from '/js/src/index.js';
  */
 export const serviceCard = (serviceData) => {
   const { name, status, version, extras = {} } = serviceData || {};
-  const { ok, message = null } = status || {};
-  const isDown = !ok;
+  const { category, message = null } = status || {};
   const showExtras = Object.keys(extras).length > 0;
   const extrasToDisplay = JSON.parse(JSON.stringify(extras));
-  const titleClass = ok ? '' : 'bg-danger white';
+  const titleClass = category === ServiceStatus.ERROR ? 'bg-danger white' : '';
   return h('.w-33.flex-column', { id: name }, [
     h('.panel-title.p2.flex-row', { class: titleClass }, [
       h('h4', name),
       version && h('i.text-right.flex-grow', { style: 'justify-content: flex-end' }, version),
     ]),
     h('.panel.flex-column.g2', [
-      isDown && serviceRow('Error', message),
+      message && serviceRow('Error', message),
       showExtras &&
       h(
         '.flex-column.g2',
@@ -44,7 +44,6 @@ export const serviceCard = (serviceData) => {
             h('div', { style: 'flex: 1; text-align: left;' }, value.toString()),
           ])),
       ),
-
     ]),
   ]);
 };

@@ -140,6 +140,7 @@ class EnvironmentService {
       environmentInfo.events = [...cachedEnvironment.events];
       environmentInfo.isDeploying = cachedEnvironment.isDeploying;
       environmentInfo.deploymentError = cachedEnvironment.deploymentError; 
+      environmentInfo.firstTaskInError = cachedEnvironment.firstTaskInError;
     } 
     return environmentInfo;
   }

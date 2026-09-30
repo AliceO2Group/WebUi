@@ -39,7 +39,7 @@ describe(`'API - GET - /configurations/restrictions' test suite`, () => {
       .get('/')
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'You must provide a JWT token'
+        message: 'Invalid token: jwt must be provided'
       });
   });
 
@@ -48,7 +48,7 @@ describe(`'API - GET - /configurations/restrictions' test suite`, () => {
       .get('/?token=invalid-token')
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'Invalid JWT token provided'
+        message: 'Invalid token: jwt malformed'
       });
   });
   

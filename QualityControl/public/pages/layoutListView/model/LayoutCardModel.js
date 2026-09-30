@@ -39,6 +39,7 @@ export default class LayoutCardModel extends Observable {
     this.owner_name = layout.owner_name;
     this.isOfficial = layout.isOfficial;
     this.name = layout.name;
+    this.labels = layout.labels || [];
 
     this.notify();
   }

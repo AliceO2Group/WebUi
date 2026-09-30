@@ -16,6 +16,7 @@ import { FailedDependencyError, LogManager, NotFoundError } from '@aliceo2/web-u
 import { httpHeadJson, httpGetJson } from '../../utils/httpRequests.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
+  getCcdbMetadataFieldMappingFor,
 } from './CcdbConstants.js';
 
 const {
@@ -85,7 +86,7 @@ export class CcdbService {
       const path = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
       serviceInfo = await httpGetJson(this._hostname, this._port, path, { headers: { Accept: 'application/json' } });
     } catch (error) {
-      throw new Error(`Unable to connect to CCDB due to: ${error}`);
+      throw new Error(`Unable to connect to CCDB due to: ${error}`, { cause: error });
     }
     try {
       const monitorData = serviceInfo?.[CCDB_MONITOR] ?? {};
@@ -94,7 +95,7 @@ export class CcdbService {
       const version = monitorData[firstKey]?.[0]?.value ?? 'unknown version';
       return { version };
     } catch (error) {
-      throw new Error(`Unable to read version of CCDB due to: ${error}`);
+      throw new Error(`Unable to read version of CCDB due to: ${error}`, { cause: error });
     }
   }
 
@@ -189,8 +190,9 @@ export class CcdbService {
     let result = null;
     try {
       result = await httpGetJson(this._hostname, this._port, url, { headers });
-    } catch {
-      throw new Error(`Failed to fetch object at url '${url}' and path '${partialIdentification.path}'.`);
+    } catch (error) {
+      const { path } = partialIdentification;
+      throw new Error(`Failed to fetch object at url '${url}' and path '${path}'.`, { cause: error });
     }
 
     if (!result?.objects?.length) {
@@ -357,7 +359,7 @@ export class CcdbService {
     }
     if (filters && Object.keys(filters).length > 0) {
       url += `/${Object.entries(filters)
-        .flatMap(([key, value]) => `${key}=${value}`)
+        .flatMap(([key, value]) => `${getCcdbMetadataFieldMappingFor(key)}=${value}`)
         .join('/')}`;
     }
     return url;

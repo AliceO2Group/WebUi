@@ -40,7 +40,7 @@ describe(`'API - GET - /tasks' test suite`, async () => {
       .get('/?token=invalid-token')
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'Invalid JWT token provided',
+        message: 'Invalid token: jwt malformed',
       });
   });
 });

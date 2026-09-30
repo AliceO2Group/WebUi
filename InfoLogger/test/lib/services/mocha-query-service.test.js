@@ -14,9 +14,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const config = require('../../../config-default.js');
 const { QueryService } = require('../../../lib/services/QueryService.js');
-const { UnauthorizedAccessError, TimeoutError } = require('@aliceo2/web-ui');
+const { UnauthorizedAccessError, TimeoutError, InvalidInputError } = require('@aliceo2/web-ui');
+const { AbortError } = require('../../../lib/utils/queryCancellation');
 
 describe('\'QueryService\' test suite', () => {
   const filters = {
@@ -71,11 +71,11 @@ describe('\'QueryService\' test suite', () => {
       $max: null, // 0, 1, 6, 11, 21
     },
   };
-  const emptySqlDataSource = new QueryService(undefined, {});
+  const emptySqlDataSource = new QueryService();
 
   describe('\'checkConnection()\' - test suite', () => {
     it('should reject with error when simple query fails', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       sqlDataSource._isAvailable = true;
       sqlDataSource._pool = {
         query: sinon.stub().rejects({
@@ -93,7 +93,7 @@ describe('\'QueryService\' test suite', () => {
     });
 
     it('should do nothing when checking connection with mysql driver and driver returns resolved Promise', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       sqlDataSource._isAvailable = false;
       sqlDataSource._pool = {
         query: sinon.stub().resolves(),
@@ -101,6 +101,48 @@ describe('\'QueryService\' test suite', () => {
 
       await assert.doesNotReject(sqlDataSource.checkConnection());
       assert.ok(sqlDataSource.isAvailable);
+    });
+
+    it('should throw InvalidInputError when no pool is configured and shouldThrow is true', async () => {
+      const sqlDataSource = new QueryService();
+      await assert.rejects(
+        sqlDataSource.checkConnection(),
+        new InvalidInputError('No database configuration provided'),
+      );
+      assert.ok(sqlDataSource.isAvailable === false);
+    });
+
+    it('should not throw and log error when no pool is configured and shouldThrow is false', async () => {
+      const sqlDataSource = new QueryService();
+      const logStub = sinon.stub();
+      sqlDataSource._logger = {
+        errorMessage: logStub,
+      };
+
+      await assert.doesNotReject(sqlDataSource.checkConnection(10000, false));
+      assert.ok(sqlDataSource.isAvailable === false);
+      assert.ok(logStub.calledOnce);
+      assert.ok(logStub.firstCall.args[0].message === 'No database configuration provided');
+    });
+
+    it('should not throw and log error when connection fails and shouldThrow is false', async () => {
+      const sqlDataSource = new QueryService();
+      const logStub = sinon.stub();
+      sqlDataSource._logger = {
+        errorMessage: logStub,
+      };
+      sqlDataSource._pool = {
+        query: sinon.stub().rejects({
+          code: 'ER_ACCESS_DENIED_ERROR',
+          errno: 1045,
+          sqlMessage: 'Access denied',
+        }),
+      };
+
+      await assert.doesNotReject(sqlDataSource.checkConnection(10000, false));
+      assert.ok(sqlDataSource.isAvailable === false);
+      assert.ok(logStub.calledOnce);
+      assert.ok(logStub.firstCall.args[0].code === 'ER_ACCESS_DENIED_ERROR');
     });
   });
 
@@ -150,7 +192,7 @@ describe('\'QueryService\' test suite', () => {
       const expectedCriteria = [
         '`timestamp`>=?',
         '`timestamp`<=?',
-        'NOT(`hostname` = ? AND `hostname` IS NOT NULL OR `hostname` = ? AND `hostname` IS NOT NULL)',
+        'NOT((`hostname` = ? AND `hostname` IS NOT NULL) OR (`hostname` = ? AND `hostname` IS NOT NULL))',
         '`severity` IN (?)',
         '`level`<=?',
         '`userId`>=?',
@@ -159,6 +201,82 @@ describe('\'QueryService\' test suite', () => {
         emptySqlDataSource._filtersToSqlConditions(likeFilters),
         { values: expectedValues, criteria: expectedCriteria },
       );
+    });
+  });
+
+  describe('Empty field filters', () => {
+    it('should skip emptyFor when value is null', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { $emptyFor: null },
+      });
+      assert.deepStrictEqual(result, { values: [], criteria: [] });
+    });
+
+    it('should generate IS NULL/empty condition when emptyFor is "match" alone', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { $emptyFor: 'match' },
+      });
+      assert.deepStrictEqual(result.values, []);
+      const expectedCriteria = '(`hostname` = \'\' OR `hostname` IS NULL)';
+      assert.deepStrictEqual(result.criteria, [expectedCriteria]);
+    });
+
+    it('should generate IS NOT NULL/non-empty condition when emptyFor is "exclude" alone', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { $emptyFor: 'exclude' },
+      });
+      assert.deepStrictEqual(result.values, []);
+      const expectedCriteria = '(`hostname` != \'\' AND `hostname` IS NOT NULL)';
+      assert.deepStrictEqual(result.criteria, [expectedCriteria]);
+    });
+
+    it('should generate OR when $match is set and emptyFor is "match"', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { match: 'test', $match: 'test', $emptyFor: 'match' },
+      });
+      assert.deepStrictEqual(result.values, ['test']);
+      const expectedCriteria = '(`hostname` = ? OR `hostname` = \'\' OR `hostname` IS NULL)';
+      assert.deepStrictEqual(result.criteria, [expectedCriteria]);
+    });
+
+    it('should generate AND when $exclude is set and emptyFor is "exclude"', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { exclude: 'test', $exclude: 'test', $emptyFor: 'exclude' },
+      });
+      assert.deepStrictEqual(result.values, ['test']);
+      assert.deepStrictEqual(result.criteria, [
+        'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
+        '(`hostname` != \'\' AND `hostname` IS NOT NULL)',
+      ]);
+    });
+
+    it('should not push emptyFor criteria when $match is present (defers to $match case)', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { match: 'test', $match: 'test', $emptyFor: 'match' },
+      });
+      // Should have one combined criterion from $match, not a separate one from emptyFor
+      assert.strictEqual(result.criteria.length, 1);
+      assert.ok(result.criteria[0].includes('IS NULL'));
+    });
+
+    it('should handle $match with multiple values and emptyFor is "match"', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { match: 'foo bar', $match: 'foo bar', $emptyFor: 'match' },
+      });
+      assert.deepStrictEqual(result.values, ['foo', 'bar']);
+      const expectedCriteria = '(`hostname` = ? OR `hostname` = ? OR `hostname` = \'\' OR `hostname` IS NULL)';
+      assert.deepStrictEqual(result.criteria, [expectedCriteria]);
+    });
+
+    it('should handle $exclude with multiple values and emptyFor is "exclude"', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { exclude: 'foo bar', $exclude: 'foo bar', $emptyFor: 'exclude' },
+      });
+      assert.deepStrictEqual(result.values, ['foo', 'bar']);
+      assert.deepStrictEqual(result.criteria, [
+        'NOT((`hostname` = ? AND `hostname` IS NOT NULL) OR (`hostname` = ? AND `hostname` IS NOT NULL))',
+        '(`hostname` != \'\' AND `hostname` IS NOT NULL)',
+      ]);
     });
   });
 
@@ -191,30 +309,39 @@ describe('\'QueryService\' test suite', () => {
 
   describe('queryFromFilters() - test suite', () => {
     it('should throw an error when unable to query(API) due to rejected promise', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
-      sqlDataSource._pool = {
+      const sqlDataSource = new QueryService();
+      const connection = {
         query: sinon.stub().rejects({
           code: 'ER_ACCESS_DENIED_ERROR',
           errno: 1045,
           sqlMessage: 'Access denied',
         }),
+        release: sinon.stub(),
+      };
+      sqlDataSource._pool = {
+        getConnection: sinon.stub().resolves(connection),
       };
       await assert.rejects(
         sqlDataSource.queryFromFilters(realFilters, { limit: 10 }),
         new UnauthorizedAccessError('SQL: [ER_ACCESS_DENIED_ERROR, 1045] Access denied'),
       );
+      assert.strictEqual(connection.release.calledOnce, true);
     });
 
     it('should successfully return result when filters are provided for querying', async () => {
       const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? '
         + 'AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
 
-      const sqlDataSource = new QueryService(config.mysql);
-      sqlDataSource._pool = {
+      const sqlDataSource = new QueryService();
+      const connection = {
         query: sinon.stub().resolves([
           { hostname: 'test', severity: 'W' },
           { hostname: 'test', severity: 'I' },
         ]),
+        release: sinon.stub(),
+      };
+      sqlDataSource._pool = {
+        getConnection: sinon.stub().resolves(connection),
       };
       const result = await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
       delete result.time;
@@ -229,28 +356,91 @@ describe('\'QueryService\' test suite', () => {
         queryAsString: query,
       };
       assert.deepStrictEqual(result, expectedResult);
+      assert.strictEqual(connection.release.calledOnce, true);
     });
 
     it('should log every executed sql query as debug', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       sqlDataSource._logger = {
         debugMessage: sinon.stub(),
       };
-      sqlDataSource._pool = {
+      const connection = {
         query: sinon.stub().resolves([{ hostname: 'test', severity: 'W' }]),
+        release: sinon.stub(),
+      };
+      sqlDataSource._pool = {
+        getConnection: sinon.stub().resolves(connection),
       };
       await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
       const completeSqlQuery = "SELECT * FROM `messages` WHERE `timestamp`>='1563794601.351' AND" +
               " `timestamp`<='1563794661.354' AND `hostname` = 'test' AND NOT(`hostname` = 'testEx' AND" +
               " `hostname` IS NOT NULL) AND `severity` IN ('D','W') ORDER BY `TIMESTAMP` LIMIT 10;";
       assert.strictEqual(sqlDataSource._logger.debugMessage.calledWith(`SQL to execute: ${completeSqlQuery}`), true);
+      assert.strictEqual(connection.release.calledOnce, true);
+    });
+
+    it('should throw QUERY_CANCELLED when signal is already aborted before query execution', async () => {
+      const sqlDataSource = new QueryService();
+      const connection = {
+        query: sinon.stub().resolves([]),
+        release: sinon.stub(),
+      };
+      sqlDataSource._pool = {
+        getConnection: sinon.stub().resolves(connection),
+      };
+
+      const controller = new AbortController();
+      controller.abort();
+
+      await assert.rejects(
+        sqlDataSource.queryFromFilters(realFilters, { limit: 10 }, controller.signal),
+        (error) =>
+          error instanceof AbortError
+          && error.code === 'QUERY_CANCELLED'
+          && error.message === 'Query cancelled by client',
+      );
+      assert.strictEqual(connection.query.called, false);
+      assert.strictEqual(connection.release.calledOnce, true);
+    });
+
+    it('should destroy connection and throw QUERY_CANCELLED when signal aborts during query execution', async () => {
+      const sqlDataSource = new QueryService();
+      let rejectQuery = null;
+      const connection = {
+        query: sinon.stub().callsFake(() => new Promise((resolve, reject) => {
+          rejectQuery = reject;
+        })),
+        release: sinon.stub(),
+        destroy: sinon.stub().callsFake(() => {
+          rejectQuery({
+            code: 'ER_ACCESS_DENIED_ERROR',
+            errno: 1045,
+            sqlMessage: 'Access denied',
+          });
+        }),
+      };
+      sqlDataSource._pool = {
+        getConnection: sinon.stub().resolves(connection),
+      };
+
+      const controller = new AbortController();
+      const queryPromise = sqlDataSource.queryFromFilters(realFilters, { limit: 10 }, controller.signal);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      controller.abort();
+
+      await assert.rejects(
+        queryPromise,
+        (error) => error instanceof AbortError && error.code === 'QUERY_CANCELLED' && error.message === 'Query cancelled by client',
+      );
+      assert.strictEqual(connection.destroy.calledOnce, true);
+      assert.strictEqual(connection.release.called, false);
     });
   });
 
   describe('queryGroupCountLogsBySeverity() - test suite', () => {
     it(`should successfully return stats when queried for all known severities
       even if none is some are not returned by data service`, async () => {
-      const dataService = new QueryService(config.mysql);
+      const dataService = new QueryService();
       dataService._pool = {
         query: sinon.stub().resolves([
           { severity: 'E', 'COUNT(*)': 102 },
@@ -268,9 +458,8 @@ describe('\'QueryService\' test suite', () => {
     });
 
     it('should throw error if data service throws SQL', async () => {
-      const dataService = new QueryService(config.mysql);
-      dataService._pool =
-      {
+      const dataService = new QueryService();
+      dataService._pool = {
         query: sinon.stub().rejects({
           code: 'ER_ACCESS_DENIED_ERROR',
           errno: 1045,

@@ -23,6 +23,7 @@ EmitterKeys} = require('../../../../lib/common/emitterKeys.enum.js');
 const { BroadcastKeys: {ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW} } = require('../../../../lib/common/broadcastKeys.enum.js');
 const { EnvironmentState } = require('../../../../lib/common/environmentState.enum.js');
 const { EnvironmentTransitionType } = require('../../../../lib/common/environmentTransitionType.enum.js');
+const { EcsOperationAndStepStatus } = require('../../../../lib/common/ecsOperationAndStepStatus.enum.js');
 
 describe(`'EnvironmentCacheService' - test suite`, () => {
   let broadcastServiceMock;
@@ -68,7 +69,8 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
         isDeploying: undefined,
         deploymentError: undefined,
         state: 'inactive',
-        events: []
+        events: [],
+        firstTaskInError: undefined,
       });
       assert.strictEqual(broadcastServiceMock.broadcast.callCount, 1);
     });
@@ -86,6 +88,47 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       environmentCacheService.addOrUpdateEnvironment(environment);
 
       assert.ok(environmentCacheService._lastUpdate >= beforeUpdate);
+    });
+
+    it('should preserve the `firstTaskInError` field when updating an existing environment', () => {
+      const firstTaskInError = {
+        environmentId: 'env123',
+        state: 'ERROR',
+        taskid: 1,
+        name: 'task1',
+        hostname: 'host1',
+        className: 'class1',
+        isCritical: false,
+      };
+
+      const initialEnvironment = {
+        id: 'env123',
+        state: 'RUNNING',
+        firstTaskInError: firstTaskInError,
+      };
+
+      environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
+
+      assert.strictEqual(environmentCacheService._environments.size, 1);
+      assert.deepStrictEqual(
+        environmentCacheService._environments.get('env123').firstTaskInError,
+        firstTaskInError
+      );
+
+      const updatedEnvironment = {
+        id: 'env123',
+        state: 'CONFIGURED',
+        someOtherField: 'newValue',
+      };
+
+      environmentCacheService.addOrUpdateEnvironment(updatedEnvironment);
+
+      assert.strictEqual(environmentCacheService._environments.size, 1);
+      const cachedEnv = environmentCacheService._environments.get('env123');
+      assert.strictEqual(cachedEnv.state, 'CONFIGURED');
+      assert.strictEqual(cachedEnv.someOtherField, 'newValue');
+      assert.deepStrictEqual(cachedEnv.firstTaskInError, firstTaskInError, 
+        'firstTaskInError should be preserved after update');
     });
   });
 
@@ -331,12 +374,12 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
       const firstTaskInErrorEventSent = {
           environmentId: 'env1',
-          state: 'ERROR',
+          state: 'ERROR_CRITICAL',
           taskid: 1,
           name: 'task1',
           hostname: 'host1',
           className: 'class1',
-          isCritical: false,
+          isCritical: true,
       };
       eventEmitter.emit(TASKS_TRACK, {
         timestamp: Date.now(),
@@ -376,14 +419,35 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
         id: 'env1',
         transition: {
           name: EnvironmentTransitionType.DESTROY,
+          status: EcsOperationAndStepStatus.DONE_OK
         },
-        message: 'environment teardown complete',
         state: EnvironmentState.DONE
       });
 
       const env = environmentCacheService._environments.get('env1');
       assert.ok(!env, 'Environment "env1" should be removed from the cache');
       assert.strictEqual(broadcastServiceMock.broadcast.callCount, 2, 'Broadcast (event and overview) should be made when environment is removed');
+    });
+
+    it('should successfully remove isDeploying flag on CONFIGURED state after deployment', () => {
+      const initialEnvironment = {
+        id: 'env1',
+        isDeploying: true,
+        state: EnvironmentState.DEPLOYED
+      };
+      environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
+
+      eventEmitter.emit(EmitterKeys.ENVIRONMENTS_TRACK, {
+        id: 'env1',
+        transition: {
+          name: EnvironmentTransitionType.CONFIGURE,
+          status: EcsOperationAndStepStatus.DONE_OK
+        },
+        state: EnvironmentState.CONFIGURED
+      });
+      const env = environmentCacheService._environments.get('env1');
+      assert.ok(env, 'Environment "env1" should exist in the cache without isDeploying flag');
+      assert.strictEqual(env.isDeploying, false, 'isDeploying flag should be removed after successful deployment');
     });
   });
 });
