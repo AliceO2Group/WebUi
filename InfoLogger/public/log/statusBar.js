@@ -13,6 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
+import { MODE } from '../constants/mode.const.js';
 
 /**
  * Bottom bar, showing status of the log's list and its details,
@@ -96,11 +97,17 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
  * @returns {vnode} - the view of the application options
  */
 const applicationOptions = (model) => [
-  h('label.d-inline', { title: 'Scroll down in live mode on new log incoming' }, h('input', {
-    type: 'checkbox',
-    checked: model.log.autoScrollLive,
-    onchange: () => model.log.toggleAutoScroll(),
-  }), ' Autoscroll'),
+  model.log.activeMode !== MODE.QUERY ? h(
+    'label.d-inline',
+    { title: 'Scroll down in live mode on new log incoming' },
+    h(
+      'span',
+      {
+        className: model.log.autoScrollLive ? 'success' : 'warning',
+      },
+      model.log.autoScrollLive ? 'Autoscroll Active' : 'Scroll to the bottom to resume autoscroll',
+    ),
+  ) : null,
   h('span.mh1'),
   h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
     type: 'checkbox',

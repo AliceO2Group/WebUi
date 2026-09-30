@@ -74,34 +74,6 @@ describe('Logs Table test-suite', async () => {
   });
 
   describe('Autoscroll behavior', async () => {
-    describe('in query mode', async () => {
-      it('should disable autoscroll when the user scrolls up', async () => {
-        await fillTableAndScrollToBottom(page);
-        await page.evaluate(() => model.log.enableAutoScroll());
-        await assertAutoScrollLive(page, true);
-
-        const scrollTopAtBottom = await getScrollTop(page);
-        await page.evaluate(() => {
-          document.querySelector('.tableLogsContent').scrollTop -= 100;
-        });
-        await waitForScrollTopBelow(page, scrollTopAtBottom);
-
-        await assertAutoScrollLive(page, false);
-      });
-
-      it('should not disable autoscroll when the log list is cleared', async () => {
-        await page.evaluate(() => model.log.enableAutoScroll());
-        await fillTableAndScrollToBottom(page);
-        await assertAutoScrollLive(page, true);
-
-        const scrollTopAtBottom = await getScrollTop(page);
-        await page.click('#clear-button');
-        await waitForScrollTopBelow(page, scrollTopAtBottom);
-
-        await assertAutoScrollLive(page, true);
-      });
-    });
-
     describe('in live mode', async () => {
       beforeEach(async () => {
         await page.waitForSelector('#live-button:not([disabled])');

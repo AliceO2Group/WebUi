@@ -16,6 +16,7 @@ import { h } from '/js/src/index.js';
 
 import { severityClass } from './severityUtils.js';
 import tableColGroup from './tableColGroup.js';
+import { MODE } from '../constants/mode.const.js';
 
 /**
  * Main content of ILG - simulates a big table scrolling.
@@ -219,14 +220,14 @@ const tableContainerHooks = (model) => ({
      */
     const onTableScroll = () => {
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
+      const { scrollHeight, clientHeight } = container;
 
       // When the logs table is emptied it causes a scroll event to be triggered as scrollTop is set to 0.
       // If scrollTop is smaller than before this is usually enough to tell if the user has scrolled up.
-      // But we need to check if the user remains at the bottom,
-      // which is the case when switching to Live mode or clearing the table.
-      // <=1 is used to catch fractional heights.
-      if (scrollTop < model.log.scrollTop) {
-        model.log.autoScrollLive = false; // stop auto-scrolling if user scrolls up
+      // However we have this situation described above where the table is emptied and scrollTop is set to 0.
+      if (model.log.activeMode !== MODE.QUERY) {
+        // <=1 tolerates fractional heights (zoom / HiDPI)
+        model.log.autoScrollLive = scrollHeight - scrollTop - clientHeight <= 1;
       }
       updateViewport();
     };
