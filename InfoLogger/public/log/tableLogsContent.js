@@ -211,7 +211,7 @@ const tableContainerHooks = (model) => ({
       const { height } = container.getBoundingClientRect();
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
       if (container.scrollTop < model.log.scrollTop) {
-        model.log.disableAutoScroll(); // stop auto-scrolling if user scroll sup
+        model.log.autoScrollLive = false; // stop auto-scrolling if user scrolls up
       }
       model.log.setScrollTop(scrollTop, height);
     };
