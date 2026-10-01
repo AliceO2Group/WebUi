@@ -24,6 +24,10 @@ describe('Live Mode test-suite', async () => {
     ({ helpers: { baseUrl }, page } = test);
   });
 
+  after(async () => {
+    await page.evaluate(() => model.log.liveStop('Query'));
+  });
+
   it('should successfully go to homepage with predefined filters', async () => {
     await page.goto(baseUrl, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
