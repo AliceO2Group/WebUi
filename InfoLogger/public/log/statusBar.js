@@ -97,15 +97,21 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
  * @returns {vnode} - the view of the application options
  */
 const applicationOptions = (model) => [
-  model.log.activeMode !== MODE.QUERY ? h(
+  model.log.activeMode === MODE.LIVE.RUNNING ? h(
     'label.d-inline',
-    { title: 'Scroll down in live mode on new log incoming' },
+    {
+      title: model.log.autoScrollLive
+        ? 'Autoscroll is active'
+        : 'Click here / Scroll down to the bottom of the screen to reactivate',
+    },
     h(
       'span',
       {
-        className: model.log.autoScrollLive ? 'success' : 'warning',
+        id: 'status-bar-auto-scroll',
+        className: model.log.autoScrollLive ? 'success' : 'warning actionable-icon',
+        onclick: model.log.autoScrollLive ? undefined : () => model.log.enableAutoScrollLive(),
       },
-      model.log.autoScrollLive ? 'Autoscroll Active' : 'Scroll to the bottom to resume autoscroll',
+      model.log.autoScrollLive ? 'Autoscroll Active' : '⚠️  Autoscroll Inactive',
     ),
   ) : null,
   h('span.mh1'),
