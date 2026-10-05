@@ -38,7 +38,8 @@ CREATE TABLE `messages` (
   KEY `ix_errsource` (`errsource`(20))
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
--- We don't partition in the local DB. Partitioning by day earns its keep over a production-sized time span;
--- but causes the seeder's re-dating updates to rewrite the entire table which is slow and not ideal.
+-- Partitioning in production due to production's time span;
+-- but locally it has the annoying effect of causing the seeder's updates
+-- to rewrite the entire table which is slow, thus we avoid partitioning locally.
 -- PARTITION BY HASH (`timestamp` DIV 86400)
 -- PARTITIONS 365
