@@ -26,8 +26,8 @@ export default (model) => [
     h('', { style: 'width:50%' }, statusLogs(model)),
     h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
     h(
-      '.flex-grow.text-right',
-      { id: 'status-bar-application-options' },
+      '.flex-row.flex-grow.items-center',
+      { id: 'status-bar-application-options', style: 'justify-content: flex-end;' },
       applicationMessage(model),
       applicationOptions(model),
     ),
@@ -107,11 +107,11 @@ const applicationOptions = (model) => [
       }, '⚠️  Autoscroll Inactive')
     : null,
   h('span.mh1'),
-  h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
+  h('label.checkbox-container.m0.items-center', { title: 'Show details of selected log' }, h('input', {
     type: 'checkbox',
     checked: model.inspectorEnabled,
     onchange: () => model.toggleInspector(),
-  }), ' Inspector'),
+  }), 'Inspector'),
 ];
 
 /**

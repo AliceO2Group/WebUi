@@ -264,3 +264,8 @@ a.disabled { pointer-events: none; cursor: default; }
   flex-direction: column;
   gap: 0.25rem;
 }
+
+.checkbox-container {
+    display: inline-flex;
+    gap: 6px;
+}
