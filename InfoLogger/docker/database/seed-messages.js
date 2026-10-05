@@ -41,8 +41,7 @@ const COLUMNS = [
 const INSERT_QUERY = `INSERT INTO messages (${COLUMNS.map((column) => `\`${column}\``).join(', ')}) `
   + `VALUES (${COLUMNS.map(() => '?').join(', ')})`;
 
-// Slides the whole batch forward so it ends at the current time
-const REDATE_QUERY = 'UPDATE messages SET `timestamp` = `timestamp` + ?';
+const UPDATE_QUERY = 'UPDATE messages SET `timestamp` = `timestamp` + ?';
 
 const CONNECTION_ATTEMPTS = 10;
 const CONNECTION_RETRY_MS = 2000;
@@ -57,7 +56,7 @@ const config = {
 };
 
 /**
- * Grab a connection from the pool, retrying while the database is still starting up.
+ * Grab a connection from the pool, retrying while the database is starting up.
  * @param {object} pool - the mariadb pool to take the connection from
  * @returns {Promise<object>} an open connection
  */
@@ -94,7 +93,7 @@ function buildRows() {
 }
 
 /**
- * Insert the batch of fake messages, or just re-date it when a previous run already inserted it
+ * Insert a new or re-dated batch of fake messages
  * @returns {Promise<void>} resolved once the database has been seeded
  */
 async function seed() {
@@ -104,14 +103,14 @@ async function seed() {
     connection = await connectWithRetry(pool);
 
     const [{ newest }] = await connection.query('SELECT MAX(`timestamp`) AS newest FROM messages;');
-
-    if (newest === null || newest === undefined) {
+    const hasBeenSeeded = newest !== null && newest !== undefined;
+    if (!hasBeenSeeded) {
       const rows = buildRows();
       console.log(`${new Date().toISOString()} [InfoLogger Seeder] Inserting ${rows.length} messages.`);
       await connection.batch(INSERT_QUERY, rows);
     } else {
       console.log(`${new Date().toISOString()} [InfoLogger Seeder] Re-dating the existing messages.`);
-      await connection.query(REDATE_QUERY, [Date.now() / 1000 - newest]);
+      await connection.query(UPDATE_QUERY, [Date.now() / 1000 - newest]);
     }
 
     console.log(`${new Date().toISOString()} [InfoLogger Seeder] Seeding completed successfully!`);
