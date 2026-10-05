@@ -36,7 +36,7 @@ async function getSeverityCounts(page) {
 
 describe('Status Bar test-suite', async () => {
   const AUTOSCROLL_SELECTOR = '#status-bar-auto-scroll';
-  const INSPECTOR_SELECTOR = '#status-bar-appli cation-options label[title*="Show details"] input';
+  const INSPECTOR_SELECTOR = '#status-bar-application-options label[title*="Show details"] input';
   const SQL_QUERY = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `severity` IN (?) '
     + 'ORDER BY `TIMESTAMP` LIMIT 100000';
 
