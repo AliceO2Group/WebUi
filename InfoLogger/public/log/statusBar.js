@@ -97,23 +97,15 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
  * @returns {vnode} - the view of the application options
  */
 const applicationOptions = (model) => [
-  model.log.activeMode === MODE.LIVE.RUNNING ? h(
-    'label.d-inline',
-    {
-      title: model.log.autoScrollLive
-        ? 'Autoscroll is active'
-        : 'Click here / Scroll down to the bottom of the screen to reactivate',
-    },
-    h(
-      'span',
-      {
+  model.log.activeMode === MODE.LIVE.RUNNING
+    ? model.log.autoScrollLive
+      ? h('span.success', { id: 'status-bar-auto-scroll', title: 'Autoscroll is active' }, 'Autoscroll Active')
+      : h('button.btn.btn-sm.btn-warning', {
         id: 'status-bar-auto-scroll',
-        className: model.log.autoScrollLive ? 'success' : 'warning actionable-icon',
-        onclick: model.log.autoScrollLive ? undefined : () => model.log.enableAutoScrollLive(),
-      },
-      model.log.autoScrollLive ? 'Autoscroll Active' : '⚠️  Autoscroll Inactive',
-    ),
-  ) : null,
+        title: 'Click here / Scroll down to the bottom of the screen to reactivate',
+        onclick: () => model.log.enableAutoScrollLive(),
+      }, '⚠️  Autoscroll Inactive')
+    : null,
   h('span.mh1'),
   h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
     type: 'checkbox',

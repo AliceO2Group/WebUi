@@ -36,7 +36,7 @@ async function getSeverityCounts(page) {
 
 describe('Status Bar test-suite', async () => {
   const AUTOSCROLL_SELECTOR = '#status-bar-auto-scroll';
-  const INSPECTOR_SELECTOR = '#status-bar-application-options label[title*="Show details"] input';
+  const INSPECTOR_SELECTOR = '#status-bar-appli cation-options label[title*="Show details"] input';
   const SQL_QUERY = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `severity` IN (?) '
     + 'ORDER BY `TIMESTAMP` LIMIT 100000';
 
@@ -379,7 +379,7 @@ describe('Status Bar test-suite', async () => {
         );
       });
 
-      it('should re-enable autoscroll when the inactive badge is clicked', async () => {
+      it('should re-enable autoscroll when inactive button is clicked', async () => {
         await page.click(AUTOSCROLL_SELECTOR);
         await page.waitForFunction(
           (selector) => document.querySelector(selector)?.textContent.includes('Autoscroll Active'),
