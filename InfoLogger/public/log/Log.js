@@ -564,6 +564,9 @@ export default class Log extends Observable {
     this.model.inspectorEnabled = false;
     this.resetStats();
     this.queryResult = RemoteData.notAsked();
+    if (this.isLiveModeRunning()) {
+      this.setAutoScrollLive(true, false);
+    }
     this.notify();
   }
 

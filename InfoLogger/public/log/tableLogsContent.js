@@ -372,6 +372,9 @@ const autoscrollManager = (model, vnode) => {
     return;
   }
 
+  // forget the last scrolled-to log so re-enabling auto-scroll jumps to the bottom straight away
+  delete vnode.dom.dataset.lastLogId;
+
   // Autoscroll to selected item
   if (model.log.item) {
     // Scroll only if we did not previously, save last try in DOM dataset
