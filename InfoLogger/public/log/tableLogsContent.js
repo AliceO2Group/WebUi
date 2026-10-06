@@ -292,7 +292,7 @@ const tableContainerHooks = (model) => ({
       const isMovingDown = scrollTop > lastScrollTop;
       lastScrollTop = scrollTop;
 
-      // programmatic scroll is set when jumping to a selected log (e.g. the error navigation buttons)
+      // programmatic scroll is set by the live auto-scroll and when jumping to a selected log
       if (container.isProgrammaticScroll) {
         container.isProgrammaticScroll = false;
       } else if (model.log.isLiveModeRunning()) {
@@ -356,7 +356,11 @@ const autoscrollManager = (model, vnode) => {
 
     if (previousLastLogId !== currentLastLogId) {
       // scroll at maximum bottom possible
+      const previousScrollTop = vnode.dom.scrollTop;
       vnode.dom.scrollTo(0, model.log.rowHeight * model.log.applicationLimit);
+      if (vnode.dom.scrollTop !== previousScrollTop) {
+        vnode.dom.isProgrammaticScroll = true;
+      }
       vnode.dom.dataset.lastLogId = currentLastLogId;
     }
 
