@@ -17,6 +17,14 @@ const test = require('../mocha-index');
 const { injectLogs } = require('../utils/utils');
 
 /**
+ * Waits for the logs table to be scrolled past the bottom.
+ * @param {Page} page - puppeteer page
+ */
+const waitForScrollPastBottom = async (page) => {
+  await page.waitForFunction(() => model.log.dom.table.scrollTop > 0, { timeout: 5000 });
+};
+
+/**
  * Fills the logs table with 200 logs and scrolls to the bottom to test autoscroll behavior.
  * @param {Page} page - puppeteer page
  */
@@ -29,7 +37,7 @@ const fillTableAndScrollToBottom = async (page) => {
   })));
 
   await page.evaluate(() => model.log.goToLastItem());
-  await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
+  await waitForScrollPastBottom(page);
 };
 
 /**
@@ -78,20 +86,22 @@ describe('Logs Table test-suite', async () => {
 
   before(async () => {
     ({ helpers: { baseUrl }, page } = test);
-  });
-
-  beforeEach(async () => {
     await page.goto(baseUrl, { waitUntil: 'networkidle0' });
-  });
-
-  after(async () => {
-    await page.evaluate(() => model.log.liveStop('Query'));
   });
 
   describe('Autoscroll behavior', async () => {
     describe('in live mode', async () => {
       beforeEach(async () => {
+        await page.waitForSelector('#live-button:not([disabled])');
         await page.evaluate(() => model.log.liveStop('Query'));
+        await page.evaluate(() => model.zoom.resetZoom());
+        await page.evaluate(() => model.log.empty());
+        await page.waitForFunction(() => model.log.dom.table.scrollTop === 0);
+      });
+
+      after(async () => {
+        await page.evaluate(() => model.log.liveStop('Query'));
+        await page.evaluate(() => model.zoom.resetZoom());
       });
 
       it('should disable autoscroll when the user scrolls up', async () => {
@@ -99,7 +109,7 @@ describe('Logs Table test-suite', async () => {
         await assertAutoScrollLive(page, true);
 
         // wait until live logs overflow the table and autoscroll has moved it down
-        await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
+        await waitForScrollPastBottom(page);
 
         await wheelOverTable(page, -100);
         await waitForAnimationFrame(page, 2);
@@ -109,7 +119,7 @@ describe('Logs Table test-suite', async () => {
 
       it('should re-enable autoscroll when the user scrolls back to the bottom', async () => {
         await page.click('#live-button');
-        await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
+        await waitForScrollPastBottom(page);
 
         await wheelOverTable(page, -100);
         await waitForAnimationFrame(page, 2);
@@ -134,7 +144,7 @@ describe('Logs Table test-suite', async () => {
         await assertAutoScrollLive(page, true);
 
         // wait until live logs overflow the table and autoscroll has moved it down
-        await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
+        await waitForScrollPastBottom(page);
 
         await page.click('#clear-button');
         await waitForAnimationFrame(page, 2);
@@ -145,7 +155,7 @@ describe('Logs Table test-suite', async () => {
       it('should not disable autoscroll when zooming in', async () => {
         await page.click('#live-button');
         await assertAutoScrollLive(page, true);
-        await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
+        await waitForScrollPastBottom(page);
 
         await page.evaluate(() => new Promise((resolve) => {
           // queue a scroll event as the autoscroll jump does (1px still counts as the bottom)...
