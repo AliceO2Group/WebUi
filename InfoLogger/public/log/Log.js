@@ -529,7 +529,7 @@ export default class Log extends Observable {
 
   /**
    * Method to check if current selected mode is live and is running
-   * @returns {boolean} is live mode running
+   * @returns {boolean} - is live mode running
    */
   isLiveModeRunning() {
     return this.activeMode === MODE.LIVE.RUNNING;
