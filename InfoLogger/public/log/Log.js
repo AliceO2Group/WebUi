@@ -586,13 +586,28 @@ export default class Log extends Observable {
   }
 
   /**
-   * Enable auto-scroll and focus the log table
+   * Focus the log table
    */
-  enableAutoScrollLive() {
-    this.autoScrollLive = true;
+  focusTable() {
     this.dom.table.focus();
     this.dom.table.scrollTo(0, this.dom.table.scrollHeight);
     this.notify();
+  }
+
+  /**
+   * Set auto-scroll for live mode and optionally notify the UI
+   * @param {boolean} enabled - whether auto-scroll should be enabled
+   * @param {boolean} notify - whether to notify the UI about the change
+   */
+  setAutoScrollLive(enabled, notify = true) {
+    if (this.autoScrollLive === enabled) {
+      return;
+    }
+    this.autoScrollLive = enabled;
+
+    if (notify) {
+      this.notify();
+    }
   }
 
   /**

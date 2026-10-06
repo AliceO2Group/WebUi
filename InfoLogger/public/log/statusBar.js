@@ -107,7 +107,7 @@ const applicationOptions = (model) => [
         {
           id: 'status-bar-auto-scroll',
           title: 'Click here / Scroll down to the bottom of the screen to reactivate',
-          onclick: () => model.log.enableAutoScrollLive(),
+          onclick: () => model.log.setAutoScrollLive(true),
         },
         [
           iconWarning(),

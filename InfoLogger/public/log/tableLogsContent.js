@@ -204,6 +204,8 @@ const tableContainerHooks = (model) => ({
    */
   oncreate(vnode) {
     const container = vnode.dom;
+    let isPointerDown = false;
+    let lastScrollTop = Math.max(container.scrollTop, 0);
 
     /**
      * Update the viewport size and scroll position in the model
@@ -221,28 +223,22 @@ const tableContainerHooks = (model) => ({
     const isAtBottom = () => container.scrollHeight - Math.max(container.scrollTop, 0) - container.clientHeight <= 1;
 
     /**
-     * Record the direction of a user scroll; scrolling up disables auto-scroll straight away.
-     * Scroll events alone cannot tell a user scroll from a layout change (zoom, new logs, table emptied),
-     * so the user's intent is taken from their input instead.
-     * @param {boolean} isUp - true if the user scrolls towards older logs
+     * Disable auto-scroll when the user scrolls towards older logs
      */
-    const onUserScroll = (isUp) => {
-      container.isUserScrollingDown = !isUp;
-      if (isUp && model.log.autoScrollLive && container.scrollTop > 0) {
-        model.log.autoScrollLive = false;
-        model.notify();
+    const onUserScrollUp = () => {
+      if (model.log.autoScrollLive && container.scrollTop > 0) {
+        model.log.setAutoScrollLive(false);
       }
     };
 
     /**
      * Resume auto-scroll when the user scrolls to the bottom in live mode.
      * Called from the input itself rather than waiting for the scroll to land, as a smooth scroll
-     * animation targets the bottom at the time of the input and falls short if logs arrive meanwhile.
+     * animation can fall short if logs arrive in the meantime.
      */
-    const resumeAutoScroll = () => {
-      if (model.log.isLiveModeRunning() && !model.log.autoScrollLive) {
-        model.log.autoScrollLive = true;
-        model.notify();
+    const resumeAutoScrollIfLive = () => {
+      if (model.log.isLiveModeRunning()) {
+        model.log.setAutoScrollLive(true);
       }
     };
 
@@ -255,10 +251,12 @@ const tableContainerHooks = (model) => ({
       if (e.ctrlKey || e.metaKey) {
         return;
       }
-      onUserScroll(e.deltaY < 0);
+      if (e.deltaY < 0) {
+        onUserScrollUp();
+      }
       const maxScrollTop = container.scrollHeight - container.clientHeight;
       if (e.deltaY > 0 && container.scrollTop + e.deltaY >= maxScrollTop - 1) {
-        resumeAutoScroll();
+        resumeAutoScrollIfLive();
       }
     };
 
@@ -267,47 +265,41 @@ const tableContainerHooks = (model) => ({
      * @param {KeyboardEvent} e - keyboard event
      */
     const onKeyDown = (e) => {
-      if (e.target.tagName.toLowerCase() === 'input') {
+      const isTyping = e.target.closest('input, textarea, select, [contenteditable="true"]');
+      const isOtherTarget = e.target !== document.body && !container.contains(e.target);
+      if (isTyping || isOtherTarget) {
         return;
       }
-      if (e.key === 'PageUp' || e.key === 'Home') {
-        onUserScroll(true);
+
+      if (e.key === 'PageUp' || e.key === 'Home' || e.key === ' ' && e.shiftKey) {
+        onUserScrollUp();
       } else if (e.key === 'End') {
-        onUserScroll(false);
-        resumeAutoScroll();
-      } else if (e.key === 'PageDown') {
-        onUserScroll(false);
+        resumeAutoScrollIfLive();
       }
     };
 
-    /**
-     * A pointer pressed on the container itself rather than a row is on the scrollbar
-     * @param {PointerEvent} e - pointer event
-     */
-    const onPointerDown = (e) => {
-      container.isDraggingScrollbar = e.target === container;
+    const setPointerDown = (down) => () => {
+      isPointerDown = down;
     };
 
     /**
-     * End of a scrollbar drag
-     */
-    const onPointerUp = () => {
-      container.isDraggingScrollbar = false;
-    };
-
-    /**
-     * Re-enable auto-scroll when the user reaches the bottom, then update the viewport.
-     * Disabling is done by the user input handlers above.
+     * Re-enable auto-scroll when a downward scroll reaches the bottom, then update the viewport.
+     * Disabling is done by the user input handlers above, except pointer drags which do both.
+     * Only a downward move counts, so a shrinking table or the start of a scroll up does not re-enable it.
      */
     const onTableScroll = () => {
+      const scrollTop = Math.max(container.scrollTop, 0);
+      const isMovingDown = scrollTop > lastScrollTop;
+      lastScrollTop = scrollTop;
+
       // programmatic scroll is set when jumping to a selected log (e.g. the error navigation buttons)
       if (container.isProgrammaticScroll) {
         container.isProgrammaticScroll = false;
       } else if (model.log.isLiveModeRunning()) {
-        if (container.isDraggingScrollbar) {
-          model.log.autoScrollLive = isAtBottom();
-        } else if (container.isUserScrollingDown && isAtBottom()) {
-          model.log.autoScrollLive = true;
+        if (isPointerDown) {
+          model.log.setAutoScrollLive(isAtBottom());
+        } else if (isMovingDown && isAtBottom()) {
+          model.log.setAutoScrollLive(true);
         }
       }
       updateViewport();
@@ -318,9 +310,9 @@ const tableContainerHooks = (model) => ({
 
     container.addEventListener('scroll', onTableScroll, { signal });
     container.addEventListener('wheel', onWheel, { passive: true, signal });
-    container.addEventListener('pointerdown', onPointerDown, { signal });
-    window.addEventListener('pointerup', onPointerUp, { signal });
-    window.addEventListener('pointercancel', onPointerUp, { signal });
+    container.addEventListener('pointerdown', setPointerDown(true), { signal });
+    window.addEventListener('pointerup', setPointerDown(false), { signal });
+    window.addEventListener('pointercancel', setPointerDown(false), { signal });
     window.addEventListener('keydown', onKeyDown, { signal });
     model.log.dom.table = container;
     // setup window size listener - view needs redraw for smart scrolling
