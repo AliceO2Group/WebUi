@@ -167,6 +167,31 @@ describe('Logs Table test-suite', async () => {
 
         await assertAutoScrollLive(page, true);
       });
+
+      it('should re-enable autoscroll when the log list is cleared', async () => {
+        await page.click('#live-button');
+        await waitForScrollPastBottom(page);
+
+        await wheelOverTable(page, -100);
+        await waitForAnimationFrame(page, 2);
+        await assertAutoScrollLive(page, false);
+
+        await page.click('#clear-button');
+        await waitForAnimationFrame(page, 2);
+
+        await assertAutoScrollLive(page, true);
+      });
+
+      it('should not change autoscroll when Home is pressed in a filter input', async () => {
+        await page.click('#live-button');
+        await waitForScrollPastBottom(page);
+
+        await page.focus('.text-area-for-message');
+        await page.keyboard.press('Home');
+        await waitForAnimationFrame(page, 2);
+
+        await assertAutoScrollLive(page, true);
+      });
     });
   });
 });
