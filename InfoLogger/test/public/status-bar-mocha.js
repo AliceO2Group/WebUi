@@ -324,7 +324,8 @@ describe('Status Bar test-suite', async () => {
 
   describe('Application Options', () => {
     describe('Autoscroll Option', () => {
-      before(async () => {
+      beforeEach(async () => {
+        await page.evaluate(() => model.log.liveStop('Query'));
         await page.waitForSelector('#live-button:not([disabled])');
       });
 
@@ -334,7 +335,6 @@ describe('Status Bar test-suite', async () => {
       });
 
       it('should display autoscroll option when in live running mode', async () => {
-        // running mode
         await page.click('#live-button');
 
         const autoscrollOption = await page.waitForSelector(AUTOSCROLL_SELECTOR);
@@ -342,6 +342,8 @@ describe('Status Bar test-suite', async () => {
       });
 
       it('should not display autoscroll option when in live paused mode', async () => {
+        await page.click('#live-button');
+        await page.waitForSelector(AUTOSCROLL_SELECTOR);
         await page.click('#live-button');
 
         await page.waitForFunction(
@@ -353,39 +355,23 @@ describe('Status Bar test-suite', async () => {
 
       it('should show autoscroll as active when enabled in live mode', async () => {
         await page.click('#live-button');
-        await page.waitForSelector(AUTOSCROLL_SELECTOR);
-
-        const message = 'Autoscroll Active';
-        await page.waitForFunction(
-          (selector, text) => document.querySelector(selector)?.textContent.includes(text),
-          {},
-          AUTOSCROLL_SELECTOR,
-          message,
-        );
+        await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Active');
       });
 
       it('should show autoscroll as inactive when disabled in live mode', async () => {
-        await page.waitForSelector(AUTOSCROLL_SELECTOR);
-        await page.evaluate(() => {
-          model.log.autoScrollLive = false;
-          model.notify();
-        });
-        const message = '⚠️  Autoscroll Inactive';
-        await page.waitForFunction(
-          (selector, text) => document.querySelector(selector)?.textContent.includes(text),
-          {},
-          AUTOSCROLL_SELECTOR,
-          message,
-        );
+        await page.click('#live-button');
+        await page.evaluate(() => model.log.setAutoScrollLive(false));
+        await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Inactive');
       });
 
       it('should re-enable autoscroll when inactive button is clicked', async () => {
+        await page.click('#live-button');
+        await page.evaluate(() => model.log.setAutoScrollLive(false));
+        await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Inactive');
+
         await page.click(AUTOSCROLL_SELECTOR);
-        await page.waitForFunction(
-          (selector) => document.querySelector(selector)?.textContent.includes('Autoscroll Active'),
-          {},
-          AUTOSCROLL_SELECTOR,
-        );
+
+        await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Active');
         assert.strictEqual(await page.evaluate(() => model.log.autoScrollLive), true);
       });
     });
