@@ -313,17 +313,20 @@ const tableContainerHooks = (model) => ({
       updateViewport();
     };
 
-    container.addEventListener('scroll', onTableScroll);
-    container.addEventListener('wheel', onWheel, { passive: true });
-    container.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('pointerup', onPointerUp);
-    window.addEventListener('keydown', onKeyDown);
+    const listeners = new AbortController();
+    const { signal } = listeners;
+
+    container.addEventListener('scroll', onTableScroll, { signal });
+    container.addEventListener('wheel', onWheel, { passive: true, signal });
+    container.addEventListener('pointerdown', onPointerDown, { signal });
+    window.addEventListener('pointerup', onPointerUp, { signal });
+    window.addEventListener('pointercancel', onPointerUp, { signal });
+    window.addEventListener('keydown', onKeyDown, { signal });
     model.log.dom.table = container;
     // setup window size listener - view needs redraw for smart scrolling
-    window.addEventListener('resize', updateViewport);
+    window.addEventListener('resize', updateViewport, { signal });
 
-    // remember these functions for later (destroy)
-    Object.assign(container, { onTableScroll, onWheel, onPointerDown, onPointerUp, onKeyDown, updateViewport });
+    container.listeners = listeners;
 
     // call the function once on next frame when we know sizes
     updateViewport();
@@ -342,13 +345,7 @@ const tableContainerHooks = (model) => ({
    * @param {vnode} vnode - the vnode of the element
    */
   ondestroy(vnode) {
-    const container = vnode.dom;
-    container.removeEventListener('scroll', container.onTableScroll);
-    container.removeEventListener('wheel', container.onWheel);
-    container.removeEventListener('pointerdown', container.onPointerDown);
-    window.removeEventListener('pointerup', container.onPointerUp);
-    window.removeEventListener('keydown', container.onKeyDown);
-    window.removeEventListener('resize', container.updateViewport);
+    vnode.dom.listeners.abort();
   },
 });
 
