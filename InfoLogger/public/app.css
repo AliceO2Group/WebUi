@@ -269,3 +269,9 @@ a.disabled { pointer-events: none; cursor: default; }
     display: inline-flex;
     gap: 6px;
 }
+
+.status-number {
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  text-align: right;
+}

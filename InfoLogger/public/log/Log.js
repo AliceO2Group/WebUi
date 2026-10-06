@@ -536,6 +536,14 @@ export default class Log extends Observable {
   }
 
   /**
+   * Method to check if current selected mode is query
+   * @returns {boolean} - is query mode
+   */
+  isQueryMode() {
+    return this.activeMode === MODE.QUERY;
+  }
+
+  /**
    * Set log's table UI sizes to allow log scrolling
    * @param {number} scrollTop - position of the user's scroll cursor
    * @param {number} scrollHeight - height of table's viewport (not content height which is higher)

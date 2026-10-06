@@ -75,7 +75,7 @@ export default (model) => [
         logsTable(model),
         inspectorSide(model),
       ]),
-      h('footer.f7.ph1', [statusBar(model)]),
+      h('footer.f7', [statusBar(model)]),
     ],
   ),
 ];

@@ -12,21 +12,23 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
-import { MODE } from '../constants/mode.const.js';
+import {
+  h,
+  iconWarning,
+} from '/js/src/index.js';
 
 /**
  * Bottom bar, showing status of the log's list and its details,
- * some application messages and some basic options like auto-scroll checkbox.
+ * some application messages and some basic options like auto-scroll button.
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the bottom bar
  */
 export default (model) => [
-  h('.flex-row', { id: 'status-bar' }, [
-    h('', { style: 'width:50%' }, statusLogs(model)),
-    h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
+  h('.flex-row.items-center.mv2.ph2.gc3', { id: 'status-bar' }, [
+    h('.flex-grow.flex-wrap.items-center.gc2', { style: 'width:50%' }, statusLogs(model)),
+    model.log.isQueryMode() && h('.flex-grow', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
     h(
-      '.flex-row.flex-grow.items-center',
+      '.flex-row.flex-grow.items-center.gc2',
       { id: 'status-bar-application-options', style: 'justify-content: flex-end;' },
       applicationMessage(model),
       applicationOptions(model),
@@ -91,22 +93,28 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
   : null;
 
 /**
- * Show some application preferences: auto-scroll and inspector checkboxes
+ * Show some application preferences: auto-scroll button and inspector checkbox
  * (could be evolve into a preference panel in the future if more options are added)
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the application options
  */
 const applicationOptions = (model) => [
-  model.log.activeMode === MODE.LIVE.RUNNING
+  model.log.isLiveModeRunning()
     ? model.log.autoScrollLive
       ? h('span.success', { id: 'status-bar-auto-scroll', title: 'Autoscroll is active' }, 'Autoscroll Active')
-      : h('button.btn.btn-sm.btn-warning', {
-        id: 'status-bar-auto-scroll',
-        title: 'Click here / Scroll down to the bottom of the screen to reactivate',
-        onclick: () => model.log.enableAutoScrollLive(),
-      }, '⚠️  Autoscroll Inactive')
+      : h(
+        'button.btn.btn-sm.btn-warning',
+        {
+          id: 'status-bar-auto-scroll',
+          title: 'Click here / Scroll down to the bottom of the screen to reactivate',
+          onclick: () => model.log.enableAutoScrollLive(),
+        },
+        [
+          iconWarning(),
+          h('span.d-inline', 'Autoscroll Inactive'),
+        ],
+      )
     : null,
-  h('span.mh1'),
   h('label.checkbox-container.m0.items-center', { title: 'Show details of selected log' }, h('input', {
     type: 'checkbox',
     checked: model.inspectorEnabled,
@@ -136,29 +144,42 @@ const statusLive = (model, frameworkInfo) =>
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the log's list status
  */
-const statusStats = (model) => [
-  h(
-    'span.ph1',
-    {
-      id: 'status-bar-buffer-size',
-    },
-    [
-      bufferStatus(model),
-      `${model.log.list.length.toLocaleString('en-US')} / ${model.log.limit.toLocaleString('en-US')} (Buffer size)`,
-    ],
-  ),
-  model.log.queryResult.match({
-    NotAsked: () => null,
-    Loading: () => 'Querying server...',
-    Success: (result) => statusQuery(model, result),
-    Failure: () => null, // notification
-  }),
-  h('span.ph1.severity-d', `${model.log.stats.debug} debug`),
-  h('span.ph1.severity-i', `${model.log.stats.info} info`),
-  h('span.ph1.severity-w', `${model.log.stats.warning} warn`),
-  h('span.ph1.severity-e', `${model.log.stats.error} error`),
-  h('span.ph1.severity-f', `${model.log.stats.fatal} fatal`),
-];
+const statusStats = (model) => {
+  const limitText = model.log.limit.toLocaleString('en-US');
+  return [
+    h(
+      'span',
+      {
+        id: 'status-bar-buffer-size',
+      },
+      [
+        bufferStatus(model),
+        statNumber(model.log.list.length),
+        ` / ${limitText} (Buffer size)`,
+      ],
+    ),
+    model.log.queryResult.match({
+      NotAsked: () => null,
+      Loading: () => 'Querying server...',
+      Success: (result) => statusQuery(model, result),
+      Failure: () => null, // notification
+    }),
+    h('span.severity-d', [statNumber(model.log.stats.debug), ' debug']),
+    h('span.severity-i', [statNumber(model.log.stats.info), ' info']),
+    h('span.severity-w', [statNumber(model.log.stats.warning), ' warn']),
+    h('span.severity-e', [statNumber(model.log.stats.error), ' error']),
+    h('span.severity-f', [statNumber(model.log.stats.fatal), ' fatal']),
+  ];
+};
+
+/**
+ * Number to display in the status bar in a locale aware format
+ * Numbers are also made to be all the same width to avoid shifting in the status bar
+ * @param {number} value - number to display
+ * @returns {vnode} - the view of the number
+ */
+const statNumber = (value) =>
+  h('span.status-number', value.toLocaleString('en-US'));
 
 const bufferStatus = (model) => {
   let dotClass = 'gray-darker'; // grey - unknown status default
@@ -169,7 +190,8 @@ const bufferStatus = (model) => {
     dotClass = 'success'; // green - limit not reached
   }
 
-  return h(`span.${dotClass}.f7.mh1`, {
+  return h(`span.${dotClass}.f7`, {
+    style: 'margin-right: var(--space-xs)',
     title: model.log.limitReached === null ? 'No query data loaded' :
       model.log.limitReached === true ? 'Limit reached - results may be incomplete' : 'Limit OK',
     id: 'status-bar-buffer-dot',
