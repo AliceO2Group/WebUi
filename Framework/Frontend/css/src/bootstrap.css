@@ -359,8 +359,9 @@ label { display: block; margin-bottom: 0.5em; }
 
 .notification { position: absolute; top: 2em; width: 100%; text-align: center; cursor: pointer; pointer-events: none; }
 .notification-content { transition: opacity 0.8s cubic-bezier(0.18, 0.89, 0.34, 1.11), filter 0.8s cubic-bezier(0.18, 0.89, 0.34, 1.11); }
-.notification-open { display: inline; opacity: 1; filter: blur(0); pointer-events: all; }
-.notification-close { display: inline; opacity: 0; filter: blur(5em); pointer-events: none;  }
+.notification-open { display: inline-flex; opacity: 1; filter: blur(0); pointer-events: all; }
+.notification-close { display: inline-flex; opacity: 0; filter: blur(5em); pointer-events: none;  }
+.notification-copy-btn { border-radius: 0 0.25em 0.25em 0; }
 
 /* Basic table */
 
