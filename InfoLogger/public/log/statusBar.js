@@ -144,42 +144,29 @@ const statusLive = (model, frameworkInfo) =>
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the log's list status
  */
-const statusStats = (model) => {
-  const limitText = model.log.limit.toLocaleString('en-US');
-  return [
-    h(
-      'span',
-      {
-        id: 'status-bar-buffer-size',
-      },
-      [
-        bufferStatus(model),
-        statNumber(model.log.list.length),
-        ` / ${limitText} (Buffer size)`,
-      ],
-    ),
-    model.log.queryResult.match({
-      NotAsked: () => null,
-      Loading: () => 'Querying server...',
-      Success: (result) => statusQuery(model, result),
-      Failure: () => null, // notification
-    }),
-    h('span.severity-d', [statNumber(model.log.stats.debug), ' debug']),
-    h('span.severity-i', [statNumber(model.log.stats.info), ' info']),
-    h('span.severity-w', [statNumber(model.log.stats.warning), ' warn']),
-    h('span.severity-e', [statNumber(model.log.stats.error), ' error']),
-    h('span.severity-f', [statNumber(model.log.stats.fatal), ' fatal']),
-  ];
-};
-
-/**
- * Number to display in the status bar in a locale aware format
- * Numbers are also made to be all the same width to avoid shifting in the status bar
- * @param {number} value - number to display
- * @returns {vnode} - the view of the number
- */
-const statNumber = (value) =>
-  h('span.status-number', value.toLocaleString('en-US'));
+const statusStats = (model) => [
+  h(
+    'span.ph1',
+    {
+      id: 'status-bar-buffer-size',
+    },
+    [
+      bufferStatus(model),
+      `${model.log.list.length.toLocaleString('en-US')} / ${model.log.limit.toLocaleString('en-US')} (Buffer size)`,
+    ],
+  ),
+  model.log.queryResult.match({
+    NotAsked: () => null,
+    Loading: () => 'Querying server...',
+    Success: (result) => statusQuery(model, result),
+    Failure: () => null, // notification
+  }),
+  h('span.ph1.severity-d', `${model.log.stats.debug} debug`),
+  h('span.ph1.severity-i', `${model.log.stats.info} info`),
+  h('span.ph1.severity-w', `${model.log.stats.warning} warn`),
+  h('span.ph1.severity-e', `${model.log.stats.error} error`),
+  h('span.ph1.severity-f', `${model.log.stats.fatal} fatal`),
+];
 
 const bufferStatus = (model) => {
   let dotClass = 'gray-darker'; // grey - unknown status default
