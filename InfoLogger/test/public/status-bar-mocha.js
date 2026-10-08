@@ -319,14 +319,56 @@ describe('Status Bar test-suite', async () => {
   });
 
   describe('Application Options', () => {
-    it('should toggle autoscroll when its checkbox is clicked', async () => {
-      await page.click(AUTOSCROLL_SELECTOR);
+    describe('Autoscroll', () => {
+      describe('in query mode', () => {
+        it('should not display autoscroll option when in MODE.QUERY', async () => {
+          await page.evaluate(() => model.log.liveStop());
+          await page.waitForFunction(
+            (selector) => !document.querySelector(selector),
+            { timeout: 2000 },
+            AUTOSCROLL_SELECTOR,
+          );
+        });
+      });
 
-      const checkedAfter = await page.$eval(AUTOSCROLL_SELECTOR, (el) => el.checked);
-      const autoScrollModelValue = await page.evaluate(() => window.model.log.autoScrollLive);
+      describe('in live mode', () => {
+        beforeEach(async () => {
+          await page.evaluate(() => model.log.liveStop());
+          await page.waitForSelector('#live-button:not([disabled])');
+          await page.click('#live-button');
+          await page.waitForFunction(() => model.log.isLiveModeRunning());
+        });
 
-      assert.strictEqual(autoScrollModelValue, checkedAfter);
-      assert.strictEqual(checkedAfter, true);
+        after(async () => {
+          await page.evaluate(() => model.log.liveStop());
+        });
+
+        it('should not display autoscroll option when in MODE.LIVE.PAUSED', async () => {
+          await page.click('#live-button');
+
+          await page.waitForFunction(
+            (selector) => !document.querySelector(selector),
+            { timeout: 2000 },
+            AUTOSCROLL_SELECTOR,
+          );
+        });
+
+        it('should display autoscroll option when in MODE.LIVE.RUNNING', async () => {
+          await page.waitForSelector(AUTOSCROLL_SELECTOR, { timeout: 2000 });
+        });
+
+        it('should toggle autoscroll when its checkbox is clicked', async () => {
+          await page.waitForSelector(AUTOSCROLL_SELECTOR, { timeout: 2000 });
+          const checkedBefore = await page.$eval(AUTOSCROLL_SELECTOR, (el) => el.checked);
+          await page.click(AUTOSCROLL_SELECTOR);
+
+          const checkedAfter = await page.$eval(AUTOSCROLL_SELECTOR, (el) => el.checked);
+          const autoScrollModelValue = await page.evaluate(() => model.log.autoScrollLive);
+
+          assert.strictEqual(checkedAfter, !checkedBefore);
+          assert.strictEqual(autoScrollModelValue, checkedAfter);
+        });
+      });
     });
 
     it('should toggle inspector when its checkbox is clicked', async () => {
