@@ -146,7 +146,7 @@ const statusLive = (model, frameworkInfo) =>
  */
 const statusStats = (model) => [
   h(
-    'span.ph1',
+    'span',
     {
       id: 'status-bar-buffer-size',
     },
