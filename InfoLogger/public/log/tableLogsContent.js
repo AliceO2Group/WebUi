@@ -198,35 +198,70 @@ const linkToWikiErrors = (errcode) => h('a', {
 const tableContainerHooks = (model) => ({
 
   /**
-   * Hook. Listen to events needed for handling scrolling like window size change
-   * And set scroll change handler to internal state of dom element
+   * Hook. Listen to scroll and window size changes to keep the model's viewport in sync
    * @param {vnode} vnode - the vnode of the element
    */
   oncreate(vnode) {
+    const container = vnode.dom;
+
     /**
-     * THis handler allow to notify model of element scrolling change (.tableLogsContent)
+     * Current scroll position, cancels negative position due to Safari bounce scrolling
+     * @returns {number} scrollTop clamped to 0
      */
-    const onTableScroll = () => {
-      const container = vnode.dom;
+    const getScrollTop = () => Math.max(container.scrollTop, 0);
+
+    /**
+     * Update the viewport size and scroll position in the model
+     * @param {number} scrollTop - current scroll position
+     */
+    const updateViewport = (scrollTop = getScrollTop()) => {
       const { height } = container.getBoundingClientRect();
-      const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
-      if (container.scrollTop < model.log.scrollTop) {
-        model.log.autoScrollLive = false; // stop auto-scrolling if user scrolls up
-      }
       model.log.setScrollTop(scrollTop, height);
     };
 
-    // call the function when scrolling is updated
-    vnode.dom.addEventListener('scroll', onTableScroll);
-    model.log.dom.table = vnode.dom;
-    // setup window size listener - view needs redraw for smart scrolling
-    window.addEventListener('resize', onTableScroll);
+    /**
+     * Whether the viewport is at the bottom of the table, <=1 tolerates fractional heights
+     * @param {number} scrollTop - current scroll position
+     * @returns {boolean} true if at the bottom
+     */
+    const isAtBottom = (scrollTop) => container.scrollHeight - scrollTop - container.clientHeight <= 1;
 
-    // remember this function for later (destroy)
-    vnode.dom.onTableScroll = onTableScroll;
+    /**
+     * Disable auto-scroll when the user scrolls up, then update the viewport.
+     * A shrinking table clamps scrollTop down but stays at the bottom, so it doesn't count.
+     * Needed as well as onTableWheel as onTableWheel doesn't cover all cases of user-initiated scrolls.
+     */
+    const onTableScroll = () => {
+      const scrollTop = getScrollTop();
+      if (scrollTop < model.log.scrollTop && !isAtBottom(scrollTop)) {
+        model.log.setAutoScrollLive(false, false);
+      }
+      updateViewport(scrollTop);
+    };
+
+    /**
+     * Disable auto-scroll as soon as the user wheels up.
+     * onTableScroll can miss them if an incoming log pushes the scroll to the bottom before the check runs.
+     * @param {WheelEvent} e - the wheel event
+     */
+    const onTableWheel = (e) => {
+      if (e.deltaY < 0 && !e.ctrlKey && !e.metaKey && getScrollTop() > 0) {
+        model.log.setAutoScrollLive(false, false);
+      }
+    };
+
+    const listeners = new AbortController();
+    const { signal } = listeners;
+
+    container.addEventListener('scroll', onTableScroll, { signal });
+    container.addEventListener('wheel', onTableWheel, { signal, passive: true });
+    // setup window size listener - view needs redraw for smart scrolling
+    window.addEventListener('resize', () => updateViewport(), { signal });
+    container.listeners = listeners;
+    model.log.dom.table = container;
 
     // call the function once on next frame when we know sizes
-    onTableScroll();
+    updateViewport();
   },
 
   /**
@@ -242,8 +277,7 @@ const tableContainerHooks = (model) => ({
    * @param {vnode} vnode - the vnode of the element
    */
   ondestroy(vnode) {
-    vnode.dom.removeEventListener('scroll', vnode.dom.onTableScroll);
-    window.removeEventListener('resize', vnode.dom.onTableScroll);
+    vnode.dom.listeners.abort();
   },
 });
 
