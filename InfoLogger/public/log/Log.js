@@ -547,15 +547,20 @@ export default class Log extends Observable {
   }
 
   /**
-   * Empty the list of all logs, reset stats, clear query mode request if any
-   * and close the inspector panel
+   * Empty the list of all logs, reset stats, clear query mode request if any,
+   * deselect the current log, close the inspector panel and re-enable auto-scroll in live mode
    */
   empty() {
     this.list = [];
+    this.item = null;
+    this.autoScrollToItem = false;
     this.limitReached = null;
     this.model.inspectorEnabled = false;
     this.resetStats();
     this.queryResult = RemoteData.notAsked();
+    if (this.isLiveModeRunning()) {
+      this.setAutoScrollLive(true, false);
+    }
     this.notify();
   }
 
@@ -575,12 +580,19 @@ export default class Log extends Observable {
   }
 
   /**
-   * Set auto-scroll for live mode and notify the UI
+   * Set auto-scroll for live mode and optionally notify the UI
    * @param {boolean} enabled - whether auto-scroll should be enabled
+   * @param {boolean} notify - whether to notify the UI if there is a change
    */
-  setAutoScrollLive(enabled) {
+  setAutoScrollLive(enabled, notify = true) {
+    if (this.autoScrollLive === enabled) {
+      return;
+    }
     this.autoScrollLive = enabled;
-    this.notify();
+
+    if (notify) {
+      this.notify();
+    }
   }
 
   /**
