@@ -27,6 +27,14 @@ const insertAndWaitForScrollPastBottom = async (page) => {
     message: `info log ${i}`,
     timestamp: Date.now() + i,
   })));
+  await waitForScrollPastBottom(page);
+};
+
+/**
+ * Waits for the logs table to be scrolled past the bottom.
+ * @param {Page} page - puppeteer page
+ */
+const waitForScrollPastBottom = async (page) => {
   await page.waitForFunction(() => model.log.dom.table.scrollTop > 0, { timeout: 5000 });
 };
 
@@ -111,8 +119,13 @@ describe('Logs Table test-suite', async () => {
       it('should not disable autoscroll when switching from a full query table to live mode', async () => {
         await page.evaluate(() => model.log.liveStop('Query'));
 
+        await injectLogs(page, Array.from({ length: 200 }, (_, i) => ({
+          severity: 'I',
+          message: `info log ${i}`,
+          timestamp: Date.now() + i,
+        })));
         await page.evaluate(() => model.log.goToLastItem());
-        await insertAndWaitForScrollPastBottom(page);
+        await waitForScrollPastBottom(page);
         await page.click('#live-button');
 
         await waitForAnimationFrame(page, 2);
