@@ -25,22 +25,6 @@ const waitForScrollPastBottom = async (page) => {
 };
 
 /**
- * Fills the logs table with 200 logs and scrolls to the bottom to test autoscroll behavior.
- * @param {Page} page - puppeteer page
- */
-const fillTableAndScrollToBottom = async (page) => {
-  // ensure table has more rows than fit on the screen
-  await injectLogs(page, Array.from({ length: 200 }, (_, i) => ({
-    severity: 'I',
-    message: `info log ${i}`,
-    timestamp: Date.now() + i,
-  })));
-
-  await page.evaluate(() => model.log.goToLastItem());
-  await waitForScrollPastBottom(page);
-};
-
-/**
  * Asserts that autoScrollLive is the expected value.
  * @param {Page} page - puppeteer page
  * @param {boolean} expected - expected value of autoScrollLive
@@ -50,9 +34,9 @@ const assertAutoScrollLive = async (page, expected) => {
 };
 
 /**
- * Scrolls the logs table with a real mouse wheel event, so the resulting scroll event is handled as a user scroll
+ * Scrolls the logs table with a real mouse wheel event
  * @param {Page} page - puppeteer page
- * @param {number} deltaY - wheel delta, negative scrolls up
+ * @param {number} deltaY - wheel delta
  */
 const wheelOverTable = async (page, deltaY) => {
   const box = await (await page.$('.tableLogsContent')).boundingBox();
@@ -121,7 +105,14 @@ describe('Logs Table test-suite', async () => {
 
       it('should not disable autoscroll when switching from a full query table to live mode', async () => {
         await page.evaluate(() => model.log.liveStop('Query'));
-        await fillTableAndScrollToBottom(page);
+        await injectLogs(page, Array.from({ length: 200 }, (_, i) => ({
+          severity: 'I',
+          message: `info log ${i}`,
+          timestamp: Date.now() + i,
+        })));
+
+        await page.evaluate(() => model.log.goToLastItem());
+        await waitForScrollPastBottom(page);
         await page.click('#live-button');
 
         await waitForAnimationFrame(page, 2);
@@ -132,7 +123,6 @@ describe('Logs Table test-suite', async () => {
       it('should not disable autoscroll when the log list is cleared', async () => {
         await assertAutoScrollLive(page, true);
 
-        // wait until live logs overflow the table and autoscroll has moved it down
         await waitForScrollPastBottom(page);
 
         await page.click('#clear-button');
@@ -162,7 +152,6 @@ describe('Logs Table test-suite', async () => {
         await waitForAnimationFrame(page, 2);
         await assertAutoScrollLive(page, true);
 
-        // zooming out shrinks the table, so the browser clamps scrollTop down to the new bottom
         await page.click('#zoom-out-button');
         await waitForAnimationFrame(page, 2);
         await assertAutoScrollLive(page, true);
