@@ -229,6 +229,7 @@ const tableContainerHooks = (model) => ({
     /**
      * Disable auto-scroll when the user scrolls up, then update the viewport.
      * A shrinking table clamps scrollTop down but stays at the bottom, so it doesn't count.
+     * Needed as well as onTableWheel as 
      */
     const onTableScroll = () => {
       const scrollTop = getScrollTop();
@@ -238,10 +239,22 @@ const tableContainerHooks = (model) => ({
       updateViewport(scrollTop);
     };
 
+    /**
+     * Disable auto-scroll as soon as the user wheels up.
+     * onTableScroll can miss them if an incoming log pushes the scroll to the bottom before the check runs.
+     * @param {WheelEvent} e - the wheel event
+     */
+    const onTableWheel = (e) => {
+      if (e.deltaY < 0 && !e.ctrlKey && !e.metaKey && getScrollTop() > 0) {
+        model.log.setAutoScrollLive(false, false);
+      }
+    };
+
     const listeners = new AbortController();
     const { signal } = listeners;
 
     container.addEventListener('scroll', onTableScroll, { signal });
+    container.addEventListener('wheel', onTableWheel, { signal, passive: true });
     // setup window size listener - view needs redraw for smart scrolling
     window.addEventListener('resize', () => updateViewport(), { signal });
     container.listeners = listeners;
