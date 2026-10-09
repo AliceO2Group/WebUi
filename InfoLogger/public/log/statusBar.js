@@ -12,11 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
+import {
+  h,
+  iconWarning,
+} from '/js/src/index.js';
 
 /**
  * Bottom bar, showing status of the log's list and its details,
- * some application messages and some basic options like auto-scroll checkbox.
+ * some application messages and some basic options like auto-scroll label/button.
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the bottom bar
  */
@@ -97,11 +100,20 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
  */
 const applicationOptions = (model) => [
   model.log.isLiveModeRunning() && [
-    h('label.d-inline', { title: 'Scroll down in live mode on new log incoming' }, h('input', {
-      type: 'checkbox',
-      checked: model.log.autoScrollLive,
-      onchange: () => model.log.toggleAutoScroll(),
-    }), ' Autoscroll'),
+    model.log.autoScrollLive
+      ? h('span.success', { id: 'status-bar-auto-scroll', title: 'Autoscroll is enabled' }, 'Autoscroll Enabled')
+      : h(
+        'button.btn.btn-sm.btn-warning',
+        {
+          id: 'status-bar-auto-scroll',
+          title: 'Click here to re-enable autoscroll',
+          onclick: () => model.log.enableAutoScrollLiveAndNotify(),
+        },
+        [
+          iconWarning(),
+          h('span.d-inline', 'Autoscroll Disabled'),
+        ],
+      ),
     h('span.mh1'),
   ],
   h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
