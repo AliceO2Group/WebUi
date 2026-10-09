@@ -90,18 +90,20 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
   : null;
 
 /**
- * Show some application preferences: auto-scroll and inspector checkboxes
+ * Show some application preferences: inspector checkbox, plus autoscroll whilst live mode is running
  * (could be evolve into a preference panel in the future if more options are added)
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the application options
  */
 const applicationOptions = (model) => [
-  h('label.d-inline', { title: 'Scroll down in live mode on new log incoming' }, h('input', {
-    type: 'checkbox',
-    checked: model.log.autoScrollLive,
-    onchange: () => model.log.toggleAutoScroll(),
-  }), ' Autoscroll'),
-  h('span.mh1'),
+  model.log.isLiveModeRunning() && [
+    h('label.d-inline', { title: 'Scroll down in live mode on new log incoming' }, h('input', {
+      type: 'checkbox',
+      checked: model.log.autoScrollLive,
+      onchange: () => model.log.toggleAutoScroll(),
+    }), ' Autoscroll'),
+    h('span.mh1'),
+  ],
   h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
     type: 'checkbox',
     checked: model.inspectorEnabled,
