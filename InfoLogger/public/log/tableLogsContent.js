@@ -229,7 +229,7 @@ const tableContainerHooks = (model) => ({
     /**
      * Disable auto-scroll when the user scrolls up, then update the viewport.
      * A shrinking table clamps scrollTop down but stays at the bottom, so it doesn't count.
-     * Needed as well as onTableWheel as 
+     * Needed as well as onTableWheel as onTableWheel doesn't cover all cases of user-initiated scrolls.
      */
     const onTableScroll = () => {
       const scrollTop = getScrollTop();
