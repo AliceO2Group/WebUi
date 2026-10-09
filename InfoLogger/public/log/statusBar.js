@@ -107,7 +107,7 @@ const applicationOptions = (model) => [
         {
           id: 'status-bar-auto-scroll',
           title: 'Click here to re-enable autoscroll',
-          onclick: () => model.log.enableAutoScrollLiveAndNotify(),
+          onclick: () => model.log.setAutoScrollLive(true),
         },
         [
           iconWarning(),
