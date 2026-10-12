@@ -227,9 +227,11 @@ const tableContainerHooks = (model) => ({
     const isAtBottom = (scrollTop) => container.scrollHeight - scrollTop - container.clientHeight <= 1;
 
     /**
-     * Disable auto-scroll when the user scrolls up, then update the viewport.
-     * A shrinking table clamps scrollTop down but stays at the bottom, so it doesn't count.
+     * Disable auto-scroll when the user performs an action that creates an up scroll event, then update the viewport.
      * Needed as well as onTableWheel as onTableWheel doesn't cover all cases of user-initiated scrolls.
+     * However unlike wheel listeners, scroll events are not processed immediately.
+     * The user can scroll up but the autoScroll manager can get executed before the scroll listener
+     * and will put the viewport back at the bottom before the scroll listener has a chance to react.
      */
     const onTableScroll = () => {
       const scrollTop = getScrollTop();
