@@ -575,10 +575,11 @@ export default class Log extends Observable {
   }
 
   /**
-   * Enable auto-scroll for live mode and scroll to the bottom of the table
+   * Set auto-scroll for live mode and notify the UI
+   * @param {boolean} enabled - whether auto-scroll should be enabled
    */
-  enableAutoScrollLiveAndNotify() {
-    this.autoScrollLive = true;
+  setAutoScrollLive(enabled) {
+    this.autoScrollLive = enabled;
     this.notify();
   }
 
