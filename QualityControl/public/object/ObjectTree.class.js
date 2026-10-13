@@ -24,6 +24,12 @@ export default class ObjectTree extends Observable {
   static _indexIncrementCount = 0;
 
   /**
+   * A shared storage instance for open branch states.
+   * @type {BrowserStorage}
+   */
+  static _openBranchStateStorage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_BRANCH_STATE);
+
+  /**
    * Instantiate tree with a root node called `name`, empty by default
    * @param {string} name - root name
    * @param {ObjectTree} parent - optional parent node
@@ -32,7 +38,6 @@ export default class ObjectTree extends Observable {
     super();
     this._index = ObjectTree._indexIncrementCount++;
     this.focusedNode = null;
-    this.openBranchStateStorage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_BRANCH_STATE);
     this.initTree(name, parent);
   }
 
@@ -258,7 +263,7 @@ export default class ObjectTree extends Observable {
     const session = sessionService.get();
     const key = session.personid.toString();
     // We traverse the path to reach the parent branch of this node
-    let branchState = this.openBranchStateStorage.getLocalItem(key) ?? {};
+    let branchState = ObjectTree._openBranchStateStorage.getLocalItem(key) ?? {};
     for (let i = 0; i < this.path.length - 1; i++) {
       branchState = branchState[this.path[i]];
       if (!branchState) {
@@ -299,7 +304,7 @@ export default class ObjectTree extends Observable {
     }
     const session = sessionService.get();
     const key = session.personid.toString();
-    const data = this.openBranchStateStorage.getLocalItem(key) ?? {};
+    const data = ObjectTree._openBranchStateStorage.getLocalItem(key) ?? {};
     // We traverse the path to reach the parent branch of this node
     let branchState = data;
     for (let i = 0; i < this.path.length - 1; i++) {
@@ -317,11 +322,11 @@ export default class ObjectTree extends Observable {
     }
     if (this.open) {
       this._markExpandedBranchesRecursive(branchState, this);
-      this.openBranchStateStorage.setLocalItem(key, data);
+      ObjectTree._openBranchStateStorage.setLocalItem(key, data);
     } else if (branchState[this.name]) {
       // Deleting from `branchState` directly updates the `data` object
       delete branchState[this.name];
-      this.openBranchStateStorage.setLocalItem(key, data);
+      ObjectTree._openBranchStateStorage.setLocalItem(key, data);
     }
   }
 

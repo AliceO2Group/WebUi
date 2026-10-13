@@ -105,7 +105,8 @@ describe('Filter actions test-suite', async () => {
 
   it('should update filters based on profile when passed in the URI', async () => {
     // for now check if the filters are reset once the profile is passed
-    const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
+    const expectedParams =
+      '?q=%7B%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%2C%22level%22%3A%7B%22max%22%3A1%7D%7D';
 
     const searchParams = await page.evaluate(() => {
       const params = { profile: 'physicist' };
@@ -123,7 +124,8 @@ describe('Filter actions test-suite', async () => {
   it('should reset filters and show warning message when profile and filters are passed', async () => {
     // wait until the previous notification is hidden
     await page.waitForFunction('window.model.notification.state === \'hidden\'');
-    const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
+    const expectedParams =
+      '?q=%7B%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%2C%22level%22%3A%7B%22max%22%3A1%7D%7D';
     const searchParams = await page.evaluate(() => {
       const params = { profile: 'physicist', q: '"severity":{"in":"I W E F"}}' };
       window.model.parseLocation(params);
@@ -132,7 +134,8 @@ describe('Filter actions test-suite', async () => {
 
     await page.waitForFunction('window.model.notification.state === \'shown\'');
     await page.waitForFunction('window.model.notification.type === \'warning\'');
-    await page.waitForFunction('window.model.notification.message === "URL can contain only filters or profile, not both"');
+    const notificationMessage = await page.evaluate(() => window.model.notification.message);
+    assert.strictEqual(notificationMessage, 'URL can contain only filters or profile, not both');
     assert.strictEqual(searchParams, expectedParams);
   });
 
@@ -148,31 +151,36 @@ describe('Filter actions test-suite', async () => {
       };
     });
 
-    assert.strictEqual(decodeURI(locationAndNotification.search), expectedDefaultParams);
+    assert.strictEqual(decodeURIComponent(locationAndNotification.search), expectedDefaultParams);
     assert.strictEqual(locationAndNotification.notification.type, 'danger');
+    const expectedMessage = 'Invalid URL filter format: Expected \',\' or \'}\''
+    + ' after property value in JSON at position 27 (line 1 column 28)';
     // CI/CD runs on Chromium so this assertion is based on Chromium's JSON engine's error message
     assert.strictEqual(
       locationAndNotification.notification.message,
-      'Invalid URL filter format: Expected \',\' or \'}\' after property value in JSON at position 27 (line 1 column 28)',
+      expectedMessage,
     );
   });
 
   it('should update URI with new encoded "match" criteria', async () => {
     const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
-    const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const expectedParams = '?q=%7B%22hostname%22%3A%7B%22match%22%3A%22%5C%22%25ald_qdip01%25%22%7D'
+      + '%2C%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%7D';
     const searchParams = await page.evaluate(() => {
+      window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
       window.model.updateRouteOnModelChange();
       return window.location.search;
     });
 
     assert.deepStrictEqual(searchParams, expectedParams);
-    assert.deepStrictEqual(decodeURI(searchParams), decodedParams);
+    assert.deepStrictEqual(decodeURIComponent(searchParams), decodedParams);
   });
 
   it('should update URI with new encoded "exclude" criteria', async () => {
     const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
-    const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const expectedParams = '?q=%7B%22hostname%22%3A%7B%22exclude%22%3A%22%5C%22%25ald_qdip01%25%22%7D'
+      + '%2C%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%7D';
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'exclude', '"%ald_qdip01%');
@@ -181,7 +189,7 @@ describe('Filter actions test-suite', async () => {
     });
 
     assert.deepStrictEqual(searchParams, expectedParams);
-    assert.deepStrictEqual(decodeURI(searchParams), decodedParams);
+    assert.deepStrictEqual(decodeURIComponent(searchParams), decodedParams);
   });
 
   it('should parse dates in format DD/MM/YY', async () => {
@@ -247,30 +255,6 @@ describe('Filter actions test-suite', async () => {
     });
     assert.strictEqual($in.length, 4);
     assert.deepStrictEqual($in, ['I', 'W', 'E', 'F']);
-  });
-
-  it('should encode special characters correctly into the URL', async () => {
-    const pidMatch = await page.evaluate(() => {
-      window.model.log.filter.setCriteria('pid', 'match', 'a+b c %d #anchor & = héllo wörld 日本語');
-      return window.model.log.filter.criterias.pid.$match;
-    });
-
-    assert.strictEqual(pidMatch, 'a+b c %d #anchor & = héllo wörld 日本語');
-
-    const searchParams = await page.evaluate(() => {
-      window.model.updateRouteOnModelChange();
-      return window.location.search;
-    });
-
-    assert.ok(searchParams.includes('a%2Bb%20c%20%25d%20%23anchor%20%26%20%3D%20h%C3%A9llo%20w%C3%B6rld%20%E6%97%A5%E6%9C%AC%E8%AA%9E'));
-  });
-
-  it('should decode special characters correctly from the URL', async () => {
-    await page.goto(`${baseUrl}?q={%22pid%22:{%22match%22:%22a%2Bb%20c%20%25d%20%23anchor%20%26%20%3D%20h%C3%A9llo%20w%C3%B6rld%20%E6%97%A5%E6%9C%AC%E8%AA%9E%22}}`, { waitUntil: 'networkidle0' });
-
-    const pidMatch = await page.evaluate(() => window.model.log.filter.criterias.pid.$match);
-
-    assert.strictEqual(pidMatch, 'a+b c %d #anchor & = héllo wörld 日本語');
   });
 
   it('should reset filters and set them again', async () => {

@@ -14,6 +14,7 @@
 
 const assert = require('assert');
 const test = require('../mocha-index');
+const { injectLogs, waitForTextInElement } = require('../utils/utils');
 
 /**
  * Helper function to get the counts of each severity type from the status bar.
@@ -31,38 +32,6 @@ async function getSeverityCounts(page) {
     });
     return counts;
   });
-}
-
-/**
- * Helper function to inject logs into the model and trigger a re-render.
- * @param {Page} page - puppeteer page
- * @param {Array<{severity: string}>} logs - array of log objects to inject
- */
-async function injectLogs(page, logs) {
-  await page.evaluate((logs) => {
-    window.model.log.list = logs;
-    window.model.log.resetStats();
-    window.model.log.list.forEach((log) => window.model.log.addStats(log));
-    window.model.notify();
-  }, logs);
-}
-
-/**
- * Helper to wait until an element's text includes the expected substring.
- * @param {Page} page - puppeteer page
- * @param {string} selector - CSS selector
- * @param {string} text - substring to wait for
- */
-async function waitForTextInElement(page, selector, text) {
-  await page.waitForFunction(
-    (sel, txt) => {
-      const el = document.querySelector(sel);
-      return el && el.textContent.includes(txt);
-    },
-    { timeout: 2000 },
-    selector,
-    text,
-  );
 }
 
 describe('Status Bar test-suite', async () => {
