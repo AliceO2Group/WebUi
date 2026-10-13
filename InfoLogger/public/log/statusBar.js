@@ -98,30 +98,35 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the application options
  */
-const applicationOptions = (model) => [
-  model.log.isLiveModeRunning() && [
-    model.log.autoScrollLive
-      ? h('span.success', { id: 'status-bar-auto-scroll', title: 'Autoscroll is enabled' }, 'Autoscroll Enabled')
-      : h(
-        'button.btn.btn-sm.btn-warning',
+const applicationOptions = (model) => {
+  const { log } = model;
+  const autoScrollEnabled = log.autoScrollLive;
+  return [
+    log.isLiveModeRunning() && [
+      h(
+        `button.btn.btn-sm${autoScrollEnabled ? '.btn-success' : '.btn-warning'}`,
         {
           id: 'status-bar-auto-scroll',
-          title: 'Click here to re-enable autoscroll',
-          onclick: () => model.log.enableAutoScrollLiveAndNotify(),
+          title: autoScrollEnabled ? 'Click here to disable autoscroll' : 'Click here to re-enable autoscroll',
+          onclick: (e) => {
+            e.currentTarget.blur();
+            log.setAutoScrollLive(!autoScrollEnabled);
+          },
         },
         [
-          iconWarning(),
-          h('span.d-inline', 'Autoscroll Disabled'),
+          !autoScrollEnabled && iconWarning(),
+          h('span.d-inline', autoScrollEnabled ? 'Autoscroll Enabled' : 'Autoscroll Disabled'),
         ],
       ),
-    h('span.mh1'),
-  ],
-  h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
-    type: 'checkbox',
-    checked: model.inspectorEnabled,
-    onchange: () => model.toggleInspector(),
-  }), ' Inspector'),
-];
+      h('span.mh1'),
+    ],
+    h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
+      type: 'checkbox',
+      checked: model.inspectorEnabled,
+      onchange: () => model.toggleInspector(),
+    }), ' Inspector'),
+  ];
+};
 
 /**
  * Status for query mode, showing how many logs are really in DB and how much time it took to load it

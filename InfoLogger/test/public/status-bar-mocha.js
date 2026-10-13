@@ -361,16 +361,28 @@ describe('Status Bar test-suite', async () => {
           await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Enabled');
         });
 
-        it('should show correct button when autoscroll is disabled', async () => {
+        it('should show correct label when autoscroll is disabled', async () => {
           await page.evaluate(() => {
-            model.log.autoScrollLive = false;
+            model.log.setAutoScrollLive(false);
           });
           await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Disabled');
         });
 
-        it('should re-enable autoscroll when disabled autoscroll button is clicked', async () => {
+        it('should disable auto-scroll when clicked whilst auto-scroll is enabled', async () => {
           await page.evaluate(() => {
-            model.log.autoScrollLive = false;
+            model.log.setAutoScrollLive(true);
+          });
+          await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Enabled');
+
+          await page.click(AUTOSCROLL_SELECTOR);
+
+          await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Disabled');
+          assert.strictEqual(await page.evaluate(() => model.log.autoScrollLive), false);
+        });
+
+        it('should enable auto-scroll when clicked whilst auto-scroll is disabled', async () => {
+          await page.evaluate(() => {
+            model.log.setAutoScrollLive(false);
           });
           await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Disabled');
 
