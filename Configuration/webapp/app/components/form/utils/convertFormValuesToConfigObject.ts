@@ -14,18 +14,26 @@
 
 import { KEY_SEPARATOR } from '../constants';
 import type { InputsType } from '~/routes/configuration';
-import type { FormObjectValue, FormValue } from '../types';
+import type { Restrictions, FormObjectValue, FormValue, ArrayRestrictions } from '../types';
+import { isArrayRestrictions, isObjectRestrictions } from '../types/helpers';
 
 /**
  * Convert flat form values back to nested configuration object format.
  * @param {InputsType} formValues - The flat form values with prefixed keys.
+ * @param {Restrictions} restrictions - The object with restrictions.
+ *  Used to determine if the current value is an object or an array
  * @param {string} prefix - The prefix to remove from keys (e.g., '/configuration').
  * @returns {FormValue} The nested configuration object.
  */
 export const convertFormValuesToConfigObject = (
   formValues: InputsType,
+  restrictions: Restrictions | undefined,
   prefix: string,
 ): FormValue => {
+  if (restrictions === undefined) {
+    throw new Error('Missing restrictions parameter');
+  }
+
   const result: FormValue = {};
 
   for (const [key, value] of Object.entries(formValues)) {
@@ -48,17 +56,27 @@ export const convertFormValuesToConfigObject = (
       continue;
     }
 
-    let current = result;
+    let currentValue = result; // pointer for currentValue place in the configuration
+    let currentRestrictions = restrictions; // pointer for currentRestrictions
     for (let i = 0; i < keys.length - 1; i++) {
       const currentKey = keys[i];
-      if (!(currentKey in current) || typeof current[currentKey] !== 'object') {
-        current[currentKey] = {};
+      currentRestrictions = isObjectRestrictions(currentRestrictions)
+        ? currentRestrictions[currentKey]
+        : (currentRestrictions as ArrayRestrictions)[0][Number(currentKey)];
+
+      if (!(currentKey in currentValue)) {
+        // we need to create next level of nesting
+        if (isObjectRestrictions(currentRestrictions)) {
+          currentValue[currentKey] = {};
+        } else if (isArrayRestrictions(currentRestrictions)) {
+          currentValue[currentKey] = Array(currentRestrictions[0].length);
+        }
       }
-      current = current[currentKey] as FormObjectValue;
+      currentValue = currentValue[currentKey] as FormObjectValue;
     }
 
     const finalKey = keys[keys.length - 1];
-    current[finalKey] = value.toString();
+    currentValue[finalKey] = value;
   }
 
   return result;

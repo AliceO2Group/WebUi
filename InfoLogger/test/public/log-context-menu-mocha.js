@@ -78,9 +78,9 @@ describe('Cell Context Menu', async () => {
     }, filledRow, emptyRow);
 
     await page.waitForFunction(() => {
-      const cells = Array.from(document.querySelectorAll('.cell-text'));
-      return cells.some((cell) => cell.textContent.trim() === 'ctx-host-01')
-            && cells.some((cell) => cell.textContent.trim() === 'ctx-message-01');
+      const cells = Array.from(document.querySelectorAll('td.cell'));
+      return cells.some((cell) => cell.textContent.includes('ctx-host-01'))
+            && cells.some((cell) => cell.textContent.includes('ctx-message-01'));
     });
   });
 
@@ -94,8 +94,8 @@ describe('Cell Context Menu', async () => {
   describe('Menu visibility', async () => {
     it('should show context menu on right-click', async () => {
       await page.evaluate(() => {
-        const hostNameCell = Array.from(document.querySelectorAll('.cell-text'))
-          .find((cell) => cell.textContent.trim() === 'ctx-host-01');
+        const hostNameCell = Array.from(document.querySelectorAll('td.cell'))
+          .find((cell) => cell.textContent.includes('ctx-host-01'));
         hostNameCell.dispatchEvent(new MouseEvent('contextmenu', {
           bubbles: true,
           cancelable: true,
@@ -164,8 +164,8 @@ describe('Cell Context Menu', async () => {
 
       // Dispatch actual right-click event on the cell to trigger the context menu and row selection
       await page.evaluate(() => {
-        const cell = Array.from(document.querySelectorAll('.cell-text'))
-          .find((cell) => cell.textContent.trim() === 'ctx-message-01');
+        const cell = Array.from(document.querySelectorAll('td.cell'))
+          .find((cell) => cell.textContent.includes('ctx-message-01'));
         cell.dispatchEvent(new MouseEvent('contextmenu', {
           bubbles: true,
           cancelable: true,
@@ -183,10 +183,7 @@ describe('Cell Context Menu', async () => {
     it('should not open context menu on right-click of empty cell', async () => {
       await page.evaluate(() => {
         const emptyCell = Array.from(document.querySelectorAll('td.cell'))
-          .find((cell) => {
-            const textEl = cell.querySelector('.cell-text');
-            return textEl && textEl.textContent.trim() === '';
-          });
+          .find((cell) => cell.textContent.trim() === '');
         emptyCell.dispatchEvent(new MouseEvent('contextmenu', {
           bubbles: true, cancelable: true, clientX: 100, clientY: 120, button: 2,
         }));
@@ -748,10 +745,7 @@ describe('Cell Context Menu', async () => {
     it('should not render hint on cells with empty content', async () => {
       const emptyHints = await page.evaluate(() => {
         const emptyCells = Array.from(document.querySelectorAll('td.cell'))
-          .filter((cell) => {
-            const textEl = cell.querySelector('.cell-text');
-            return textEl && textEl.textContent.trim() === '';
-          });
+          .filter((cell) => cell.textContent.trim() === '');
         return emptyCells.filter((cell) => cell.querySelector('.cell-context-menu-hint')).length;
       });
 
