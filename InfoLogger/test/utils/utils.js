@@ -25,6 +25,7 @@ function shuffle(array) {
   return array;
 }
 
+/**
  * Helper function to inject logs into the model and trigger a re-render.
  * @param {Page} page - puppeteer page
  * @param {Array<{severity: string}>} logs - array of log objects to inject
