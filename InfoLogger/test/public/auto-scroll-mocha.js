@@ -132,20 +132,10 @@ describe('Auto-scroll test-suite', async () => {
       await assertAutoScrollLive(page, true);
     });
 
-    it('should re-enable autoscroll when the log list is cleared', async () => {
-      await injectAndWaitForScrolledDown(page);
-      await page.evaluate(() => {
-        model.log.autoScrollLive = false;
-      });
-      await assertAutoScrollLive(page, false);
-
-      await page.click('#clear-button');
-
-      await assertAutoScrollLive(page, true);
-    });
-
     it('should not disable autoscroll when zooming in and out', async () => {
-      await assertAutoScrollLive(page, true);
+      await page.evaluate(() => {
+        model.log.autoScrollLive = true;
+      });
       await injectAndWaitForScrolledDown(page);
       await page.click('#zoom-in-button');
       await assertAutoScrollLive(page, true);

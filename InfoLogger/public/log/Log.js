@@ -548,7 +548,7 @@ export default class Log extends Observable {
 
   /**
    * Empty the list of all logs, reset stats, clear query mode request if any,
-   * deselect the current log, close the inspector panel and re-enable auto-scroll in live mode
+   * deselect the current log and close the inspector panel
    */
   empty() {
     this.list = [];
@@ -558,9 +558,6 @@ export default class Log extends Observable {
     this.model.inspectorEnabled = false;
     this.resetStats();
     this.queryResult = RemoteData.notAsked();
-    if (this.isLiveModeRunning()) {
-      this.setAutoScrollLive(true, false);
-    }
     this.notify();
   }
 
