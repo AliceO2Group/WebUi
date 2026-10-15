@@ -44,6 +44,7 @@ const ConfigurationPage = () => {
   } = useConfigurationForm({
     configuration,
     configurationName,
+    configurationRestrictions,
   });
 
   const { showModal, handleProceed, handleSaveAndProceed, handleCancel } = useUnsavedChangesBlocker(
