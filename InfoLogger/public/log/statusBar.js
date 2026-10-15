@@ -12,10 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import {
-  h,
-  iconWarning,
-} from '/js/src/index.js';
+import { h, iconWarning } from '/js/src/index.js';
 
 /**
  * Bottom bar, showing status of the log's list and its details,
