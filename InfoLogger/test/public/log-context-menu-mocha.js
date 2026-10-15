@@ -91,6 +91,10 @@ describe('Cell Context Menu', async () => {
     });
   });
 
+  after(async () => {
+    await page.evaluate(() => model.log.contextMenu.hide());
+  });
+
   describe('Menu visibility', async () => {
     it('should show context menu on right-click', async () => {
       await page.evaluate(() => {
