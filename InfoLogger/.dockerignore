@@ -1,0 +1,12 @@
+# Default ignore everything
+*
+
+# Project
+!lib/
+!package*.json
+!public/
+!index.js
+!test/
+!eslint.config.js
+!config.js
+!docker/

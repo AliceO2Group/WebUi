@@ -13,6 +13,19 @@
  */
 
 /**
+ * Shuffle an array in place using the Fisher-Yates algorithm.
+ * @param {Array} array - the array to shuffle
+ * @returns {Array} the shuffled array
+ */
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/**
  * Helper function to inject logs into the model and trigger a re-render.
  * @param {Page} page - puppeteer page
  * @param {Array<{severity: string}>} logs - array of log objects to inject
@@ -45,6 +58,7 @@ async function waitForTextInElement(page, selector, text) {
 }
 
 module.exports = {
+  shuffle,
   injectLogs,
   waitForTextInElement,
 };
