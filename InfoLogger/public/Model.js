@@ -17,7 +17,7 @@ import {
   Observable, WebSocketClient, QueryRouter,
   Loader, RemoteData, sessionService, Notification,
 } from '/js/src/index.js';
-import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
+import { callRateLimiter } from './common/utils.js';
 import { ConfigurationService } from './services/ConfigurationService.js';
 import { MODE } from './constants/mode.const.js';
 import Log from './log/Log.js';
@@ -94,6 +94,7 @@ export default class Model extends Observable {
   handleWSAuthed() {
     // Tell server not to stream by default
     this.ws.setFilter(() => false);
+    this.notify();
   }
 
   /**
@@ -115,12 +116,6 @@ export default class Model extends Observable {
       this.frameworkInfo = RemoteData.failure(result.message);
     } else {
       this.frameworkInfo = RemoteData.success(result);
-      if (result['infoLogger-gui'].name && result['infoLogger-gui'].name.trim()) {
-        window.ILG = {
-          name: `ILG - ${result['infoLogger-gui'].name}`,
-        };
-        setBrowserTabTitle(window.ILG.name);
-      }
     }
     this.notify();
     return;

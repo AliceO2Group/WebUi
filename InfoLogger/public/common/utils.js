@@ -56,7 +56,7 @@ export function callRateLimiter(fn, time) {
  * @returns {void}
  */
 export function setBrowserTabTitle(title = undefined) {
-  if (document && title) {
+  if (document && title && document.title !== title) {
     document.title = title;
   }
 }
