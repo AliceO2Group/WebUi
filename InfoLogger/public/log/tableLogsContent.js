@@ -211,7 +211,7 @@ const tableContainerHooks = (model) => ({
       const { height } = container.getBoundingClientRect();
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
       if (container.scrollTop < model.log.scrollTop) {
-        model.log.autoScrollLive = false; // stop auto-scrolling if user scrolls up
+        model.log.setAutoScrollLive(false); // stop auto-scrolling if user scrolls up
       }
       model.log.setScrollTop(scrollTop, height);
     };
@@ -269,6 +269,9 @@ const autoscrollManager = (model, vnode) => {
     // don't try to scroll to selected item when auto-scroll is ON
     return;
   }
+
+  // forget the last scrolled log so re-enabling autoscroll jumps to bottom straight away on a redraw
+  delete vnode.dom.dataset.lastLogId;
 
   // Autoscroll to selected item
   if (model.log.item) {

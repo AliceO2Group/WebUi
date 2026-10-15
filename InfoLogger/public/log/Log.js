@@ -575,11 +575,11 @@ export default class Log extends Observable {
   }
 
   /**
-   * Enable or disable auto-scroll for live mode, a checkbox is used to control it
+   * Set auto-scroll for live mode and notify the UI
+   * @param {boolean} enabled - whether auto-scroll should be enabled
    */
-  toggleAutoScroll() {
-    this.autoScrollLive = !this.autoScrollLive;
-    this.dom.table.focus();
+  setAutoScrollLive(enabled) {
+    this.autoScrollLive = enabled;
     this.notify();
   }
 
