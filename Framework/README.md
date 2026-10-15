@@ -72,6 +72,7 @@ npm install --save @aliceo2/web-ui
 * [Consul](./docs/guide/consul.md) - Consul service with simple Read queries
 * [JIRA](./docs/guide/jira.md) - Create JIRA issues
 * [Notification service](./docs/guide/notification.md) - Trigger and receive notification using Kafka cluster
+* [Migration to v3](./docs/guide/migration-v3.md) - Upgrade an application from v2 (Express v4) to v3 (Express v5)
 
 ### Frontend guide
 - [Template engine](./docs/guide/template-engine.md) - MVC using hyperscript and observable model
