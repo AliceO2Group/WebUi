@@ -43,8 +43,14 @@ class HttpServer {
     httpConfig.tls = !httpConfig.tls ? false : httpConfig.tls;
     httpConfig.hostname = !httpConfig.hostname ? 'localhost' : httpConfig.hostname;
     this.limit = !httpConfig.limit ? '100kb' : httpConfig.limit;
+    this.queryParser = !httpConfig.queryParser ? 'simple' : httpConfig.queryParser;
+    assert(
+      ['simple', 'extended'].includes(this.queryParser),
+      `Invalid config value: queryParser must be 'simple' or 'extended', received '${this.queryParser}'`,
+    );
 
     this.app = express();
+    this.app.set('query parser', this.queryParser);
 
     if (process.env.NODE_ENV === 'production') {
       this.app.set('trust proxy', true);

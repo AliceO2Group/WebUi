@@ -295,6 +295,31 @@ describe('HTTP constructor checks', () => {
     httpServer = new HttpServer(conf, config.jwt);
     assert.strictEqual(httpServer.limit, '10Mb', 'Provided limit was not set');
   });
+  it('should successfully default query parser to simple and keep bracket keys flat', async () => {
+    httpServer = new HttpServer({ ...config.http }, config.jwt);
+    httpServer.get('/query', (req, res) => res.json(req.query), { public: true });
+    assert.strictEqual(httpServer.queryParser, 'simple', 'Default query parser was not set');
+    await request(httpServer)
+      .get('/api/query?a=1&a=2&filter[name]=test')
+      .expect(200)
+      .expect({ a: ['1', '2'], 'filter[name]': 'test' });
+  });
+  it('should successfully use extended query parser when provided in configuration', async () => {
+    httpServer = new HttpServer({ ...config.http, queryParser: 'extended' }, config.jwt);
+    httpServer.get('/query', (req, res) => res.json(req.query), { public: true });
+    assert.strictEqual(httpServer.queryParser, 'extended', 'Provided query parser was not set');
+    await request(httpServer)
+      .get('/api/query?fields[]=a&fields[]=b&filter[name]=test')
+      .expect(200)
+      .expect({ fields: ['a', 'b'], filter: { name: 'test' } });
+  });
+  it('should throw an error if provided query parser is not supported', () => {
+    assert.throws(
+      () => new HttpServer({ ...config.http, queryParser: 'qs' }, config.jwt),
+      /queryParser must be 'simple' or 'extended'/,
+    );
+    httpServer = { close: () => Promise.resolve() };
+  });
 });
 
 describe('URL parameters extraction checks', () => {
