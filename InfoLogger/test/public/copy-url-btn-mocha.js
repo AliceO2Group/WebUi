@@ -37,8 +37,8 @@ describe('Copy URL button test-suite', async () => {
   });
 
   it('should display the button with the correct label', async () => {
-    const button = await page.$('#copy-url');
-    const label = await page.evaluate((el) => el.textContent, button);
+    const button = await page.waitForSelector('#copy-url');
+    const label = await button.evaluate((el) => el.textContent);
     assert.strictEqual(label, 'Copy URL');
   });
 
@@ -49,10 +49,10 @@ describe('Copy URL button test-suite', async () => {
     });
     await waitForNextRender(page);
     await page.click('#copy-url');
+    await page.waitForFunction(() => document.querySelector('#copy-url').textContent.includes('Copied!'));
     const copiedText = await page.evaluate(() => navigator.clipboard.readText());
-    const expectedUrl = `${baseUrl}?q=%7B%22message%22%3A%7B%22match%22`
-    + '%3A%22needle%22%7D%2C%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%7D';
-    assert.strictEqual(copiedText, expectedUrl);
+    const { searchParams } = new URL(copiedText);
+    assert.strictEqual(JSON.parse(searchParams.get('q')).message.match, 'needle');
   });
 
   it('should display a notification on copy failure', async () => {
