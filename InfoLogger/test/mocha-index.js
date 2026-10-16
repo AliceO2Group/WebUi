@@ -116,6 +116,7 @@ describe('InfoLogger', function () {
   require('./public/zoom.mocha');
   require('./public/log-context-menu-mocha');
   require('./public/copy-url-btn-mocha');
+  require('./public/auto-scroll-mocha');
 
   after(async () => {
     await browser.close();

@@ -31,4 +31,3 @@ mount(document.body, view, model, debug);
 
 // Expose model to interact with it the browser's console
 window.model = model;
-window.ILG = { name: 'ILG - ' };
