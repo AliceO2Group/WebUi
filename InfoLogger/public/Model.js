@@ -361,26 +361,34 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending if location is filters or profile
    * @param {object} params - URL parameters
    */
-  parseLocation(params) {
+  async parseLocation(params) {
     if (params.profile && params.q) {
       this.log.filter.resetCriteria();
       this.notification.show('URL can contain only filters or profile, not both', 'warning');
       return;
-    } else if (params.profile) {
-      this.getProfile(params.profile);
-      return; // live=true ignored if a profile is used
-    } else if (params.q) {
-      this.getUserProfile();
+    };
+
+    const profileLoaded = params.profile ? this.getProfile(params.profile) : this.getUserProfile();
+
+    let filterError = null;
+    if (params.q) {
       try {
         this.log.filter.fromObject(JSON.parse(params.q));
       } catch (error) {
         this.log.filter.resetCriteria();
         this.updateRouteOnModelChange();
-        this.notification.show(`Invalid URL filter format: ${error.message}`, 'danger');
-        return; // don't go live when q is invalid
+        filterError = error; // don't go live when q is invalid
       }
-    } else {
-      this.getUserProfile();
+    }
+
+    // await as our notification system only shows one notification at a time
+    // and profile loading will trigger a notification
+    // and we don't want it and error messages to interfere with each other
+    await profileLoaded;
+
+    if (filterError) {
+      this.notification.show(`Invalid URL filter format: ${filterError.message}`, 'danger');
+      return; // don't go live when q is invalid
     }
 
     if (params.live === 'true') {
@@ -402,7 +410,8 @@ export default class Model extends Observable {
     }
 
     if (!this.log.queryResult.isNotAsked()) {
-      return; // user started a query as framework has loaded but WS not yet
+      this.notification.show('A query was run before live mode was ready, staying in query mode', 'warning', 3000);
+      return;
     }
     if (!this.log.isLiveModeAvailable()) {
       this.notification.show('Live mode is currently unavailable, loaded in query mode', 'danger', 3000);
@@ -417,7 +426,7 @@ export default class Model extends Observable {
    * do it silently to avoid infinite loop
    */
   updateRouteOnModelChange() {
-    this.router.go(this.log.filter.queryString, true, true);
+    this.router.go(this.log.filter.queryString + (this.log.activeMode === 'Running' ? '&live=true' : ''), true, true);
   }
 
   /**
