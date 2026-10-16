@@ -133,8 +133,8 @@ describe('Live Mode test-suite', async () => {
   it('should stay in QUERY mode when live=true is combined with an invalid url filter', async () => {
     await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}&live=true`, { waitUntil: 'networkidle0' });
     const { activeMode, notification } = await page.evaluate(() => ({
-      activeMode: window.model.log.activeMode,
-      notification: window.model.notification,
+      activeMode: model.log.activeMode,
+      notification: model.notification,
     }));
 
     assert.strictEqual(activeMode, 'Query');
@@ -144,6 +144,7 @@ describe('Live Mode test-suite', async () => {
 
   it('should successfully enable LIVE mode from url parameter with the defined filter', async () => {
     await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}}&live=true`, { waitUntil: 'networkidle0' });
+    await page.waitForFunction(() => model.log.activeMode === 'Running', { timeout: 5000 });
 
     const { activeMode, className, search, autoScroll } = await getLiveState(page);
 
@@ -157,6 +158,8 @@ describe('Live Mode test-suite', async () => {
 
   it('should successfully enable LIVE mode from url parameter with no filter', async () => {
     await page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
+    await page.waitForFunction(() => model.log.activeMode === 'Running', { timeout: 5000 });
+
     const { activeMode, className, search, title, autoScroll } = await getLiveState(page);
 
     assert.strictEqual(autoScroll, true);
@@ -166,6 +169,22 @@ describe('Live Mode test-suite', async () => {
     assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
 
     assert.ok(title.endsWith(' LIVE'), `unexpected title: ${title}`);
+  });
+
+  it('should notify and stay in QUERY when live service is unavailable', async () => {
+    const { activeMode, message } = await page.evaluate(async () => {
+      model.log.liveStop();
+      const { status } = window.model.frameworkInfo.payload.infoLoggerServer;
+      status.ok = false;
+      try {
+        await model.startLiveModeFromURL();
+        return { activeMode: model.log.activeMode, message: model.notification.message };
+      } finally {
+        status.ok = true;
+      }
+    });
+    assert.strictEqual(activeMode, 'Query');
+    assert.ok(message.startsWith('Live mode is currently unavailable'));
   });
 
   describe('Empty field filters in live mode', async () => {
