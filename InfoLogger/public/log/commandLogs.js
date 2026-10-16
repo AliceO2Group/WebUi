@@ -42,7 +42,7 @@ const LIVE_BUTTON_TYPES_BY_MODE = {
 export const commandLogs = (model) => [
   userActionsDropdown(model),
   h('', interactionModesGroupButton(model)),
-  h('', h('button.btn', { onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear')),
+  h('', h('button.btn', { id: 'clear-button', onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear')),
   h('.btn-group', [
     h('button.btn', {
       disabled: !model.log.list.length,
@@ -80,7 +80,7 @@ export const commandLogs = (model) => [
  * @returns {vnode} - the view of the interaction mode buttons
  */
 const interactionModesGroupButton = (model) => {
-  const { frameworkInfo, log } = model;
+  const { frameworkInfo } = model;
 
   return frameworkInfo.match({
     NotAsked: () => h('button.btn', { disabled: true }, ''),
@@ -88,8 +88,8 @@ const interactionModesGroupButton = (model) => {
     Failure: () => null,
     Success: () =>
       h('.btn-group', [
-        queryButton(log),
-        liveButton(log),
+        queryButton(model.log),
+        liveButton(model.log),
       ]),
   });
 };

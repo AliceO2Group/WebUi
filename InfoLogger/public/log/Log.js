@@ -547,11 +547,13 @@ export default class Log extends Observable {
   }
 
   /**
-   * Empty the list of all logs, reset stats, clear query mode request if any
-   * and close the inspector panel
+   * Empty the list of all logs, reset stats, clear query mode request if any,
+   * deselect the current log and close the inspector panel
    */
   empty() {
     this.list = [];
+    this.item = null;
+    this.autoScrollToItem = false;
     this.limitReached = null;
     this.model.inspectorEnabled = false;
     this.resetStats();
@@ -575,12 +577,19 @@ export default class Log extends Observable {
   }
 
   /**
-   * Enable or disable auto-scroll for live mode, a checkbox is used to control it
+   * Set auto-scroll for live mode and optionally notify the UI
+   * @param {boolean} enabled - whether auto-scroll should be enabled
+   * @param {boolean} notify - whether to notify the UI if there is a change
    */
-  toggleAutoScroll() {
-    this.autoScrollLive = !this.autoScrollLive;
-    this.dom.table.focus();
-    this.notify();
+  setAutoScrollLive(enabled, notify = true) {
+    if (this.autoScrollLive === enabled) {
+      return;
+    }
+    this.autoScrollLive = enabled;
+
+    if (notify) {
+      this.notify();
+    }
   }
 
   /**

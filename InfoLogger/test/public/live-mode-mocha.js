@@ -33,7 +33,7 @@ describe('Live Mode test-suite', async () => {
   });
 
   after(async () => {
-    await page.evaluate(() => window.model.log.liveStop());
+    await page.evaluate(() => model.log.liveStop());
   });
 
   it('should successfully go to homepage with predefined filters', async () => {
