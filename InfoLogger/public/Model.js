@@ -386,6 +386,15 @@ export default class Model extends Observable {
   }
 
   /**
+   * Get the shareable URL with the current filter query string
+   * Built from the model rather than the address bar, which is debounced.
+   * @returns {string} - the shareable URL
+   */
+  get shareableURL() {
+    return new URL(this.log.filter.queryString, this.router.location).href;
+  }
+
+  /**
    * Toggle inspector on the right
    */
   toggleInspector() {
