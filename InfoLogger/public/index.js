@@ -19,13 +19,14 @@ sessionService.loadAndHideParameters();
 window.sessionService = sessionService;
 
 // Import MVC
-import { mount } from '/js/src/index.js';
+import { mount, StatefulComponent } from '/js/src/index.js';
 import view from './view.js';
 import Model from './Model.js';
 
 // Start application
 const model = new Model();
 const debug = true; // shows when redraw is done
+StatefulComponent.useRenderer(model); // Register the model for the stateful components
 mount(document.body, view, model, debug);
 
 // Expose model to interact with it the browser's console
