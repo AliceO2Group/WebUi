@@ -132,6 +132,11 @@ describe('Live Mode test-suite', async () => {
 
   it('should stay in QUERY mode when live=true is combined with an invalid url filter', async () => {
     await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}&live=true`, { waitUntil: 'networkidle0' });
+    await page.waitForFunction(
+      () => model.notification.message.startsWith('Invalid URL filter format'),
+      { timeout: 5000 },
+    );
+
     const { activeMode, notification } = await page.evaluate(() => ({
       activeMode: model.log.activeMode,
       notification: model.notification,
@@ -171,7 +176,7 @@ describe('Live Mode test-suite', async () => {
     assert.ok(title.endsWith(' LIVE'), `unexpected title: ${title}`);
   });
 
-  it('should notify and stay in QUERY when live service is unavailable', async () => {
+  it('startLiveModeFromURL should notify and stay in QUERY when live service is unavailable', async () => {
     const { activeMode, message } = await page.evaluate(async () => {
       model.log.liveStop();
       const { status } = window.model.frameworkInfo.payload.infoLoggerServer;

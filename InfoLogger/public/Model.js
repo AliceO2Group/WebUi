@@ -58,29 +58,34 @@ export default class Model extends Observable {
 
     this.frameworkInfoEnabled = false;
     this.frameworkInfo = RemoteData.notAsked();
+
+    /** @type {Promise<void>} resolves once the framework info has loaded (success or failure) */
     this.frameworkInfoLoaded = this.getFrameworkInfo();
 
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
 
-    // Setup router
-    this.router = new QueryRouter();
-    this.router.observe(this.handleLocationChange.bind(this));
-    this.router.bubbleTo(this);
-
-    // Setup keyboard and wheel dispatchers
-    window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
-    window.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
-
-    // Setup WS connection
+    // Setup WS connection before the router as parsing live=true awaits wsSettled
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
+
+    /** @type {Promise<void>} resolves once the websocket is authenticated or closed */
     this.wsSettled = new Promise((resolve) => {
       this.ws.addListener('authed', resolve);
       this.ws.addListener('close', resolve);
     });
     this.ws.addListener('close', this.handleWSClose.bind(this));
+
+    // Setup router
+    this.router = new QueryRouter();
+    this.router.observe(this.handleLocationChange.bind(this));
+    this.router.bubbleTo(this);
+    this.handleLocationChange(); // Init first page
+
+    // Setup keyboard and wheel dispatchers
+    window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
+    window.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
 
     // update router on model change
     // Model can change very often we protect router with callRateLimiter
@@ -89,9 +94,6 @@ export default class Model extends Observable {
 
     this.zoom = new Zoom();
     this.zoom.bubbleTo(this);
-
-    // Must run last as live=true awaits frameworkInfoLoaded and wsSettled, so both must exist before the URL is parsed
-    this.handleLocationChange(); // Init first page
   }
 
   /**
@@ -350,10 +352,14 @@ export default class Model extends Observable {
   /**
    * Delegates sub-model actions depending new location of the page
    */
-  handleLocationChange() {
+  async handleLocationChange() {
     const { params } = this.router;
     if (params) {
-      this.parseLocation(params);
+      try {
+        await this.parseLocation(params);
+      } catch (error) {
+        this.notification.show(`Unable to load page from URL: ${error.message}`, 'danger');
+      }
     }
   }
 
@@ -366,7 +372,7 @@ export default class Model extends Observable {
       this.log.filter.resetCriteria();
       this.notification.show('URL can contain only filters or profile, not both', 'warning');
       return;
-    };
+    }
 
     const profileLoaded = params.profile ? this.getProfile(params.profile) : this.getUserProfile();
 
@@ -377,13 +383,11 @@ export default class Model extends Observable {
       } catch (error) {
         this.log.filter.resetCriteria();
         this.updateRouteOnModelChange();
-        filterError = error; // don't go live when q is invalid
+        filterError = error;
       }
     }
 
-    // await as our notification system only shows one notification at a time
-    // and profile loading will trigger a notification
-    // and we don't want it and error messages to interfere with each other
+    // Profile loading shows its own notification; wait so it doesn't overwrite the filter error
     await profileLoaded;
 
     if (filterError) {
@@ -392,7 +396,7 @@ export default class Model extends Observable {
     }
 
     if (params.live === 'true') {
-      this.startLiveModeFromURL();
+      await this.startLiveModeFromURL();
     }
   }
 
