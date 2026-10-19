@@ -426,7 +426,7 @@ export default class Model extends Observable {
    * do it silently to avoid infinite loop
    */
   updateRouteOnModelChange() {
-    this.router.go(this.log.filter.queryString + (this.log.activeMode === 'Running' ? '&live=true' : ''), true, true);
+    this.router.go(this.log.filter.queryString, true, true);
   }
 
   /**
