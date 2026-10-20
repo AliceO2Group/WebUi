@@ -58,10 +58,24 @@ export default class Model extends Observable {
 
     this.frameworkInfoEnabled = false;
     this.frameworkInfo = RemoteData.notAsked();
-    this.getFrameworkInfo();
+
+    /** @type {Promise<void>} resolves once the framework info has loaded (success or failure) */
+    this.frameworkInfoLoaded = this.getFrameworkInfo();
 
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
+
+    // Setup WS connection before the router as parsing live=true awaits wsSettled
+    this.ws = new WebSocketClient();
+    this.ws.addListener('command', this.handleWSCommand.bind(this));
+    this.ws.addListener('authed', this.handleWSAuthed.bind(this));
+
+    /** @type {Promise<void>} resolves once the websocket is authenticated or closed */
+    this.wsSettled = new Promise((resolve) => {
+      this.ws.addListener('authed', resolve);
+      this.ws.addListener('close', resolve);
+    });
+    this.ws.addListener('close', this.handleWSClose.bind(this));
 
     // Setup router
     this.router = new QueryRouter();
@@ -72,12 +86,6 @@ export default class Model extends Observable {
     // Setup keyboard and wheel dispatchers
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
     window.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
-
-    // Setup WS connection
-    this.ws = new WebSocketClient();
-    this.ws.addListener('command', this.handleWSCommand.bind(this));
-    this.ws.addListener('authed', this.handleWSAuthed.bind(this));
-    this.ws.addListener('close', this.handleWSClose.bind(this));
 
     // update router on model change
     // Model can change very often we protect router with callRateLimiter
@@ -344,10 +352,14 @@ export default class Model extends Observable {
   /**
    * Delegates sub-model actions depending new location of the page
    */
-  handleLocationChange() {
+  async handleLocationChange() {
     const { params } = this.router;
     if (params) {
-      this.parseLocation(params);
+      try {
+        await this.parseLocation(params);
+      } catch (error) {
+        this.notification.show(`Unable to load page from URL: ${error.message}`, 'danger');
+      }
     }
   }
 
@@ -355,26 +367,62 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending if location is filters or profile
    * @param {object} params - URL parameters
    */
-  parseLocation(params) {
+  async parseLocation(params) {
     if (params.profile && params.q) {
       this.log.filter.resetCriteria();
       this.notification.show('URL can contain only filters or profile, not both', 'warning');
       return;
-    } else if (params.profile) {
-      this.getProfile(params.profile);
-      return;
-    } else if (params.q) {
-      this.getUserProfile();
+    }
+
+    const profileLoaded = params.profile ? this.getProfile(params.profile) : this.getUserProfile();
+
+    let filterError = null;
+    if (params.q) {
       try {
         this.log.filter.fromObject(JSON.parse(params.q));
       } catch (error) {
         this.log.filter.resetCriteria();
         this.updateRouteOnModelChange();
-        this.notification.show(`Invalid URL filter format: ${error.message}`, 'danger');
+        filterError = error;
       }
-    } else {
-      this.getUserProfile();
     }
+
+    // Profile loading shows its own notification; wait so it doesn't overwrite the filter error
+    await profileLoaded;
+
+    if (filterError) {
+      this.notification.show(`Invalid URL filter format: ${filterError.message}`, 'danger');
+      return; // don't go live when q is invalid
+    }
+
+    if (params.live === 'true') {
+      await this.startLiveModeFromURL();
+    }
+  }
+
+  /**
+   * Start live mode from URL once dependencies are ready
+   */
+  async startLiveModeFromURL() {
+    await Promise.all([
+      this.frameworkInfoLoaded,
+      this.wsSettled,
+    ]);
+
+    if (!this.ws.authed) {
+      return; // connection lost before auth, handleWSClose has already notified the user
+    }
+
+    if (!this.log.queryResult.isNotAsked()) {
+      this.notification.show('A query was run before live mode was ready, staying in query mode', 'warning', 3000);
+      return;
+    }
+    if (!this.log.isLiveModeAvailable()) {
+      this.notification.show('Live mode is currently unavailable, loaded in query mode', 'danger', 3000);
+      return;
+    }
+
+    this.log.liveStart();
   }
 
   /**
