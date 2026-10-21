@@ -14,6 +14,7 @@
 
 import Observable from './Observable.js';
 import { h } from './renderer.js';
+import { copyToClipboard } from './utilities/clipboard.js';
 import switchCase from './switchCase.js';
 import { iconClipboard, iconCheck, iconCircleX } from './icons.js';
 
@@ -49,11 +50,14 @@ export class Notification extends Observable {
     this.message = '';
     this.type = 'primary';
     this.state = 'hidden'; // Shown, hidden
-    this.hideTimerId = null; // Timer to auto-hide notification
-    this.duration = 5000; // Original duration of the current notification
     this.hovered = false; // Whether the notification is hovered
-    this.copyState = 'idle'; // 'idle' | 'copied' | 'failed' — state for the copy button
+
+    this.hideTimerId = null; // Timer to auto-hide notification
+    this.duration = 5000; // Default duration of the current notification
+
     this.copyTimerId = null; // Timer to reset copyState to 'idle' after copy
+    this.copyDuration = 1500; // How long copyState shows 'copied'/'failed' before resetting to 'idle'
+    this.copyState = 'idle'; // 'idle' | 'copied' | 'failed' - state for the copy button
   }
 
   /**
@@ -76,8 +80,7 @@ export class Notification extends Observable {
     duration = duration || 5000;
 
     // Clear previous message countdowns
-    clearTimeout(this.hideTimerId);
-    clearTimeout(this.copyTimerId);
+    this.clearTimeouts();
 
     this.message = message;
     this.type = type;
@@ -86,26 +89,28 @@ export class Notification extends Observable {
     this.copyState = 'idle';
 
     // Auto-hide after duration
-    if (duration !== Infinity) {
-      this.hideTimerId = setTimeout(() => {
-        if (!this.hovered) {
-          this.hide();
-        }
-      }, duration);
-    }
+    this.startHideTimer();
 
     this.notify();
   }
 
   /**
-   * Set notification as hidden before countdown ends
+   * Clear any active timeout for the currently shown notification.
+   */
+  clearTimeouts() {
+    clearTimeout(this.hideTimerId);
+    clearTimeout(this.copyTimerId);
+  }
+
+  /**
+   * Set notification state to `'hidden'`, copy state to `'idle'` and clear `hovered` before countdown ends
    * (by a click on notification for example)
    */
   hide() {
-    clearTimeout(this.hideTimerId);
-    clearTimeout(this.copyTimerId);
+    this.clearTimeouts();
     this.state = 'hidden';
     this.copyState = 'idle';
+    this.hovered = false;
 
     this.notify();
   }
@@ -120,6 +125,15 @@ export class Notification extends Observable {
       return;
     }
     clearTimeout(this.hideTimerId);
+    this.startHideTimer();
+  }
+
+  /**
+   * Start the auto-hide countdown using the stored duration. The notification is only hidden
+   * when the countdown ends if it is not hovered.
+   * No-op when duration is Infinity.
+   */
+  startHideTimer() {
     if (this.duration !== Infinity) {
       this.hideTimerId = setTimeout(() => {
         if (!this.hovered) {
@@ -130,17 +144,22 @@ export class Notification extends Observable {
   }
 
   /**
-   * Copy the current message to the clipboard and flash `copyState` to `'copied'` for 1.5s.
-   * If the clipboard write rejects, `copyState` flashes to `'failed'` instead.
+   * Copy the current message to the clipboard and flash `copyState` to `'copied'` for `copyDuration` ms.
+   * If the clipboard is unavailable or the write rejects, `copyState` flashes to `'failed'` instead.
    * @return {Promise<void>}
    */
   async copy() {
+    const copiedMessage = this.message;
     let nextState;
     try {
-      await navigator.clipboard.writeText(this.message);
+      await copyToClipboard(copiedMessage);
       nextState = 'copied';
     } catch {
       nextState = 'failed';
+    }
+    // The notification was hidden or replaced while the write was pending
+    if (this.state !== 'shown' || this.message !== copiedMessage) {
+      return;
     }
     clearTimeout(this.copyTimerId);
     this.copyState = nextState;
@@ -148,7 +167,7 @@ export class Notification extends Observable {
     this.copyTimerId = setTimeout(() => {
       this.copyState = 'idle';
       this.notify();
-    }, 1500);
+    }, this.copyDuration);
   }
 }
 
@@ -200,10 +219,7 @@ export const notification = (notificationInstance) => h('.notification.text-no-s
       failed: "Couldn't copy",
       idle: 'Copy to clipboard',
     }),
-    onclick: (e) => {
-      e.stopPropagation();
-      notificationInstance.copy();
-    },
+    onclick: () => notificationInstance.copy(),
   }, switchCase(notificationInstance.copyState, {
     copied: iconCheck(),
     failed: iconCircleX(),
