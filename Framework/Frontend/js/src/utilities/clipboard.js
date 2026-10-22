@@ -17,7 +17,7 @@
 import { isContextSecure } from './browserContext.js';
 
 /**
- * Returns why the clipboard cannot be written to in the current context, if anything prevents it.
+ * Checks the availability of the clipboard and provides a message if it is not accessible.
  * @returns {string|null} A descriptive reason if the clipboard is unavailable, `null` otherwise.
  */
 export const getClipboardUnavailableReason = () => {
