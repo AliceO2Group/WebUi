@@ -193,25 +193,25 @@ export class Notification extends Observable {
 }
 
 /**
- * Shows notification according to `model`. Because of its absolute position it should
+ * Shows notification according to a notification instance. Because of its absolute position it should
  * be placed as first element inside body.
- * @param {Notification} model - instance of Notification
+ * @param {Notification} instance - instance of Notification
  * @return {vnode} - virtual node to render notification
  */
-export const notification = (model) => {
-  const { type, message, copyState, isShown } = model;
+export const notification = (instance) => {
+  const { type, message, copyState, isShown } = instance;
   const { title, icon } = COPY_STATE_VIEW[copyState];
 
   return h('.notification.text-no-select.level4.text-light', h('div.notification-content.br2.shadow-level4', {
     className: `white bg-${type} ${isShown ? 'notification-open' : 'notification-close'}`,
-    onmouseenter: () => model.setHovered(true),
-    onmouseleave: () => model.setHovered(false),
+    onmouseenter: () => instance.setHovered(true),
+    onmouseleave: () => instance.setHovered(false),
   }, [
-    h('div.mh2.pv2', { onclick: () => model.hide() }, message),
+    h('div.mh2.pv2', { onclick: () => instance.hide() }, message),
     h('button.btn.notification-copy-btn', {
       tabIndex: isShown ? 0 : -1,
       title,
-      onclick: () => model.copy(),
+      onclick: () => instance.copy(),
     }, icon()),
   ]));
 };
