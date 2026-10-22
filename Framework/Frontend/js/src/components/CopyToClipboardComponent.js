@@ -14,7 +14,7 @@
 import { StatefulComponent } from './StatefulComponent.js';
 import { iconCheck, iconLinkIntact } from '../icons.js';
 import { h } from '../renderer.js';
-import { isContextSecure } from '../utilities/browserContext.js';
+import { copyToClipboard, getClipboardUnavailableReason } from '../utilities/clipboard.js';
 
 /**
  * Represents a component that allows copying text to the clipboard.
@@ -27,15 +27,8 @@ export class CopyToClipboardComponent extends StatefulComponent {
     super();
     this._successStateTimeout = null;
 
-    this._available = true;
-    this._message = '';
-
-    try {
-      this.checkClipboardAvailability();
-    } catch ({ message: errorMessage }) {
-      this._available = false;
-      this._message = errorMessage;
-    }
+    this._message = getClipboardUnavailableReason() ?? '';
+    this._available = !this._message;
   }
 
   /**
@@ -47,7 +40,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
    */
   async copyToClipboard(clipboardTargetValue, onFailure) {
     try {
-      await navigator.clipboard.writeText(clipboardTargetValue);
+      await copyToClipboard(clipboardTargetValue);
 
       if (this._successStateTimeout) {
         clearTimeout(this._successStateTimeout);
@@ -64,44 +57,6 @@ export class CopyToClipboardComponent extends StatefulComponent {
         onFailure(error);
       }
     }
-  }
-
-  /**
-   * Checks the availability of the clipboard and provides a message if it is not accessible.
-   *
-   * @throws {Error} Throws an error with a descriptive message if the clipboard is not available.
-   * @returns {void}
-   */
-  checkClipboardAvailability() {
-    if (!isContextSecure()) {
-      throw new Error('Clipboard not available in a non-secure context.');
-    }
-
-    if (!this.isClipboardSupported()) {
-      throw new Error('Clipboard API is not supported in this browser.');
-    }
-
-    if (this.isWindowEmbedded()) {
-      throw new Error('Clipboard access is restricted in iframes.');
-    }
-  }
-
-  /**
-   * Checks if the clipboard API is available in the user's browser.
-   *
-   * @returns {boolean} Returns `true` if it is available
-   */
-  isClipboardSupported() {
-    return Boolean(navigator.clipboard);
-  }
-
-  /**
-   * Check if the window is embedded in a frame.
-   *
-   * @returns {boolean} Returns `true` if it is embedded
-   */
-  isWindowEmbedded() {
-    return window !== window.parent;
   }
 
   /**
