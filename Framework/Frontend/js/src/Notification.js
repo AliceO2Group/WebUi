@@ -84,7 +84,7 @@ export class Notification extends Observable {
 
   /**
    * Whether a notification is currently displayed.
-   * @return {boolean}
+   * @return {boolean} - whether the notification is currently shown
    */
   get isShown() {
     return this.state === NOTIFICATION_STATES.SHOWN;
