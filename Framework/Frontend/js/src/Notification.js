@@ -208,7 +208,7 @@ export const notification = (model) => {
     onmouseleave: () => model.setHovered(false),
   }, [
     h('div.mh2.pv2', { onclick: () => model.hide() }, message),
-    h(`button.btn.btn-${type}.notification-copy-btn`, {
+    h('button.btn.notification-copy-btn', {
       tabIndex: isShown ? 0 : -1,
       title,
       onclick: () => model.copy(),
