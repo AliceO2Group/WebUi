@@ -149,6 +149,9 @@ export class Notification extends Observable {
    * @return {Promise<void>}
    */
   async copy() {
+    if (this.state !== 'shown') {
+      return;
+    }
     const copiedMessage = this.message;
     let nextState;
     try {
@@ -214,6 +217,7 @@ export const notification = (notificationInstance) => h('.notification.text-no-s
 }, [
   h('div.mh2.pv2', { onclick: () => notificationInstance.hide() }, notificationInstance.message),
   h(`button.btn.btn-${notificationInstance.type}.notification-copy-btn`, {
+    tabIndex: notificationInstance.state === 'shown' ? 0 : -1,
     title: switchCase(notificationInstance.copyState, {
       copied: 'Copied!',
       failed: "Couldn't copy",
