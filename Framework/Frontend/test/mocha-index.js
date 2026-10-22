@@ -328,7 +328,7 @@ describe('Framework Frontend', function() {
         await page.waitForFunction(() => window.__clipboardText === 'Secret message');
       });
 
-      it('does allow focusing the copy button while hidden', async () => {
+      it('doesn\'t allow focusing the copy button while hidden', async () => {
         await page.evaluate(async () => {
           notificationModel.show('Secret message', 'success', 5000);
           notificationModel.hide();
