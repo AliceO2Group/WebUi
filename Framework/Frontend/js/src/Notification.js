@@ -15,11 +15,32 @@
 import Observable from './Observable.js';
 import { h } from './renderer.js';
 import { copyToClipboard } from './utilities/clipboard.js';
-import switchCase from './switchCase.js';
 import { iconClipboard, iconCheck, iconCircleX } from './icons.js';
 
+const DEFAULT_DURATION_MS = 5000;
+const COPY_FEEDBACK_MS = 1500;
+
+const NOTIFICATION_TYPES = ['danger', 'warning', 'success', 'primary'];
+
+const NOTIFICATION_STATES = {
+  SHOWN: 'shown',
+  HIDDEN: 'hidden',
+};
+
+const COPY_STATES = {
+  IDLE: 'idle',
+  COPIED: 'copied',
+  FAILED: 'failed',
+};
+
+const COPY_STATE_VIEW = {
+  [COPY_STATES.IDLE]: { title: 'Copy to clipboard', icon: iconClipboard },
+  [COPY_STATES.COPIED]: { title: 'Copied!', icon: iconCheck },
+  [COPY_STATES.FAILED]: { title: "Couldn't copy", icon: iconCircleX },
+};
+
 /**
- * Container of notification with time management
+ * Container of notification with time management and copy-to-clipboard.
  * Only 1 notification is handled at once.
  * @extends Observable
  * @example
@@ -49,15 +70,24 @@ export class Notification extends Observable {
 
     this.message = '';
     this.type = 'primary';
-    this.state = 'hidden'; // Shown, hidden
-    this.hovered = false; // Whether the notification is hovered
 
-    this.hideTimerId = null; // Timer to auto-hide notification
-    this.duration = 5000; // Default duration of the current notification
+    this.state = NOTIFICATION_STATES.HIDDEN;
 
+    this.copyState = COPY_STATES.IDLE;
+
+    this.hovered = false;
+    this.duration = DEFAULT_DURATION_MS;
+
+    this.hideTimerId = null;
     this.copyTimerId = null; // Timer to reset copyState to 'idle' after copy
-    this.copyDuration = 1500; // How long copyState shows 'copied'/'failed' before resetting to 'idle'
-    this.copyState = 'idle'; // 'idle' | 'copied' | 'failed' - state for the copy button
+  }
+
+  /**
+   * Whether a notification is currently displayed.
+   * @return {boolean}
+   */
+  get isShown() {
+    return this.state === NOTIFICATION_STATES.SHOWN;
   }
 
   /**
@@ -72,25 +102,19 @@ export class Notification extends Observable {
       return;
     }
 
-    if (type !== 'danger' && type !== 'warning' &&
-        type !== 'success' && type !== 'primary') {
+    if (!NOTIFICATION_TYPES.includes(type)) {
       throw new Error(`Notification type must be danger, warning, success or primary. "${type}" provided`);
     }
 
-    duration = duration || 5000;
-
-    // Clear previous message countdowns
     this.clearTimeouts();
 
     this.message = message;
     this.type = type;
-    this.state = 'shown';
-    this.duration = duration;
-    this.copyState = 'idle';
+    this.duration = duration || DEFAULT_DURATION_MS;
+    this.state = NOTIFICATION_STATES.SHOWN;
+    this.copyState = COPY_STATES.IDLE;
 
-    // Auto-hide after duration
-    this.startHideTimer();
-
+    this.restartHideTimer();
     this.notify();
   }
 
@@ -108,125 +132,86 @@ export class Notification extends Observable {
    */
   hide() {
     this.clearTimeouts();
-    this.state = 'hidden';
-    this.copyState = 'idle';
+    this.state = NOTIFICATION_STATES.HIDDEN;
+    this.copyState = COPY_STATES.IDLE;
     this.hovered = false;
 
     this.notify();
   }
 
   /**
-   * Restart the auto-hide countdown for the currently shown notification, reusing the
-   * stored duration.
+   * Track whether the notification is hovered. Leaving it restarts the auto-hide countdown.
+   * @param {boolean} hovered - whether the pointer is over the notification
+   */
+  setHovered(hovered) {
+    this.hovered = hovered;
+    if (!hovered) {
+      this.restartHideTimer();
+    }
+  }
+
+  /**
+   * (Re)start the auto-hide countdown using the stored duration. The notification is only hidden
+   * when the countdown ends AND it is not hovered.
    * No-op when the notification is hidden or duration is Infinity.
    */
   restartHideTimer() {
-    if (this.state !== 'shown') {
+    clearTimeout(this.hideTimerId);
+    if (!this.isShown || this.duration === Infinity) {
       return;
     }
-    clearTimeout(this.hideTimerId);
-    this.startHideTimer();
+    this.hideTimerId = setTimeout(() => !this.hovered && this.hide(), this.duration);
   }
 
   /**
-   * Start the auto-hide countdown using the stored duration. The notification is only hidden
-   * when the countdown ends if it is not hovered.
-   * No-op when duration is Infinity.
-   */
-  startHideTimer() {
-    if (this.duration !== Infinity) {
-      this.hideTimerId = setTimeout(() => {
-        if (!this.hovered) {
-          this.hide();
-        }
-      }, this.duration);
-    }
-  }
-
-  /**
-   * Copy the current message to the clipboard and flash `copyState` to `'copied'` for `copyDuration` ms.
+   * Copy the current message to the clipboard and flash `copyState` to `'copied'` for `COPY_FEEDBACK_MS` ms.
    * If the clipboard is unavailable or the write rejects, `copyState` flashes to `'failed'` instead.
    * @return {Promise<void>}
    */
   async copy() {
-    if (this.state !== 'shown') {
+    if (!this.isShown) {
       return;
     }
     const copiedMessage = this.message;
-    let nextState;
-    try {
-      await copyToClipboard(copiedMessage);
-      nextState = 'copied';
-    } catch {
-      nextState = 'failed';
-    }
+    const nextState = await copyToClipboard(copiedMessage)
+      .then(() => COPY_STATES.COPIED, () => COPY_STATES.FAILED);
+
     // The notification was hidden or replaced while the write was pending
-    if (this.state !== 'shown' || this.message !== copiedMessage) {
+    if (!this.isShown || this.message !== copiedMessage) {
       return;
     }
+
     clearTimeout(this.copyTimerId);
     this.copyState = nextState;
     this.notify();
+
     this.copyTimerId = setTimeout(() => {
-      this.copyState = 'idle';
+      this.copyState = COPY_STATES.IDLE;
       this.notify();
-    }, this.copyDuration);
+    }, COPY_FEEDBACK_MS);
   }
 }
 
 /**
- * Shows notification according to `notificationInstance`. Because of its absolute position it should
+ * Shows notification according to `model`. Because of its absolute position it should
  * be placed as first element inside body.
- * @param {Notification} notificationInstance - instance of Notification
+ * @param {Notification} model - instance of Notification
  * @return {vnode} - virtual node to render notification
- * @example
- * import {mount, h, Notification, notification} from '../../Frontend/js/src/index.js';
- *
- * const view = (model) => [
- *   notification(model),
- *   h('div.m4', [
- *     h('button', {onclick: () => model.show('An admin has taken lock form you.', 'primary')}, 'Show primary'),
- *     h('button', {onclick: () => model.show('Environment has been created.', 'success')}, 'Show success'),
- *     h('button', {onclick: () => model.show('Unable to create, please check inputs and retry.', 'warning')}, 'Show warning'),
- *     h('button', {onclick: () => model.show('Server connection has been lost.', 'danger')}, 'Show danger'),
- *   ]),
- * ];
- *
- * // Create some basic model
- * const model = new Notification();
- *
- * mount(document.body, view, model, true);
  */
-export const notification = (notificationInstance) => h('.notification.text-no-select.level4.text-light', {
+export const notification = (model) => {
+  const { type, message, copyState, isShown } = model;
+  const { title, icon } = COPY_STATE_VIEW[copyState];
 
-}, h('div.notification-content.br2.shadow-level4', {
-  // ClassName: notificationInstance.message && (notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'),
-  onmouseenter: () => {
-    notificationInstance.hovered = true;
-  },
-  onmouseleave: () => {
-    notificationInstance.hovered = false;
-    notificationInstance.restartHideTimer();
-  },
-  className: `${switchCase(notificationInstance.type, {
-    primary: 'white bg-primary',
-    success: 'white bg-success',
-    warning: 'white bg-warning',
-    danger: 'white bg-danger',
-  })} ${notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'}`,
-}, [
-  h('div.mh2.pv2', { onclick: () => notificationInstance.hide() }, notificationInstance.message),
-  h(`button.btn.btn-${notificationInstance.type}.notification-copy-btn`, {
-    tabIndex: notificationInstance.state === 'shown' ? 0 : -1,
-    title: switchCase(notificationInstance.copyState, {
-      copied: 'Copied!',
-      failed: "Couldn't copy",
-      idle: 'Copy to clipboard',
-    }),
-    onclick: () => notificationInstance.copy(),
-  }, switchCase(notificationInstance.copyState, {
-    copied: iconCheck(),
-    failed: iconCircleX(),
-    idle: iconClipboard(),
-  })),
-]));
+  return h('.notification.text-no-select.level4.text-light', h('div.notification-content.br2.shadow-level4', {
+    className: `white bg-${type} ${isShown ? 'notification-open' : 'notification-close'}`,
+    onmouseenter: () => model.setHovered(true),
+    onmouseleave: () => model.setHovered(false),
+  }, [
+    h('div.mh2.pv2', { onclick: () => model.hide() }, message),
+    h(`button.btn.btn-${type}.notification-copy-btn`, {
+      tabIndex: isShown ? 0 : -1,
+      title,
+      onclick: () => model.copy(),
+    }, icon()),
+  ]));
+};
