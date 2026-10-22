@@ -44,22 +44,25 @@ const COPY_STATE_VIEW = {
  * Only 1 notification is handled at once.
  * @extends Observable
  * @example
- * import {mount, h, Notification, notification} from '../../Frontend/js/src/index.js';
+ * import { mount, h, Observable, Notification, notification } from '@aliceo2/web-ui';
  *
+ * class Model extends Observable {
+ *   constructor() {
+ *     super();
+ *     this.notification = new Notification();
+ *     this.notification.bubbleTo(this);
+ *   }
+ * }
+ *
+ * // Render first inside body
  * const view = (model) => [
- *   notification(model),
+ *   notification(model.notification),
  *   h('div.m4', [
- *     h('button', {onclick: () => model.show('An admin has taken lock form you.', 'primary')}, 'Show primary'),
- *     h('button', {onclick: () => model.show('Environment has been created.', 'success')}, 'Show success'),
- *     h('button', {onclick: () => model.show('Unable to create, please check inputs and retry.', 'warning')}, 'Show warning'),
- *     h('button', {onclick: () => model.show('Server connection has been lost.', 'danger')}, 'Show danger'),
+ *     h('button', { onclick: () => model.notification.show('Environment has been created.', 'success') }, 'Start Environment'),
  *   ]),
  * ];
  *
- * // Create some basic model
- * const model = new Notification();
- *
- * mount(document.body, view, model, true);
+ * mount(document.body, view, new Model(), true);
  */
 export class Notification extends Observable {
   /**
