@@ -106,7 +106,7 @@ Run `npm run docker:cleanup` to remove all containers created by the above and t
 
 Sources live in [src/](src/) and are bundled by [Vite](https://vite.dev/) ([vite.config.mjs](vite.config.mjs)). A lightweight MVC app on top of `@aliceo2/web-ui`.
 
-- **Build & serving** - `npm run build` bundles the frontend into `dist/`, which [index.js](index.js) serves (`npm run mocha` builds first).
+- **Build & serving** - With `NODE_ENV=development` (set by `npm run start:dev` and the docker compose files), [index.js](index.js) serves the frontend through Vite middleware, with hot module reload over a WebSocket on port `5173`. Otherwise it serves the bundle from `dist/`, produced by `npm run build` (`npm run mocha` builds first).
 - **App shell** - [index.html](index.html) bootstraps [src/index.js](src/index.js), which mounts the top-level [Model](src/Model.js) and renders [view.js](src/view.js).
 - **Sub-models** - [log/Log.js](src/log/Log.js) drives the log table (rendering in `tableLogs*.js`, inspector, status bar, context menu, zoom, etc.). [logFilter/LogFilter.js](src/logFilter/LogFilter.js) owns the filter inputs. [table/Table.js](src/table/Table.js) holds shared table state.
 - **Supporting code** - [services/](src/services/), [constants/](src/constants/), [common/](src/common/), [about/](src/about/) (about component).
