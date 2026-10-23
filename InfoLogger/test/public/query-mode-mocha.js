@@ -186,7 +186,7 @@ describe('Query Mode test-suite', async () => {
     before(async () => {
       ({
         TEXT_FILTER_OPERATORS: textFilterOperators,
-      } = await import('../../public/constants/text-filter-operators.const.js'));
+      } = await import('../../src/constants/text-filter-operators.const.js'));
     });
 
     it('should ask for confirmation when no text filters are set and not execute query when user cancels', async () => {
