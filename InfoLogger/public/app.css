@@ -264,3 +264,19 @@ a.disabled { pointer-events: none; cursor: default; }
   flex-direction: column;
   gap: 0.25rem;
 }
+
+.status-number {
+  font-variant-numeric: tabular-nums;
+}
+
+#status-bar {
+  min-height: 1.6em;
+}
+
+#status-bar-application-options { 
+  justify-content: flex-end; 
+}
+
+#status-bar-buffer-dot {
+  margin-right: var(--space-xs);
+}
