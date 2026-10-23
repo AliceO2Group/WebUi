@@ -35,7 +35,7 @@ async function getSeverityCounts(page) {
 }
 
 describe('Status Bar test-suite', async () => {
-  const AUTOSCROLL_SELECTOR = '#status-bar-application-options label[title*="Scroll down"] input';
+  const AUTOSCROLL_SELECTOR = '#status-bar-auto-scroll';
   const INSPECTOR_SELECTOR = '#status-bar-application-options label[title*="Show details"] input';
   const SQL_QUERY = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `severity` IN (?) '
     + 'ORDER BY `TIMESTAMP` LIMIT 100000';
@@ -79,6 +79,7 @@ describe('Status Bar test-suite', async () => {
         window.model.frameworkInfo = RemoteData.success({
           mysql: { host: 'test-host.cern.ch', status: { ok: true } },
           infoLoggerServer: { status: { ok: true } },
+          'infoLogger-gui': { name: 'LOCAL-TEST' },
         });
         window.model.log.activeMode = 'Running';
         window.model.log.liveStartedAt = new Date();
@@ -94,6 +95,7 @@ describe('Status Bar test-suite', async () => {
         window.model.frameworkInfo = RemoteData.success({
           mysql: { host: 'localhost', status: { ok: true } },
           infoLoggerServer: { status: { ok: true } },
+          'infoLogger-gui': { name: 'LOCAL-TEST' },
         });
         window.model.log.activeMode = 'Query';
         window.model.log.liveStartedAt = null;
@@ -317,14 +319,79 @@ describe('Status Bar test-suite', async () => {
   });
 
   describe('Application Options', () => {
-    it('should toggle autoscroll when its checkbox is clicked', async () => {
-      await page.click(AUTOSCROLL_SELECTOR);
+    describe('Autoscroll', () => {
+      describe('in query mode', () => {
+        it('should not display autoscroll option when in MODE.QUERY', async () => {
+          await page.evaluate(() => model.log.liveStop());
+          await page.waitForFunction(
+            (selector) => !document.querySelector(selector),
+            { timeout: 2000 },
+            AUTOSCROLL_SELECTOR,
+          );
+        });
+      });
 
-      const checkedAfter = await page.$eval(AUTOSCROLL_SELECTOR, (el) => el.checked);
-      const autoScrollModelValue = await page.evaluate(() => window.model.log.autoScrollLive);
+      describe('in live mode', () => {
+        beforeEach(async () => {
+          await page.evaluate(() => model.log.liveStop());
+          await page.waitForSelector('#live-button:not([disabled])');
+          await page.click('#live-button');
+          await page.waitForFunction(() => model.log.isLiveModeRunning());
+        });
 
-      assert.strictEqual(autoScrollModelValue, checkedAfter);
-      assert.strictEqual(checkedAfter, true);
+        after(async () => {
+          await page.evaluate(() => model.log.liveStop());
+        });
+
+        it('should not display autoscroll option when in MODE.LIVE.PAUSED', async () => {
+          await page.click('#live-button');
+
+          await page.waitForFunction(
+            (selector) => !document.querySelector(selector),
+            { timeout: 2000 },
+            AUTOSCROLL_SELECTOR,
+          );
+        });
+
+        it('should display autoscroll option when in MODE.LIVE.RUNNING', async () => {
+          await page.waitForSelector(AUTOSCROLL_SELECTOR, { timeout: 2000 });
+        });
+
+        it('should show correct label when autoscroll is enabled', async () => {
+          await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Enabled');
+        });
+
+        it('should show correct label when autoscroll is disabled', async () => {
+          await page.evaluate(() => {
+            model.log.setAutoScrollLive(false);
+          });
+          await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Disabled');
+        });
+
+        it('should disable auto-scroll when clicked whilst auto-scroll is enabled', async () => {
+          await page.evaluate(() => {
+            model.log.setAutoScrollLive(true);
+          });
+          await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Enabled');
+
+          await page.click(AUTOSCROLL_SELECTOR);
+
+          await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Disabled');
+          assert.strictEqual(await page.evaluate(() => model.log.autoScrollLive), false);
+        });
+
+        it('should enable auto-scroll when clicked whilst auto-scroll is disabled', async () => {
+          await page.evaluate(() => {
+            model.log.setAutoScrollLive(false);
+          });
+          await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Disabled');
+
+          await page.click(AUTOSCROLL_SELECTOR);
+
+          await waitForTextInElement(page, AUTOSCROLL_SELECTOR, 'Autoscroll Enabled');
+          assert.strictEqual(await page.evaluate(() => model.log.autoScrollLive), true);
+        });
+      });
     });
 
     it('should toggle inspector when its checkbox is clicked', async () => {

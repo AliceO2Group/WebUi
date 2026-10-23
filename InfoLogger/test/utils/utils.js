@@ -57,8 +57,19 @@ async function waitForTextInElement(page, selector, text) {
   );
 }
 
+/*
+ * A stale element from a previous test can already satisfy a waitForSelector check
+ * before the pending redraw (reflecting the new state) has actually run.
+ * Waiting for two animation frames guarantees the redraw has fired at least once
+ * since the mutation.
+ */
+const waitForNextRender = (page) => page.evaluate(() => new Promise((resolve) => {
+  requestAnimationFrame(() => requestAnimationFrame(resolve));
+}));
+
 module.exports = {
   shuffle,
   injectLogs,
   waitForTextInElement,
+  waitForNextRender,
 };

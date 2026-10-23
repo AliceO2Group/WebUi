@@ -12,11 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
+import { h, iconWarning } from '/js/src/index.js';
 
 /**
  * Bottom bar, showing status of the log's list and its details,
- * some application messages and some basic options like auto-scroll checkbox.
+ * some application messages and some basic options like auto-scroll label/button.
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the bottom bar
  */
@@ -90,24 +90,40 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
   : null;
 
 /**
- * Show some application preferences: auto-scroll and inspector checkboxes
+ * Show some application preferences: inspector checkbox, plus autoscroll whilst live mode is running
  * (could be evolve into a preference panel in the future if more options are added)
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the application options
  */
-const applicationOptions = (model) => [
-  h('label.d-inline', { title: 'Scroll down in live mode on new log incoming' }, h('input', {
-    type: 'checkbox',
-    checked: model.log.autoScrollLive,
-    onchange: () => model.log.toggleAutoScroll(),
-  }), ' Autoscroll'),
-  h('span.mh1'),
-  h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
-    type: 'checkbox',
-    checked: model.inspectorEnabled,
-    onchange: () => model.toggleInspector(),
-  }), ' Inspector'),
-];
+const applicationOptions = (model) => {
+  const { log } = model;
+  const autoScrollEnabled = log.autoScrollLive;
+  return [
+    log.isLiveModeRunning() && [
+      h(
+        `button.btn.btn-sm${autoScrollEnabled ? '.btn-success' : '.btn-warning'}`,
+        {
+          id: 'status-bar-auto-scroll',
+          title: autoScrollEnabled ? 'Click here to disable autoscroll' : 'Click here to re-enable autoscroll',
+          onclick: (e) => {
+            e.currentTarget.blur();
+            log.setAutoScrollLive(!autoScrollEnabled);
+          },
+        },
+        [
+          !autoScrollEnabled && iconWarning(),
+          h('span.d-inline', autoScrollEnabled ? 'Autoscroll Enabled' : 'Autoscroll Disabled'),
+        ],
+      ),
+      h('span.mh1'),
+    ],
+    h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
+      type: 'checkbox',
+      checked: model.inspectorEnabled,
+      onchange: () => model.toggleInspector(),
+    }), ' Inspector'),
+  ];
+};
 
 /**
  * Status for query mode, showing how many logs are really in DB and how much time it took to load it
