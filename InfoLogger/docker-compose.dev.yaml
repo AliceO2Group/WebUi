@@ -11,6 +11,7 @@ services:
 
     ports:
       - "8080:8080"
+      - "5173:5173" # Vite HMR WS
 
     volumes:
       - type: bind
@@ -41,3 +42,8 @@ services:
         read_only: true
         source: ./index.js
         target: /home/node/app/index.js
+        # Use the local Framework source to allow edits from it to come through before it gets released
+      - type: bind
+        read_only: true
+        source: ../Framework
+        target: /home/node/app/node_modules/@aliceo2/web-ui
