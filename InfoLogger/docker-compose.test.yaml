@@ -6,5 +6,9 @@ services:
     
     restart: "no"
 
-    environment:
-      NODE_ENV: development
+    volumes:
+      # Use the local Framework source to allow edits from it to come through before it gets released
+      - type: bind
+        read_only: true
+        source: ../Framework
+        target: /home/node/app/node_modules/@aliceo2/web-ui
