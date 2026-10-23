@@ -16,17 +16,17 @@ import { h, iconWarning } from '/js/src/index.js';
 
 /**
  * Bottom bar, showing status of the log's list and its details,
- * some application messages and some basic options like auto-scroll label/button.
+ * some application messages and some basic options like auto-scroll button.
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the bottom bar
  */
 export default (model) => [
-  h('.flex-row', { id: 'status-bar' }, [
-    h('', { style: 'width:50%' }, statusLogs(model)),
-    h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
+  h('.flex-row.items-center.ph2.mv2.gc3', { id: 'status-bar' }, [
+    h('.flex-grow.flex-wrap.items-center.gc2', { style: 'width:50%' }, statusLogs(model)),
+    model.log.isActiveModeQuery() && h('.flex-grow', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
     h(
-      '.flex-grow.text-right',
-      { id: 'status-bar-application-options' },
+      '.flex-row.flex-grow.items-center.gc3',
+      { id: 'status-bar-application-options', style: 'justify-content: flex-end;' },
       applicationMessage(model),
       applicationOptions(model),
     ),
@@ -115,13 +115,12 @@ const applicationOptions = (model) => {
           h('span.d-inline', autoScrollEnabled ? 'Autoscroll Enabled' : 'Autoscroll Disabled'),
         ],
       ),
-      h('span.mh1'),
     ],
-    h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
+    h('label.flex-row.items-center.g1.m0', { title: 'Show details of selected log' }, h('input', {
       type: 'checkbox',
       checked: model.inspectorEnabled,
       onchange: () => model.toggleInspector(),
-    }), ' Inspector'),
+    }), 'Inspector'),
   ];
 };
 
@@ -149,13 +148,16 @@ const statusLive = (model, frameworkInfo) =>
  */
 const statusStats = (model) => [
   h(
-    'span.ph1',
+    'span',
     {
       id: 'status-bar-buffer-size',
     },
     [
       bufferStatus(model),
-      `${model.log.list.length.toLocaleString('en-US')} / ${model.log.limit.toLocaleString('en-US')} (Buffer size)`,
+      statNumber(model.log.list.length),
+      ' / ',
+      statNumber(model.log.limit),
+      ' (Buffer size)',
     ],
   ),
   model.log.queryResult.match({
@@ -164,12 +166,30 @@ const statusStats = (model) => [
     Success: (result) => statusQuery(model, result),
     Failure: () => null, // notification
   }),
-  h('span.ph1.severity-d', `${model.log.stats.debug} debug`),
-  h('span.ph1.severity-i', `${model.log.stats.info} info`),
-  h('span.ph1.severity-w', `${model.log.stats.warning} warn`),
-  h('span.ph1.severity-e', `${model.log.stats.error} error`),
-  h('span.ph1.severity-f', `${model.log.stats.fatal} fatal`),
+  statLabel(model.log.stats.debug, 'debug'),
+  statLabel(model.log.stats.info, 'info'),
+  statLabel(model.log.stats.warning, 'warn'),
+  statLabel(model.log.stats.error, 'error'),
+  statLabel(model.log.stats.fatal, 'fatal'),
 ];
+
+/**
+ * Number to display in the status bar in a locale aware format
+ * Digits use tabular figures so a count changing without gaining a digit does not shift the status bar
+ * @param {number} value - number to display
+ * @returns {vnode} - view of the number
+ */
+const statNumber = (value) =>
+  h('span.status-number', value.toLocaleString('en-US'));
+
+/**
+ * Label for a specific severity level in the status bar
+ * @param {number} value - number of logs for this severity
+ * @param {string} severity - name of the severity level
+ * @returns {vnode} - view of the severity label
+ */
+const statLabel = (value, severity) =>
+  h(`span.severity-${severity.charAt(0)}`, [statNumber(value), ` ${severity}`]);
 
 const bufferStatus = (model) => {
   let dotClass = 'gray-darker'; // grey - unknown status default
@@ -180,7 +200,7 @@ const bufferStatus = (model) => {
     dotClass = 'success'; // green - limit not reached
   }
 
-  return h(`span.${dotClass}.f7.mh1`, {
+  return h(`span.${dotClass}.f7`, {
     title: model.log.limitReached === null ? 'No query data loaded' :
       model.log.limitReached === true ? 'Limit reached - results may be incomplete' : 'Limit OK',
     id: 'status-bar-buffer-dot',

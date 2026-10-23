@@ -490,6 +490,7 @@ export default class Log extends Observable {
     this.limitReached = null;
     this.resetStats();
     this.queryResult = RemoteData.notAsked(); // empty all data from last query
+    this.statusDropdown = false;
     this.activeMode = MODE.LIVE.RUNNING;
     this.liveStartedAt = new Date();
 
