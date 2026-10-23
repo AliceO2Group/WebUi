@@ -23,6 +23,18 @@ services:
         target: /home/node/app/public
       - type: bind
         read_only: true
+        source: ./src
+        target: /home/node/app/src
+      - type: bind
+        read_only: true
+        source: ./index.html
+        target: /home/node/app/index.html
+      - type: bind
+        read_only: true
+        source: ./vite.config.mjs
+        target: /home/node/app/vite.config.mjs
+      - type: bind
+        read_only: true
         source: ./config.js
         target: /home/node/app/config.js
       - type: bind

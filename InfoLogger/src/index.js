@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import sessionService from '/js/src/sessionService.js';
+import { sessionService } from '/js/src/index.js';
 sessionService.loadAndHideParameters();
 
 // Expose sessionService to interact with it the browser's console
