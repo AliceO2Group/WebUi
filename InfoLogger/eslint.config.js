@@ -25,6 +25,7 @@ module.exports = [
       'tmp/',
       '.nyc_output/',
       'coverage/',
+      'dist/',
       'docker/database/',
     ],
   },
