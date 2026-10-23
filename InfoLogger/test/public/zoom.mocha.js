@@ -36,8 +36,8 @@ describe('Zoom test-suite', async () => {
       });
 
       assert.strictEqual(result.zoomLevel, 1, 'default zoom level should be 1');
-      assert.strictEqual(result.fontSize, '0.7rem', 'default font size should be 0.7rem');
-      assert.strictEqual(result.rowHeight, '0.91rem', 'default row height should be 0.91rem');
+      assert.match(result.fontSize, /^0*\.70*rem$/, 'default font size should be 0.7rem');
+      assert.match(result.rowHeight, /^0*\.910*rem$/, 'default row height should be 0.91rem');
     });
   });
 
@@ -252,8 +252,8 @@ describe('Zoom test-suite', async () => {
       });
 
       assert.strictEqual(result.zoomLevel, 1, 'zoom level should reset to 1');
-      assert.strictEqual(result.fontSize, '0.700rem', 'font size should reset to default');
-      assert.strictEqual(result.rowHeight, '0.910rem', 'row height should reset to default');
+      assert.match(result.fontSize, /^0*\.70*rem$/, 'font size should reset to default');
+      assert.match(result.rowHeight, /^0*\.910*rem$/, 'row height should reset to default');
     });
   });
 

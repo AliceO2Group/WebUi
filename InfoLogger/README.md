@@ -104,12 +104,14 @@ Run `npm run docker:cleanup` to remove all containers created by the above and t
 
 ## Frontend
 
-Static files served from [public/](public/); no build step. A lightweight MVC app on top of `@aliceo2/web-ui`.
+Sources live in [src/](src/) and are bundled by [Vite](https://vite.dev/) ([vite.config.mjs](vite.config.mjs)). A lightweight MVC app on top of `@aliceo2/web-ui`.
 
-- **App shell** - [index.html](public/index.html) bootstraps [index.js](public/index.js), which mounts the top-level [Model](public/Model.js) and renders [view.js](public/view.js).
-- **Sub-models** - [log/Log.js](public/log/Log.js) drives the log table (rendering in `tableLogs*.js`, inspector, status bar, context menu, zoom, etc.). [logFilter/LogFilter.js](public/logFilter/LogFilter.js) owns the filter inputs. [table/Table.js](public/table/Table.js) holds shared table state.
-- **Supporting code** - [services/](public/services/), [constants/](public/constants/), [common/](public/common/), [about/](public/about/) (about component).
-- **Styles** - [app.css](public/app.css), layered on the framework's [bootstrap.css](../Framework/Frontend/css/src/bootstrap.css).
+- **Build & serving** - `npm run build` bundles the frontend into `dist/`, which [index.js](index.js) serves (`npm run mocha` builds first).
+- **App shell** - [index.html](index.html) bootstraps [src/index.js](src/index.js), which mounts the top-level [Model](src/Model.js) and renders [view.js](src/view.js).
+- **Sub-models** - [log/Log.js](src/log/Log.js) drives the log table (rendering in `tableLogs*.js`, inspector, status bar, context menu, zoom, etc.). [logFilter/LogFilter.js](src/logFilter/LogFilter.js) owns the filter inputs. [table/Table.js](src/table/Table.js) holds shared table state.
+- **Supporting code** - [services/](src/services/), [constants/](src/constants/), [common/](src/common/), [about/](src/about/) (about component).
+- **Styles** - [app.css](src/app.css), layered on the framework's [bootstrap.css](../Framework/Frontend/css/src/bootstrap.css).
+- **Static assets** - [public/](public/) holds files copied as-is into the bundle (vendored `moment` / `moment-timezone`).
 
 ## Local Development
 
