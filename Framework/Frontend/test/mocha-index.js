@@ -315,7 +315,7 @@ describe('Framework Frontend', function() {
       it('clicking the message hides the notification', async () => {
         await page.evaluate(() => {
           notificationModel.show('Click me to close', 'primary', 1000);
-          document.querySelector('.notification-content .mh2.pv2').click();
+          document.querySelector('.notification-message').click();
         });
         await page.waitForFunction(() => notificationModel.state === 'hidden');
       });
