@@ -26,7 +26,7 @@ export default (model) => [
     model.log.isActiveModeQuery() && h('.flex-grow', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
     h(
       '.flex-row.flex-grow.items-center.gc3',
-      { id: 'status-bar-application-options', style: 'justify-content: flex-end;' },
+      { id: 'status-bar-application-options' },
       applicationMessage(model),
       applicationOptions(model),
     ),
