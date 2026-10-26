@@ -139,7 +139,11 @@ const statusQuery = (model, result) => `in ${(result.time / 1000).toFixed(2)}s`;
  * @returns {vnode} - the view of the live status
  */
 const statusLive = (model, frameworkInfo) =>
-  [`(Connected to ${frameworkInfo.mysql.host} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`];
+  h('span', [
+    `(Connected to ${frameworkInfo.mysql.host} for `,
+    h('span.status-number', model.timezone.formatDuration(model.log.liveStartedAt)),
+    ')',
+  ]);
 
 /**
  * Status of the log's list (independent of mode): how many global and how many per severity
