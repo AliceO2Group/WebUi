@@ -77,6 +77,7 @@ export class Notification extends Observable {
     this.state = NOTIFICATION_STATES.HIDDEN;
 
     this.copyState = COPY_STATES.IDLE;
+    this.copyError = null;
 
     this.hovered = false;
     this.duration = DEFAULT_DURATION_MS;
@@ -176,8 +177,15 @@ export class Notification extends Observable {
       return;
     }
     const copiedMessage = this.message;
-    const nextState = await copyToClipboard(copiedMessage)
-      .then(() => COPY_STATES.COPIED, () => COPY_STATES.FAILED);
+    let nextState;
+    let copyError = null;
+    try {
+      await copyToClipboard(copiedMessage);
+      nextState = COPY_STATES.COPIED;
+    } catch (err) {
+      nextState = COPY_STATES.FAILED;
+      copyError = err.message;
+    }
 
     // The notification was hidden or replaced while the write was pending
     if (!this.isShown || this.message !== copiedMessage) {
@@ -186,10 +194,12 @@ export class Notification extends Observable {
 
     clearTimeout(this.copyTimerId);
     this.copyState = nextState;
+    this.copyError = copyError;
     this.notify();
 
     this.copyTimerId = setTimeout(() => {
       this.copyState = COPY_STATES.IDLE;
+      this.copyError = null;
       this.notify();
     }, COPY_FEEDBACK_MS);
   }
@@ -220,7 +230,7 @@ export const notification = (instance) => {
     ),
     h('button.btn.notification-copy-btn', {
       tabIndex: isShown ? 0 : -1,
-      title,
+      title: instance.copyError ?? title,
       onclick: () => instance.copy(),
     }, icon()),
   ]));
