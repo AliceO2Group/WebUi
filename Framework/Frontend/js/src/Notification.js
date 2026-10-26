@@ -99,9 +99,9 @@ export class Notification extends Observable {
    * `duration` for `danger` type should be set to Infinity if error is fatal for application (not working until reload)
    * @param {string} message - what to say
    * @param {string} type - how to say (danger, warning, success, primary)
-   * @param {number} duration - optional, how much time to show it (ms), Infinity for unlimited time.
+   * @param {number} [duration=DEFAULT_DURATION_MS] - optional, how much time to show it (ms), Infinity for unlimited time.
    */
-  show(message, type, duration) {
+  show(message, type, duration = DEFAULT_DURATION_MS) {
     if (!message) {
       return;
     }
@@ -114,7 +114,7 @@ export class Notification extends Observable {
 
     this.message = message;
     this.type = type;
-    this.duration = duration || DEFAULT_DURATION_MS;
+    this.duration = duration;
     this.state = NOTIFICATION_STATES.SHOWN;
     this.copyState = COPY_STATES.IDLE;
 
