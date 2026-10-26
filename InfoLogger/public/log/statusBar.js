@@ -22,11 +22,11 @@ import { h, iconWarning } from '/js/src/index.js';
  */
 export default (model) => [
   h('.flex-row.items-center.ph2.mv2.gc3', { id: 'status-bar' }, [
-    h('.flex-grow.flex-wrap.items-center.gc2', { style: 'width:50%' }, statusLogs(model)),
-    model.log.isActiveModeQuery() && h('.flex-grow', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
+    h('.flex-grow.flex-wrap.items-center.gc2', statusLogs(model)),
+    model.log.isActiveModeQuery() && h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
     h(
-      '.flex-row.flex-grow.items-center.gc3',
-      { id: 'status-bar-application-options' },
+      '.flex-row.items-center.gc3',
+      { id: 'status-bar-application-options', style: 'width:20%' },
       applicationMessage(model),
       applicationOptions(model),
     ),
