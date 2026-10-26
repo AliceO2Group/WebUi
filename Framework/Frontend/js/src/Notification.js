@@ -36,7 +36,7 @@ const COPY_STATES = {
 const COPY_STATE_VIEW = {
   [COPY_STATES.IDLE]: { title: 'Copy to clipboard', icon: iconClipboard },
   [COPY_STATES.COPIED]: { title: 'Copied!', icon: iconCheck },
-  [COPY_STATES.FAILED]: { title: "Couldn't copy", icon: iconCircleX },
+  [COPY_STATES.FAILED]: { title: 'Could not copy', icon: iconCircleX },
 };
 
 /**
