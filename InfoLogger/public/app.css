@@ -269,6 +269,9 @@ a.disabled { pointer-events: none; cursor: default; }
   font-variant-numeric: tabular-nums;
 }
 
+/* ensure status bar has a minimum height
+otherwise line-height of text at 1.5em and the height of autoscroll button at 1.6 em might causes height change between
+live mode running and it not. */
 #status-bar {
   min-height: 1.6em;
 }
