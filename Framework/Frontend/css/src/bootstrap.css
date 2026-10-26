@@ -363,6 +363,10 @@ label { display: block; margin-bottom: 0.5em; }
 .notification-close { display: inline-flex; opacity: 0; filter: blur(5em); pointer-events: none;  }
 .btn.notification-copy-btn { border-radius: 0 .25rem .25rem 0; background-color: rgba(0, 0, 0, .15); color: inherit; }
 .btn.notification-copy-btn:hover { background-color: rgba(0, 0, 0, .3); color: inherit; }
+.btn.notification-copy-btn:active { background-color: rgba(0, 0, 0, .22); }
+.notification-message { border-radius: .25rem 0 0 .25rem; }
+.notification-message:hover { background-color: rgba(0, 0, 0, .15); }
+.notification-message:active { background-color: rgba(0, 0, 0, .08); }
 
 /* Basic table */
 

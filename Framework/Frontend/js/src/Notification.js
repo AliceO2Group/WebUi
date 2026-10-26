@@ -210,7 +210,14 @@ export const notification = (instance) => {
     onmouseenter: () => instance.setHovered(true),
     onmouseleave: () => instance.setHovered(false),
   }, [
-    h('div.mh2.pv2', { onclick: () => instance.hide() }, message),
+    h(
+      'div.notification-message.ph2.pv2',
+      {
+        title: 'Click to dismiss',
+        onclick: () => instance.hide(),
+      },
+      message,
+    ),
     h('button.btn.notification-copy-btn', {
       tabIndex: isShown ? 0 : -1,
       title,
