@@ -102,9 +102,10 @@ class QueryService {
     const criteriaString = this._getCriteriaAsString(criteria);
     const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ?;`;
     const queryValues = [...values, limit];
+    const queryAsString = processPreparedSQLStatement(requestRows, values, limit);
     const startTime = Date.now(); // ms
 
-    this._logger.debugMessage(`SQL to execute: ${processPreparedSQLStatement(requestRows, values, limit)}`);
+    this._logger.debugMessage(`SQL to execute: ${queryAsString}`);
 
     let rows = [];
     let connection = null;
@@ -144,7 +145,7 @@ class QueryService {
       count: rows.length,
       limit: limit,
       time: totalTime, // ms
-      queryAsString: this._getSQLQueryAsString(criteriaString, limit),
+      queryAsString,
     };
   }
 
@@ -184,16 +185,6 @@ class QueryService {
    */
   _getCriteriaAsString(criteria) {
     return criteria && criteria.length ? `WHERE ${criteria.join(' AND ')}` : '';
-  }
-
-  /**
-   * Get the SQL Query used as a string
-   * @param {string} criteriaVerbose - criteria as string in SQL format
-   * @param {number} limit - limit of number of messages
-   * @returns {string} - SQL Query as string
-   */
-  _getSQLQueryAsString(criteriaVerbose, limit) {
-    return `SELECT * FROM \`messages\` ${criteriaVerbose} ORDER BY \`TIMESTAMP\` LIMIT ${limit}`;
   }
 
   /**
