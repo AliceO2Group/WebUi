@@ -276,8 +276,8 @@ a.disabled { pointer-events: none; cursor: default; }
   margin-left: 0; /* .btn-sm adds its own margin; spacing comes from the parent's gap */
 }
 
-#status-bar-application-options { 
-  justify-content: flex-end; 
+#status-bar-application-options {
+  justify-content: flex-end;
 }
 
 #status-bar-buffer-dot {
