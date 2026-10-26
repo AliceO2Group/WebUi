@@ -22,12 +22,11 @@ import { h, iconWarning } from '/js/src/index.js';
  */
 export default (model) => [
   h('.flex-row.items-center.ph2.mv2.gc3', { id: 'status-bar' }, [
-    h('.flex-grow.flex-wrap.items-center.gc2', statusLogs(model)),
+    h('.flex-grow.flex-wrap.items-center.gc2', [statusLogs(model), applicationMessage(model)]),
     model.log.isActiveModeQuery() && h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
     h(
       '.flex-row.items-center.gc3',
       { id: 'status-bar-application-options', style: 'width:20%' },
-      applicationMessage(model),
       applicationOptions(model),
     ),
   ]),
@@ -85,7 +84,7 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
   ? h(
     'span.danger',
     { id: 'status-bar-application-message' },
-    `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `,
+    `Application reached more than ${model.log.applicationLimit} logs, please clear if possible`,
   )
   : null;
 
