@@ -26,8 +26,8 @@ async function getSeverityCounts(page) {
     const counts = {};
     const severityLabels = ['d', 'i', 'w', 'e', 'f'];
     severityLabels.forEach((label) => {
-      const el = document.querySelector(`span.ph1.severity-${label}`);
-      const count = Number(el.textContent.trim().split(' ')[0]);
+      const el = document.querySelector(`span.severity-${label} .status-number`);
+      const count = Number(el.textContent.replace(/,/g, ''));
       counts[label.toUpperCase()] = count;
     });
     return counts;
