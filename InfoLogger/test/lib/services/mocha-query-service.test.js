@@ -329,8 +329,9 @@ describe('\'QueryService\' test suite', () => {
     });
 
     it('should successfully return result when filters are provided for querying', async () => {
-      const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? '
-        + 'AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
+      const query = 'SELECT * FROM `messages` WHERE `timestamp`>=\'1563794601.351\' AND `timestamp`<=\'1563794661.354\' '
+        + 'AND `hostname` = \'test\' AND NOT(`hostname` = \'testEx\' AND `hostname` IS NOT NULL) '
+        + 'AND `severity` IN (\'D\',\'W\') ORDER BY `TIMESTAMP` LIMIT 10;';
 
       const sqlDataSource = new QueryService();
       const connection = {

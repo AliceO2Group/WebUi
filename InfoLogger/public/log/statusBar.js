@@ -12,22 +12,21 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
+import { h, iconWarning } from '/js/src/index.js';
 
 /**
  * Bottom bar, showing status of the log's list and its details,
- * some application messages and some basic options like auto-scroll checkbox.
+ * some application messages and some basic options like auto-scroll button.
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the bottom bar
  */
 export default (model) => [
-  h('.flex-row', { id: 'status-bar' }, [
-    h('', { style: 'width:50%' }, statusLogs(model)),
-    h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
+  h('.flex-row.items-center.ph2.mv2.gc3', { id: 'status-bar' }, [
+    h('.flex-grow.flex-wrap.items-center.gc2', [statusLogs(model), applicationMessage(model)]),
+    model.log.isActiveModeQuery() && h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
     h(
-      '.flex-grow.text-right',
-      { id: 'status-bar-application-options' },
-      applicationMessage(model),
+      '.flex-row.items-center.gc3',
+      { id: 'status-bar-application-options', style: 'width:20%' },
       applicationOptions(model),
     ),
   ]),
@@ -85,29 +84,44 @@ const applicationMessage = (model) => model.log.list.length > model.log.applicat
   ? h(
     'span.danger',
     { id: 'status-bar-application-message' },
-    `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `,
+    `Application reached more than ${model.log.applicationLimit} logs, please clear if possible`,
   )
   : null;
 
 /**
- * Show some application preferences: auto-scroll and inspector checkboxes
+ * Show some application preferences: inspector checkbox, plus autoscroll whilst live mode is running
  * (could be evolve into a preference panel in the future if more options are added)
  * @param {Model} model - root model of the application
  * @returns {vnode} - the view of the application options
  */
-const applicationOptions = (model) => [
-  h('label.d-inline', { title: 'Scroll down in live mode on new log incoming' }, h('input', {
-    type: 'checkbox',
-    checked: model.log.autoScrollLive,
-    onchange: () => model.log.toggleAutoScroll(),
-  }), ' Autoscroll'),
-  h('span.mh1'),
-  h('label.d-inline', { title: 'Show details of selected log' }, h('input', {
-    type: 'checkbox',
-    checked: model.inspectorEnabled,
-    onchange: () => model.toggleInspector(),
-  }), ' Inspector'),
-];
+const applicationOptions = (model) => {
+  const { log } = model;
+  const autoScrollEnabled = log.autoScrollLive;
+  return [
+    log.isLiveModeRunning() && [
+      h(
+        `button.btn.btn-sm${autoScrollEnabled ? '.btn-success' : '.btn-warning'}`,
+        {
+          id: 'status-bar-auto-scroll',
+          title: autoScrollEnabled ? 'Click here to disable autoscroll' : 'Click here to re-enable autoscroll',
+          onclick: (e) => {
+            e.currentTarget.blur();
+            log.setAutoScrollLive(!autoScrollEnabled);
+          },
+        },
+        [
+          !autoScrollEnabled && iconWarning(),
+          h('span.d-inline', autoScrollEnabled ? 'Autoscroll Enabled' : 'Autoscroll Disabled'),
+        ],
+      ),
+    ],
+    h('label.flex-row.items-center.g1.m0', { title: 'Show details of selected log' }, h('input', {
+      type: 'checkbox',
+      checked: model.inspectorEnabled,
+      onchange: () => model.toggleInspector(),
+    }), 'Inspector'),
+  ];
+};
 
 /**
  * Status for query mode, showing how many logs are really in DB and how much time it took to load it
@@ -124,7 +138,11 @@ const statusQuery = (model, result) => `in ${(result.time / 1000).toFixed(2)}s`;
  * @returns {vnode} - the view of the live status
  */
 const statusLive = (model, frameworkInfo) =>
-  [`(Connected to ${frameworkInfo.mysql.host} for ${model.timezone.formatDuration(model.log.liveStartedAt)})`];
+  h('span', [
+    `(Connected to ${frameworkInfo.mysql.host} for `,
+    h('span.status-number', model.timezone.formatDuration(model.log.liveStartedAt)),
+    ')',
+  ]);
 
 /**
  * Status of the log's list (independent of mode): how many global and how many per severity
@@ -133,13 +151,16 @@ const statusLive = (model, frameworkInfo) =>
  */
 const statusStats = (model) => [
   h(
-    'span.ph1',
+    'span',
     {
       id: 'status-bar-buffer-size',
     },
     [
       bufferStatus(model),
-      `${model.log.list.length.toLocaleString('en-US')} / ${model.log.limit.toLocaleString('en-US')} (Buffer size)`,
+      statNumber(model.log.list.length),
+      ' / ',
+      statNumber(model.log.limit),
+      ' (Buffer size)',
     ],
   ),
   model.log.queryResult.match({
@@ -148,12 +169,30 @@ const statusStats = (model) => [
     Success: (result) => statusQuery(model, result),
     Failure: () => null, // notification
   }),
-  h('span.ph1.severity-d', `${model.log.stats.debug} debug`),
-  h('span.ph1.severity-i', `${model.log.stats.info} info`),
-  h('span.ph1.severity-w', `${model.log.stats.warning} warn`),
-  h('span.ph1.severity-e', `${model.log.stats.error} error`),
-  h('span.ph1.severity-f', `${model.log.stats.fatal} fatal`),
+  statLabel(model.log.stats.debug, 'debug'),
+  statLabel(model.log.stats.info, 'info'),
+  statLabel(model.log.stats.warning, 'warn'),
+  statLabel(model.log.stats.error, 'error'),
+  statLabel(model.log.stats.fatal, 'fatal'),
 ];
+
+/**
+ * Number to display in the status bar in a locale aware format
+ * Digits use tabular figures so a count changing without gaining a digit does not shift the status bar
+ * @param {number} value - number to display
+ * @returns {vnode} - view of the number
+ */
+const statNumber = (value) =>
+  h('span.status-number', value.toLocaleString('en-US'));
+
+/**
+ * Label for a specific severity level in the status bar
+ * @param {number} value - number of logs for this severity
+ * @param {string} severity - name of the severity level
+ * @returns {vnode} - view of the severity label
+ */
+const statLabel = (value, severity) =>
+  h(`span.severity-${severity.charAt(0)}`, [statNumber(value), ` ${severity}`]);
 
 const bufferStatus = (model) => {
   let dotClass = 'gray-darker'; // grey - unknown status default
@@ -164,7 +203,7 @@ const bufferStatus = (model) => {
     dotClass = 'success'; // green - limit not reached
   }
 
-  return h(`span.${dotClass}.f7.mh1`, {
+  return h(`span.${dotClass}.f7`, {
     title: model.log.limitReached === null ? 'No query data loaded' :
       model.log.limitReached === true ? 'Limit reached - results may be incomplete' : 'Limit OK',
     id: 'status-bar-buffer-dot',

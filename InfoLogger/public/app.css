@@ -264,3 +264,22 @@ a.disabled { pointer-events: none; cursor: default; }
   flex-direction: column;
   gap: 0.25rem;
 }
+
+.status-number {
+  font-variant-numeric: tabular-nums;
+}
+
+/* match the 1.5em text line height so the status bar does not change height when the button appears in a running live mode */
+#status-bar-auto-scroll {
+  padding-block: 0;
+  line-height: 1.5;
+  margin-left: 0; /* .btn-sm adds its own margin; spacing comes from the parent's gap */
+}
+
+#status-bar-application-options {
+  justify-content: flex-end;
+}
+
+#status-bar-buffer-dot {
+  margin-right: var(--space-xs);
+}

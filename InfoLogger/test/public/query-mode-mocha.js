@@ -51,8 +51,8 @@ const setupQueryTestState = (page) =>
     window.confirm = () => true;
     window.model.frameworkInfo = {
       isSuccess: () => true,
-      payload: { mysql: { status: { ok: true } } },
-      match: ({ Success }) => Success({ mysql: { status: { ok: true } } }),
+      payload: { mysql: { status: { ok: true } }, 'infoLogger-gui': { name: 'LOCAL-TEST' } },
+      match: ({ Success }) => Success({ mysql: { status: { ok: true } }, 'infoLogger-gui': { name: 'LOCAL-TEST' } }),
     };
     window.model.log.filter.resetCriteria();
     window.model.log.empty();
@@ -95,14 +95,14 @@ const runQueryWithMocks = (page, { confirmReturn, textFilterOperator }) =>
       postCalls += 1;
       return { ok: true,
         status: 200,
-        json: async () => [] };
+        json: async () => ({ rows: [], count: 0 }) };
     };
 
     // Mock the frameworkInfo to make the query method think the query service is available in its check
     window.model.frameworkInfo = {
       isSuccess: () => true,
-      payload: { mysql: { status: { ok: true } } },
-      match: ({ Success }) => Success({ mysql: { status: { ok: true } } }),
+      payload: { mysql: { status: { ok: true } }, 'infoLogger-gui': { name: 'LOCAL-TEST' } },
+      match: ({ Success }) => Success({ mysql: { status: { ok: true } }, 'infoLogger-gui': { name: 'LOCAL-TEST' } }),
     };
 
     // Default state of filters includes no text filters
@@ -125,10 +125,9 @@ const runQueryWithMocks = (page, { confirmReturn, textFilterOperator }) =>
   });
 
 describe('Query Mode test-suite', async () => {
-  let page;
-
+  let page = null;
   before(async () => {
-    page = test.page;
+    ({ page } = test);
   });
 
   it('should fail because it is not configured', async () => {
@@ -138,6 +137,16 @@ describe('Query Mode test-suite', async () => {
     } catch (e) {
       // code failed, so it is a successful test
     }
+  });
+
+  it('should show correct browser tab title', async () => {
+    await page.evaluate(() => {
+      document.title = 'stale';
+    });
+
+    await runQueryWithMocks(page, { confirmReturn: true });
+
+    await page.waitForFunction(() => document.title === 'ILG - LOCAL-TEST QUERY', { timeout: 1000 });
   });
 
   it('should copy multiple rows in the correct format', async () => {

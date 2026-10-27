@@ -39,11 +39,11 @@
     "index.js"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.11.0",
-    "joi": "18.2.6",
+    "@aliceo2/web-ui": "2.12.0",
+    "joi": "18.3.0",
     "jsroot": "7.11.0",
     "kafkajs": "2.2.4",
-    "mariadb": "3.5.3",
+    "mariadb": "3.5.4",
     "sequelize": "6.37.8",
     "umzug": "3.8.2"
   },

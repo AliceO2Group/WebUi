@@ -27,6 +27,7 @@ export { documentClickTaggedEventRegistry } from './utilities/documentClickTagge
 export { buildUrl } from './utilities/buildUrl.js';
 export { parseUrlParameters } from './utilities/parseUrlParameters.js';
 export { isContextSecure } from './utilities/browserContext.js';
+export { copyToClipboard, getClipboardUnavailableReason } from './utilities/clipboard.js';
 
 // Formatters
 export { formatTimeDuration } from './formatter/formatTimeDuration.js';
