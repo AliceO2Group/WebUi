@@ -16,11 +16,13 @@ process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
 const assert = require('assert');
+const sinon = require('sinon');
 const path = require('path');
 const url = require('url');
 const config = require('./../config-default.json');
 const O2TokenService = require('./../services/O2TokenService.js');
 const HttpServer = require('./../http/server');
+const OpenId = require('./../http/openid.js');
 const { parseUrlParameters } = require('../http/parseUrlParameters.js');
 const { buildUrl } = require('../http/buildUrl.js');
 
@@ -283,7 +285,8 @@ describe('HTTP server', () => {
 describe('HTTP constructor checks', () => {
   let httpServer;
   afterEach(async () => {
-    await httpServer.close();
+    await httpServer?.close();
+    httpServer = null;
   });
   it('should succesfully add default limit for request body size to 100kb', async () => {
     httpServer = new HttpServer(config.http, config.jwt);
@@ -294,6 +297,34 @@ describe('HTTP constructor checks', () => {
     conf.limit = '10Mb';
     httpServer = new HttpServer(conf, config.jwt);
     assert.strictEqual(httpServer.limit, '10Mb', 'Provided limit was not set');
+  });
+  it('should default apiAuth to false', () => {
+    httpServer = new HttpServer(config.http, config.jwt);
+    assert.strictEqual(httpServer.apiAuth, false);
+  });
+  it('should enable apiAuth when passed as true', () => {
+    httpServer = new HttpServer({ ...config.http, apiAuth: true }, config.jwt);
+    assert.strictEqual(httpServer.apiAuth, true);
+  });
+
+  describe('with OpenID mocked', () => {
+    // Skip issuer as it'll exit the process if the well-known endpoint is unreachable
+    before(() => sinon.stub(OpenId.prototype, 'createIssuer').resolves());
+    after(() => sinon.restore());
+
+    it('should throw when apiAuth is enabled but api_redirect_uri is missing', () => {
+      const openIdConf = { ...config.openId, api_redirect_uri: undefined };
+      assert.throws(
+        () => new HttpServer({ ...config.http, apiAuth: true }, config.jwt, openIdConf),
+        /Missing config value: api_redirect_uri/,
+      );
+    });
+    it('should not throw when apiAuth is enabled and api_redirect_uri is provided', () => {
+      const openIdConf = { ...config.openId, api_redirect_uri: 'http://localhost/api/auth/callback' };
+      assert.doesNotThrow(() => {
+        httpServer = new HttpServer({ ...config.http, apiAuth: true }, config.jwt, openIdConf);
+      });
+    });
   });
 });
 
