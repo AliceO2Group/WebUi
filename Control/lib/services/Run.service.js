@@ -136,10 +136,10 @@ class RunService {
       const calibrationMappings = await this._apricotService.getRuntimeEntryByComponent(COG, CALIBRATION_MAPPING);
       return JSON.parse(calibrationMappings);
     } catch (error) {
-      const err = grpcErrorToNativeError(error);
-      this._logger.errorMessage(`Unable to load calibration mapping due to: ${err}`,
+      const nativeError = error instanceof Error ? error : grpcErrorToNativeError(error);
+      this._logger.errorMessage(`Unable to load calibration mapping due to: ${nativeError.message}`,
         {level: LogLevel.OPERATIONS, system: 'GUI', facility: 'calibration-service'}
-      )
+      );
     }
     return {};
   }

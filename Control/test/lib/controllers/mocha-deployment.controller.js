@@ -179,4 +179,128 @@ describe('DeploymentController test suite', function() {
       assert.ok(res.json.calledWith({ message: 'Environment deployment failure acknowledged' }));
     });
   });
+
+  describe('newAsyncDeploymentCalibrationHandler - tests', function() {
+    let mockEnvService;
+
+    beforeEach(function() {
+      mockWorkflowService.retrieveWorkflowSavedConfiguration = sinon.stub();
+      mockEnvService = { newAutoEnvironment: sinon.stub() };
+      deploymentController._envService = mockEnvService;
+      req.body = {};
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub()
+      };
+    });
+
+    it('should return 400 if detectors list is empty', async function() {
+      req.body = { detectors: [], configurationName: 'test-config' };
+      await deploymentController.newAsyncDeploymentCalibrationHandler(req, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({
+        message: 'Exactly one detector must be specified for deployment',
+        status: 400,
+        title: 'Invalid Input'
+      }));
+    });
+
+    it('should return 400 if more than one detector is provided', async function() {
+      req.body = { detectors: ['DET1', 'DET2'], configurationName: 'test-config' };
+      await deploymentController.newAsyncDeploymentCalibrationHandler(req, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({
+        message: 'Exactly one detector must be specified for deployment',
+        status: 400,
+        title: 'Invalid Input'
+      }));
+    });
+
+    it('should return 400 if configurationName is missing', async function() {
+      req.body = { detectors: ['DET1'] };
+      await deploymentController.newAsyncDeploymentCalibrationHandler(req, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({
+        message: 'Missing Configuration Name for deployment',
+        status: 400,
+        title: 'Invalid Input'
+      }));
+    });
+
+    it('should return error when retrieveWorkflowSavedConfiguration rejects', async function() {
+      req.body = { detectors: ['DET1'], configurationName: 'test-config' };
+      mockWorkflowService.retrieveWorkflowSavedConfiguration.rejects(new Error('Configuration not found'));
+      await deploymentController.newAsyncDeploymentCalibrationHandler(req, res);
+      assert.ok(res.status.calledWith(500));
+      assert.ok(res.json.calledWith({
+        message: 'Configuration not found',
+        status: 500,
+        title: 'Unknown Error'
+      }));
+    });
+
+    it('should return 400 when no variables found in the saved configuration', async function() {
+      req.body = { detectors: ['DET1'], configurationName: 'test-config' };
+      mockWorkflowService.retrieveWorkflowSavedConfiguration.resolves({ variables: null });
+      await deploymentController.newAsyncDeploymentCalibrationHandler(req, res);
+      assert.ok(res.status.calledWith(400));
+      assert.ok(res.json.calledWith({
+        message: 'No configuration variables found for test-config',
+        status: 400,
+        title: 'Invalid Input'
+      }));
+    });
+
+    it('should return error when getDefaultTemplateSource rejects', async function() {
+      req.body = { detectors: ['DET1'], configurationName: 'test-config' };
+      mockWorkflowService.retrieveWorkflowSavedConfiguration.resolves({ variables: { key: 'val' } });
+      mockWorkflowService.getDefaultTemplateSource.rejects(new Error('Template source unavailable'));
+      await deploymentController.newAsyncDeploymentCalibrationHandler(req, res);
+      assert.ok(res.status.calledWith(500));
+      assert.ok(res.json.calledWith({
+        message: 'Template source unavailable',
+        status: 500,
+        title: 'Unknown Error'
+      }));
+    });
+
+    it('should return error when environment deployment fails', async function() {
+      req.body = { detectors: ['DET1'], configurationName: 'test-config', runType: 'PHYSICS' };
+      mockWorkflowService.retrieveWorkflowSavedConfiguration.resolves({ variables: { key: 'val' } });
+      mockWorkflowService.getDefaultTemplateSource.resolves({ template: 'readout', repository: 'repo', revision: '1.0' });
+      mockEnvService.newAutoEnvironment.rejects(new Error('Deployment failed'));
+      await deploymentController.newAsyncDeploymentCalibrationHandler(req, res);
+      assert.ok(res.status.calledWith(500));
+      assert.ok(res.json.calledWith({
+        message: 'Deployment failed',
+        status: 500,
+        title: 'Unknown Error'
+      }));
+    });
+
+    it('should successfully deploy calibration environment and return 200', async function() {
+      const variables = { key: 'val' };
+      const template = 'readout';
+      const repository = 'repo';
+      const revision = '1.0';
+      const configurationName = 'test-config';
+      const detector = 'DET1';
+      const runType = 'PHYSICS';
+
+      req.body = { detectors: [detector], configurationName, runType };
+      mockWorkflowService.retrieveWorkflowSavedConfiguration.resolves({ variables });
+      mockWorkflowService.getDefaultTemplateSource.resolves({ template, repository, revision });
+      mockEnvService.newAutoEnvironment.resolves({ id: 'env123' });
+
+      await deploymentController.newAsyncDeploymentCalibrationHandler(req, res);
+
+      assert.ok(mockEnvService.newAutoEnvironment.calledOnce);
+      assert.strictEqual(mockEnvService.newAutoEnvironment.firstCall.args[0], `${repository}/workflows/${template}@${revision}`);
+      assert.deepStrictEqual(mockEnvService.newAutoEnvironment.firstCall.args[1], variables);
+      assert.strictEqual(mockEnvService.newAutoEnvironment.firstCall.args[2], detector);
+      assert.strictEqual(mockEnvService.newAutoEnvironment.firstCall.args[3], runType);
+      assert.ok(res.status.calledWith(200));
+      assert.ok(res.json.calledWith({ id: 'env123' }));
+    });
+  });
 });
