@@ -9,7 +9,7 @@
 #### Instance
 ```js
 const {HttpServer} = require('@aliceo2/web-ui');
-HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT, autoListen: AUTO_LISTEN}, JWT_CONF, OPENID_CONF);
+HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT, autoListen: AUTO_LISTEN, limit: LIMIT, apiAuth: API_AUTH}, JWT_CONF, OPENID_CONF);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:
@@ -21,6 +21,7 @@ Where:
      * [`TLS_CERT`] - certificate filepath, TLS must be enabled
      * [`AUTO_LISTEN`] - flag that enables/disables automatic listening (default: `true`)
      * [`LIMIT`] - controls the maximum request body size. Defaults to '100kb'. 
+     * [`API_AUTH`] - flag that enables/disables the `/api/auth` routes, `OPENID_CONF` must then set `api_redirect_uri` (default: `false`)
  * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)
 
