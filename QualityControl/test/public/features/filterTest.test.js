@@ -137,7 +137,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
   );
 
   await testParent.test('not filtering by run number should not display any run information', { timeout }, async () => {
-    await page.locator('#runNumberFilter').fill('Backspace');
+    await page.locator('#runNumberFilter').fill('');
     await page.locator('#triggerFilterButton').click();
     await delay(100);
 
