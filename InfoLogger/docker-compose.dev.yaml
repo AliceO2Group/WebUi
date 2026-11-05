@@ -1,0 +1,31 @@
+name: infologger-dev
+services:
+  application:
+    build:
+      target: development
+
+    restart: "no"
+
+    environment:
+      NODE_ENV: development
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - type: bind
+        read_only: true
+        source: ./lib
+        target: /home/node/app/lib
+      - type: bind
+        read_only: true
+        source: ./public
+        target: /home/node/app/public
+      - type: bind
+        read_only: true
+        source: ./config.js
+        target: /home/node/app/config.js
+      - type: bind
+        read_only: true
+        source: ./index.js
+        target: /home/node/app/index.js

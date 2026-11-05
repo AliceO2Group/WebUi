@@ -11,6 +11,8 @@
   - [Interface User Guide](#interface-user-guide)
   - [Requirements](#requirements)
   - [Project Layout](#project-layout)
+  - [Scripts](#scripts)
+    - [Docker development](#docker-development)
   - [Backend](#backend)
   - [Frontend](#frontend)
   - [Local Development](#local-development)
@@ -55,12 +57,41 @@ Screenshot of the current interface, running locally against a fake InfoLoggerSe
 ## Requirements
 
 - `nodejs` >= `22.x`
+- Docker/Docker Compose
 - InfoLogger MariaDB database for Query mode
 - InfoLoggerServer endpoint for Live mode
 
 ## Project Layout
 
 ILG is a Node.js API Gateway and Single-Page Application built on top of the `@aliceo2/web-ui` framework. It serves as a unified interface to two separate operational backends: a **MariaDB database** for historical queries and an **InfoLoggerServer TCP endpoint** for live log streaming.
+## Scripts
+| Script | Description |
+| --- | --- |
+| `npm start` | Run the app (`node index.js`). |
+| `npm run lint` | Lint the project with ESLint. |
+| `npm run lint:fix` | Lint and automatically fix fixable problems. |
+| `npm test` | Run the linter, then the Mocha test suite. |
+| `npm run coverage` | Run the test suite under `nyc` and generate the coverage report. |
+| `npm run coverage:report` | Generate HTML + JSON coverage reports under `coverage/` from the last run. |
+
+Docker commands (`docker:dev`, `docker:dev:local-ilg`, `docker:dev:local-db`, `docker:dev:local-both`, `docker:test` and `docker:cleanup`) are documented under [Docker development](#docker-development).
+
+### Docker development
+
+The development image is approx. 500MB and the test image is approx 1.5GB, about 50% of that is due to puppeteer's chromium requirement.
+
+`database` and `simulator` each live in their own Compose override file, so they only start when you ask for them. Rather than stacking `-f` flags by hand, use one of:
+
+| Script | Compose files (on top of `docker-compose.yaml`) | Application | Database | Simulator |
+| --- | --- | --- | --- | --- |
+| `npm run docker:dev` | `dev` | ✅ | ❌ | ❌ |
+| `npm run docker:dev:local-ilg` | `dev` + `dev.ilg` | ✅ | ❌ | ✅ |
+| `npm run docker:dev:local-db` | `dev` + `dev.db` | ✅ | ✅ | ❌ |
+| `npm run docker:dev:local-both` | `dev` + `dev.db` + `dev.ilg` | ✅ | ✅ | ✅ |
+
+For services with a cross, point `config.js` at a remote host and port and change the credentials accordingly. For services with a checkmark, the script will start a local container for you.
+
+Run `npm run docker:cleanup` to remove all containers created by the above and their data.
 
 ## Backend
 
@@ -93,72 +124,38 @@ cp config-default.js config.js
 
 Edit `config.js` for the setup you're using below.
 
-`npm run dev` runs the backend under nodemon. The frontend has no hot reload - refresh the browser to pick up changes.
-
 ### Query & Live mode Against a remote backend (e.g. a staging instance)
 
-1. Point `mysql` and `infoLoggerServer` in `config.js` at the remote host and port.
-2. `npm start`, then open [http://localhost:8080](http://localhost:8080).
+1. Point `mysql` and `infoLoggerServer` in `config.js` at a remote host and port. Ask your team for the correct values if you don't have them.
+2. `npm run docker:dev`, then open [http://localhost:8080](http://localhost:8080).
 
 ### Live mode against synthetic logs (thoroughly test Live mode)
 
-The bundled [fake InfoLoggerServer](test/live-simulator/) emits a log every 0-100 ms, shuffling through [test/live-simulator/fakeData.json](test/live-simulator/fakeData.json).
+The bundled [fake InfoLoggerServer](test/live-simulator/) emits a log every 0-100 ms, shuffling through [test/fake-data/fakeData.json](test/fake-data/fakeData.json).
 
-1. Set `infoLoggerServer` in `config.js` to `localhost:6102`.
-2. Terminal 1: `npm run simul`.
-3. Terminal 2: `npm run dev`.
-4. Open [http://localhost:8080](http://localhost:8080) and click **Live**.
+1. Point `infoLoggerServer` in `config.js` at `simulator`.
+2. `npm run docker:dev:local-ilg`.
+3. Open [http://localhost:8080](http://localhost:8080) and click **Live**.
 
 ### Query against a local DB
 
-Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+1. Point `mysql` in `config.js` at `database`.
+2. `npm run docker:dev:local-db`.
+3. Open [http://localhost:8080](http://localhost:8080) and click **Query**.
 
-1. In a working dir, create `compose.yaml`:
+The schema in [test/db/INFOLOGGER.sql](test/db/INFOLOGGER.sql) is applied once, when the database volume is
+first created. The `seeder` service then runs [test/db/seed-messages.js](test/db/seed-messages.js) on **every**
+`up`: it inserts a batch of messages if the table is empty, or re-dates the existing messages to keep them within the N many days specified in `seed-messages.js`. The seeder is idempotent, so you can run `docker compose up` repeatedly without accumulating duplicate messages. You only need to run 'npm run docker:cleanup' to remove the database volume if you have made changes to the schema or the seeder.
 
-   ```yaml
-   services:
-     mariadb:
-       image: mariadb
-       restart: unless-stopped
-       ports: ['3306:3306']
-       environment:
-         MARIADB_ROOT_PASSWORD: root # this is just an example, not intended to be a production configuration
-     phpmyadmin:
-       image: phpmyadmin
-       restart: unless-stopped
-       ports: ['9090:80']
-       environment:
-         - PMA_HOST=mariadb
-   ```
-
-   Gives you a MariaDB server with phpMyAdmin on the latest image. Pin a specific version (e.g. `mariadb:11.5`) by changing the `image:` tag.
-
-2. `docker compose up -d`.
-3. Open [http://localhost:9090/](http://localhost:9090/) → log in `root` / `root` → **New** → create database `INFOLOGGER`.
-4. Open the **SQL** tab, paste [docs/database-specs.sql](docs/database-specs.sql), click **Go**.
-5. In `config.js`:
-
-   ```js
-   mysql: {
-     host: '127.0.0.1', 
-     user: 'root',
-     password: 'root',
-     database: 'INFOLOGGER',
-     port: 3306,
-     timeout: 60000,
-     retryMs: 5000,
-   },
-   ```
-
-6. `npm run dev` - startup should log `Connection to DB successfully established: 127.0.0.1:3306`.
+Need both at once? `npm run docker:dev:local-both` starts the simulator and the local DB together.
 
 ## Testing
 
-- `npm test` - eslint + mocha. `npm run mocha` runs the suite alone.
+- `npm run docker:test` - eslint + mocha.
   - Backend tests: [test/lib/](test/lib).
   - Frontend tests: [test/public/](test/public).
   - Add or update the matching test when fixing a bug.
-- `npm run eslint` - config in [eslint.config.js](eslint.config.js). Lint failures block CI.
+- Lint failures block CI.
 
 ### Integration tests (live elsewhere)
 

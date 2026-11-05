@@ -28,7 +28,7 @@ module.exports = {
   // optional data source, comment object if not used
   // all options: https://github.com/mysqljs/mysql#connection-options
   mysql: {
-    host: '127.0.0.1',
+    host: process.env.mariadb_host ?? 'database',
     user: 'root',
     password: 'root',
     database: 'INFOLOGGER',
@@ -40,7 +40,7 @@ module.exports = {
   // optional data source, comment object if not used
   // all options: https://nodejs.org/api/net.html#net_socket_connect_options_connectlistener
   infoLoggerServer: {
-    host: 'localhost',
+    host: process.env.infologger_host ?? 'simulator',
     port: 6102,
   },
   logging: {
