@@ -34,6 +34,7 @@ class HttpServer {
   /**
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
    * @param {object} httpConfig - configuration of HTTP server
+   * @param {boolean} [httpConfig.apiAuth=false] - whether API authentication is enabled
    * @param {object} [jwtConfig] - configuration of JWT
    * @param {object} [connectIdConfig] - configuration of OpenID Connect
    */
@@ -43,6 +44,7 @@ class HttpServer {
     httpConfig.tls = !httpConfig.tls ? false : httpConfig.tls;
     httpConfig.hostname = !httpConfig.hostname ? 'localhost' : httpConfig.hostname;
     this.limit = !httpConfig.limit ? '100kb' : httpConfig.limit;
+    this.apiAuth = Boolean(httpConfig.apiAuth);
 
     this.app = express();
 
@@ -54,6 +56,7 @@ class HttpServer {
 
     this.o2TokenService = new O2TokenService(jwtConfig);
     if (connectIdConfig) {
+      assert(!this.apiAuth || connectIdConfig.api_redirect_uri, 'Missing config value: api_redirect_uri');
       this.openid = new OpenId(connectIdConfig);
       this.openid.createIssuer().catch(() => process.exit(1));
       this.ipAddressWhitelist = !connectIdConfig.sa_whitelist ? '127.0.0.1' : connectIdConfig.sa_whitelist;

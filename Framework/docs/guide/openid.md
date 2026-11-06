@@ -5,13 +5,14 @@ It defines how to handle service accounts.
 
 ### Instance
 ```js
-new OpenId({secret: SECRET, id: ID, redirect_uri: REDIRECT_URI, well_known: WELL_KNOWN[, timeout: TIMEOUT, sa_whitelist: SA_WHITELIST, sa_role: SA_ROLE]});
+new OpenId({secret: SECRET, id: ID, redirect_uri: REDIRECT_URI, well_known: WELL_KNOWN[, api_redirect_uri: API_REDIRECT_URI, timeout: TIMEOUT, sa_whitelist: SA_WHITELIST, sa_role: SA_ROLE]});
 ```
 Where:
    * `SECRET` - Application secret
    * `ID` - Application ID
    * `REDIRECT_URI` - Authentication callback
    * `WELL_KNOWN` - So-called "well-known" endpoint defining OpenID configuration
+   * [`API_REDIRECT_URI`] - API authentication callback, required when HTTP server's `apiAuth` is enabled
    * [`TIMEOUT`] - OpenID timeout in milliseconds
    * [`SA_WHITELIST`] - IP address range to accept service accounts from
    * [`SA_ROLE`] - OpenID role that service account needs to access
