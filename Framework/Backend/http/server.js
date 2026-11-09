@@ -486,10 +486,8 @@ class HttpServer {
       // Read back user params from state
       const userQuery = JSON.parse(Buffer.from(req.query.state, 'base64').toString('ascii'));
 
-      // Concatenates with user query
-      Object.assign(query, userQuery);
-
-      res.redirect(buildUrl('/', query));
+      // Concatenates with user query; authentication parameters go last so the user query cannot override them
+      res.redirect(buildUrl('/', { ...userQuery, ...query }));
     }).catch((reason) => {
       this.logger.errorMessage(`OpenId failed: ${reason}`);
       res.status(401).send('OpenId failed');
