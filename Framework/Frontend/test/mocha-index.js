@@ -386,13 +386,24 @@ describe('Framework Frontend', function() {
 
     it('should redirect to the login without a token and come back with a new session', async () => {
       const navigation = loginPage.waitForNavigation({waitUntil: 'networkidle0'});
-      const {loaded, session} = await loginPage.evaluate(() => {
+      // The redirect destroys this page's context, so the result is kept in sessionStorage, which survives it
+      await loginPage.evaluate(() => {
         history.replaceState({}, '', '/?personid=9&q=HelloTest');
         const service = new window.sessionService.constructor();
         const loaded = service.loadAndHideParameters({loginUrl: '/api/login'});
-        return {loaded, session: service.session};
+        sessionStorage.setItem('redirectTestData', JSON.stringify({loaded, session: service.session}));
+      }).catch((error) => {
+        if (!error.message.includes('Execution context was destroyed')) {
+          throw error;
+        }
       });
       await navigation;
+
+      const {loaded, session} = await loginPage.evaluate(() => {
+        const data = JSON.parse(sessionStorage.getItem('redirectTestData'));
+        sessionStorage.removeItem('redirectTestData');
+        return data;
+      });
 
       assert.strictEqual(loaded, false);
       assert.strictEqual(session, null);
