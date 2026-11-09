@@ -385,7 +385,8 @@ describe('Framework Frontend', function() {
     });
 
     it('should redirect to the login without a token and come back with a new session', async () => {
-      const navigation = loginPage.waitForNavigation({waitUntil: 'networkidle0'});
+      // waitForNavigation also resolves on replaceState same-document calls
+      const navigation = loginPage.waitForNavigation({waitUntil: 'networkidle0',  ignoreSameDocumentNavigation: true});
       // The redirect destroys this page's context, so the result is kept in sessionStorage, which survives it
       await loginPage.evaluate(() => {
         history.replaceState({}, '', '/?personid=9&q=HelloTest');
