@@ -126,7 +126,7 @@ describe('REST API', () => {
   it('GET "/api/login" should respond 404 when "apiAuthRoutes" is not enabled', async () => {
     const serverWithoutAuthRoutes = new HttpServer({ ...config.http, autoListen: false }, config.jwt);
     await request(serverWithoutAuthRoutes.app)
-      .get('/api/login')
+      .get(`/api/login?token=${token}`)
       .expect(404);
   });
 
