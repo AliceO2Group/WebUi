@@ -19,7 +19,7 @@ const path = require('path');
  * Reading config file
  * Start servers
  */
-const http = new HttpServer({ hostname: 'localhost', port: 8085 }, {});
+const http = new HttpServer({ hostname: 'localhost', port: 8085, apiAuthRoutes: true }, {});
 http.addStaticPath(path.join(__dirname, 'public'));
 
 http.post('/ok.json', replyWithOk);
