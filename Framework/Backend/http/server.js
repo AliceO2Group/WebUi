@@ -34,6 +34,7 @@ class HttpServer {
   /**
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
    * @param {object} httpConfig - configuration of HTTP server
+   * @param {boolean} [httpConfig.apiAuthRoutes] - registers "/api/login" and "/api/callback" when true
    * @param {object} [jwtConfig] - configuration of JWT
    * @param {object} [connectIdConfig] - configuration of OpenID Connect
    */
@@ -43,6 +44,7 @@ class HttpServer {
     httpConfig.tls = !httpConfig.tls ? false : httpConfig.tls;
     httpConfig.hostname = !httpConfig.hostname ? 'localhost' : httpConfig.hostname;
     this.limit = !httpConfig.limit ? '100kb' : httpConfig.limit;
+    this.apiAuthRoutes = Boolean(httpConfig.apiAuthRoutes);
 
     this.app = express();
 
@@ -191,6 +193,17 @@ class HttpServer {
       this.app.get('/callback', (req, res) => this.identCallback(req, res));
     } else {
       this.app.get('/', (req, res, next) => this.addDefaultUserData(req, res, next));
+    }
+
+    if (this.apiAuthRoutes) {
+      if (this.openid) {
+        this.app.get('/api/callback', (req, res) => this.identCallback(req, res));
+      }
+
+      this.app.get('/api/login', (req, res) => {
+        delete req.query.token;
+        return this.openid ? this.ident(req, res) : this.addDefaultUserData(req, res);
+      });
     }
 
     // Router for static files (can grow with addStaticPath)

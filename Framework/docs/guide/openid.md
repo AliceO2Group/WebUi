@@ -31,7 +31,7 @@ openId: {
 2. Register your application
 3. Add "SSO Registration"
 4. Select "OpenID Connect (OIDC)"
-5. Set "Redirect URI": eg. `https://myapp.cern.ch/callback`
+5. Set "Redirect URI": eg. `https://myapp.cern.ch/callback` or, with `apiAuthRoutes` enabled in the HTTP config, `https://myapp.cern.ch/api/callback`
 6. Submit (do not check any boxes)
 
 ### Roles and e-group authorisation

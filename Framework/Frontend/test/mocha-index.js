@@ -372,6 +372,65 @@ describe('Framework Frontend', function() {
     });
   });
 
+  describe('sessionService login api login redirect', function() {
+    let loginPage; // Separate page as the redirect reloads it, which would lose the state of the other tests
+
+    beforeEach(async () => {
+      loginPage = await browser.newPage();
+      await loginPage.goto(`http://localhost:${port}`, {waitUntil: 'networkidle0'});
+    });
+
+    afterEach(async () => {
+      await loginPage.close();
+    });
+
+    it('should redirect to the login without a token and come back with a new session', async () => {
+      const navigation = loginPage.waitForNavigation({waitUntil: 'networkidle0'});
+      const {loaded, session} = await loginPage.evaluate(() => {
+        history.replaceState({}, '', '/?personid=9&q=HelloTest');
+        const service = new window.sessionService.constructor();
+        const loaded = service.loadAndHideParameters({loginUrl: '/api/login'});
+        return {loaded, session: service.session};
+      });
+      await navigation;
+
+      assert.strictEqual(loaded, false);
+      assert.strictEqual(session, null);
+
+      const {search, personid} = await loginPage.evaluate(() => ({
+        search: location.search,
+        personid: window.sessionService.get().personid,
+      }));
+      assert.strictEqual(search, '?q=HelloTest');
+      assert.strictEqual(personid, '0');
+    });
+
+    it('should load the session without redirecting when there is a token', async () => {
+      const {loaded, token} = await loginPage.evaluate(() => {
+        history.replaceState({}, '', '/?personid=1&name=Test&token=abc&username=test&access=admin');
+        const service = new window.sessionService.constructor();
+        const loaded = service.loadAndHideParameters({loginUrl: '/api/login'});
+        return {loaded, token: service.get().token};
+      });
+
+      assert.strictEqual(loaded, true);
+      assert.strictEqual(token, 'abc');
+    });
+
+    it('should throw without a token when no login URL is given', async () => {
+      const message = await loginPage.evaluate(() => {
+        history.replaceState({}, '', '/');
+        try {
+          new window.sessionService.constructor().loadAndHideParameters();
+        } catch (error) {
+          return error.message;
+        }
+      });
+
+      assert.strictEqual(message, 'query string should contain the parameter personid');
+    });
+  });
+
   describe('BrowserStorage class', function() {
     it('should successfully set (key,value) in localStorage & sessionStorage', async () => {
       const storage = await page.evaluate(async () => {
