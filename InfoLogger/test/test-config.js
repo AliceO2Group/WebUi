@@ -22,6 +22,7 @@ module.exports = {
     tls: false,
     allow: true,
     name: 'TST',
+    apiAuthRoutes: true,
   },
   infoLoggerServer: {
     host: 'localhost',
