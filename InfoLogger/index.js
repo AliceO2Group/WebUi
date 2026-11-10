@@ -29,7 +29,7 @@ const http = new HttpServer({
   ...config.http,
   ...isDev && { extraConnectSrc: [`ws://${config.http.hostname ?? 'localhost'}:${VITE_HMR_PORT}`] },
 }, config.jwt, config.openId);
-const ws = new WebSocket(http);
+const ws = new WebSocket(http, { path: '/ws' });
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/index`);
 
