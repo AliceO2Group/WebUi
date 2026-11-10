@@ -443,6 +443,41 @@ describe('Framework Frontend', function() {
     });
   });
 
+  describe('WebSocketClient URL', function() {
+    let wsPage; // Separate page as the session and URL are modified
+
+    beforeEach(async () => {
+      wsPage = await browser.newPage();
+      await wsPage.goto(`http://localhost:${port}`, {waitUntil: 'networkidle0'});
+      // add query to test it is stripped
+      await wsPage.evaluate(() => history.replaceState({}, '', '/some/page?q=filter'));
+    });
+
+    afterEach(async () => {
+      await wsPage.close();
+    });
+
+    it('should connect on the page path when no path is given', async () => {
+      const {url, token} = await wsPage.evaluate(() => {
+        const client = new WebSocketClient();
+        const {url} = client.connection;
+        client.connection.close();
+        return {url, token: window.sessionService.get().token};
+      });
+      assert.strictEqual(url, `ws://localhost:${port}/some/page?token=${token}`);
+    });
+
+    it('should connect on the given path', async () => {
+      const {url, token} = await wsPage.evaluate(() => {
+        const client = new WebSocketClient({path: '/ws'});
+        const {url} = client.connection;
+        client.connection.close();
+        return {url, token: window.sessionService.get().token};
+      });
+      assert.strictEqual(url, `ws://localhost:${port}/ws?token=${token}`);
+    });
+  });
+
   describe('BrowserStorage class', function() {
     it('should successfully set (key,value) in localStorage & sessionStorage', async () => {
       const storage = await page.evaluate(async () => {
