@@ -31,11 +31,13 @@ class WebSocket {
   /**
    * Starts up the server and binds event handler.
    * @param {object} httpsServer - HTTPS server instance
+   * @param {Object} [options] - options
+   * @param {string} [options.path] - optional path to bind the WS to
    * @constructor
    */
-  constructor(httpsServer) {
+  constructor(httpsServer, { path } = {}) {
     this.http = httpsServer;
-    this.server = new WebSocketServer({ server: httpsServer.getServer, clientTracking: true });
+    this.server = new WebSocketServer({ server: httpsServer.getServer, path, clientTracking: true });
     this.server.on('connection', (client, request) => this.onconnection(client, request));
 
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);

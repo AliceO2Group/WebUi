@@ -105,12 +105,15 @@ const { location } = window;
 class WebSocketClient extends EventEmitter {
   /**
    * Create a connection to the server
+   * @param {Object} [options] - options
+   * @param {string} [options.path] - optional path to bind the WS to
    */
-  constructor() {
+  constructor({ path } = {}) {
     super();
 
     this.connection = null;
     this.authed = false;
+    this.path = path;
 
     this._connect();
   }
@@ -121,6 +124,11 @@ class WebSocketClient extends EventEmitter {
   _connect() {
     const session = sessionService.get();
     const url = new URL(location);
+    // Only the token is read by the server, so drop the page's own query from the handshake, URL looks cleaner too
+    url.search = '';
+    if (this.path) {
+      url.pathname = this.path;
+    }
     url.protocol = location.protocol === 'https:' ? 'wss' : 'ws';
     url.searchParams.append('token', session.token);
 
