@@ -13,7 +13,7 @@
  */
 
 import { sessionService } from '/js/src/index.js';
-sessionService.loadAndHideParameters();
+const isSessionLoaded = sessionService.loadAndHideParameters({ loginUrl: '/api/login' });
 
 // Expose sessionService to interact with it the browser's console
 window.sessionService = sessionService;
@@ -23,20 +23,22 @@ import { mount, StatefulComponent } from '/js/src/index.js';
 import view from './view.js';
 import Model from './Model.js';
 
-// Start application
-const model = new Model();
-const debug = true; // shows when redraw is done
-StatefulComponent.useRenderer(model); // Register the model for the stateful components
-let currentView = view;
-mount(document.body, (model) => currentView(model), model, debug);
+// Start application, unless the browser is being redirected to the login
+if (isSessionLoaded) {
+  const model = new Model();
+  const debug = true; // shows when redraw is done
+  StatefulComponent.useRenderer(model); // Register the model for the stateful components
+  let currentView = view;
+  mount(document.body, (model) => currentView(model), model, debug);
 
-// Expose model to interact with it the browser's console
-window.model = model;
+  // Expose model to interact with it the browser's console
+  window.model = model;
 
-// Dev only: swap in the new view tree on edit and keep model state; stripped from the prod build
-if (import.meta.hot) {
-  import.meta.hot.accept('./view.js', (newModule) => {
-    currentView = newModule.default;
-    model.notify();
-  });
+  // Dev only: swap in the new view tree on edit and keep model state; stripped from the prod build
+  if (import.meta.hot) {
+    import.meta.hot.accept('./view.js', (newModule) => {
+      currentView = newModule.default;
+      model.notify();
+    });
+  }
 }
