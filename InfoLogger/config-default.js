@@ -23,6 +23,7 @@ module.exports = {
     tls: false,
     allow: true,
     name: 'ILG',
+    apiAuthRoutes: true,
   },
 
   // optional data source, comment object if not used
