@@ -68,3 +68,26 @@ EXPOSE 6102
 USER 1000:1000
 
 CMD [ "node", "test/live-simulator/runInfoLoggerServer.js" ]
+
+#
+# ---- Build ----
+# Bundles the frontend into dist/ for nginx to serve
+FROM developmentdependencies AS build
+
+# Overlay the local Framework frontend on the published package so unreleased Framework changes are bundled.
+# Needs the `framework` build context (see docker-compose.nginx.yaml); remove once ILG depends on a release with them.
+COPY --from=framework Frontend ./node_modules/@aliceo2/web-ui/Frontend
+
+COPY index.html vite.config.mjs ./
+COPY public ./public
+COPY src ./src
+RUN npx vite build
+
+#
+# ---- Nginx ----
+FROM nginx:1.31-alpine AS nginx
+
+COPY --from=build /home/node/app/dist /dist
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
