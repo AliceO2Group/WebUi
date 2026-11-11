@@ -27,7 +27,16 @@ import Model from './Model.js';
 const model = new Model();
 const debug = true; // shows when redraw is done
 StatefulComponent.useRenderer(model); // Register the model for the stateful components
-mount(document.body, view, model, debug);
+let currentView = view;
+mount(document.body, (model) => currentView(model), model, debug);
 
 // Expose model to interact with it the browser's console
 window.model = model;
+
+// Dev only: swap in the new view tree on edit and keep model state; stripped from the prod build
+if (import.meta.hot) {
+  import.meta.hot.accept('./view.js', (newModule) => {
+    currentView = newModule.default;
+    model.notify();
+  });
+}
