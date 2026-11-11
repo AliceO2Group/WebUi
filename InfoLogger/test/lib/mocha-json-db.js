@@ -15,9 +15,11 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const JsonFileConnector = require('../../lib/JSONFileConnector.js');
 
-const CONFIG_FILE = path.join(__dirname, 'db.json.temp');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'infologger-test-'));
+const CONFIG_FILE = path.join(tempDir, 'db.json');
 
 const TEST_CONTENT = {
   colsHeader: {
@@ -49,10 +51,6 @@ let jsonConfig;
 
 describe('JSON file custom database', () => {
   before(() => {
-    // Drop previous DB if exists
-    try {
-      fs.unlinkSync(CONFIG_FILE);
-    } catch (error) { }
     jsonConfig = new JsonFileConnector(CONFIG_FILE);
   });
 
@@ -171,6 +169,6 @@ describe('JSON file custom database', () => {
     });
   });
   after(() => {
-    fs.unlinkSync(CONFIG_FILE);
+    fs.rmSync(tempDir, { recursive: true, force: true });
   });
 });

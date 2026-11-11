@@ -1,0 +1,62 @@
+# Local MariaDB to query, plus a one-shot seeder.
+services:
+  application:
+    depends_on:
+      database:
+        condition: service_healthy
+      seeder:
+        condition: service_completed_successfully
+
+  database:
+    image: mariadb:10.5
+
+    # Fail the stack
+    restart: "no"
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: INFOLOGGER
+
+    # should you want to access the DB using a external program
+    ports:
+    - "3306:3306"
+
+    # The schema is applied once, when the data volume is first created.
+    # A directory mount, not a single file so can have multiple scripts.
+    volumes:
+      - type: bind
+        read_only: true
+        source: ./docker/database/initdb.d
+        target: /docker-entrypoint-initdb.d
+      - type: volume
+        source: database-data
+        target: /var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 20s
+      retries: 20
+
+  # One-shot job: re-seeds the messages table on every `up`, so the fake logs are
+  # always dated within the last day and a `-1d`/`-2d` filter shows them straight away.
+  seeder:
+    build:
+      target: seeder
+
+    restart: "no"
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+    environment:
+      NODE_ENV: development
+      MYSQL_HOST: database
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: INFOLOGGER
+
+volumes:
+  database-data:
