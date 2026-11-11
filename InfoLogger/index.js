@@ -29,7 +29,7 @@ const http = new HttpServer({
   ...config.http,
   ...isDev && { extraConnectSrc: [`ws://${config.http.hostname ?? 'localhost'}:${VITE_HMR_PORT}`] },
 }, config.jwt, config.openId);
-const ws = new WebSocket(http);
+const ws = new WebSocket(http, { path: '/ws' });
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/index`);
 
@@ -47,14 +47,6 @@ const start = async () => {
     // Vite ends unmatched requests with 404, so API calls must skip it
     http.routerStatics.use((req, res, next) =>
       req.path.startsWith('/api/') ? next() : vite.middlewares(req, res, next));
-  } else {
-    const distPath = path.join(__dirname, 'dist');
-    if (!fs.existsSync(distPath)) {
-      logger.errorMessage(`Frontend build not found at ${distPath}, run "npm run build" first`);
-    } else {
-      logger.infoMessage(`Serving frontend files from ${distPath}`);
-    }
-    http.addStaticPath(distPath);
   }
 
   // Attach services to web server

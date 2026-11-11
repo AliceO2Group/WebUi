@@ -66,7 +66,7 @@ export default class Model extends Observable {
     this.accountMenuEnabled = false;
 
     // Setup WS connection before the router as parsing live=true awaits wsSettled
-    this.ws = new WebSocketClient();
+    this.ws = new WebSocketClient({ path: '/ws' });
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
 
