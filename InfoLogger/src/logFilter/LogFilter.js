@@ -380,7 +380,8 @@ export default class LogFilter extends Observable {
 
     const criteriasJSON = JSON.stringify(this.criterias);
     const functionAsString = filterFunction.toString();
-    const functionWithCriterias = functionAsString.replace('\'DATA_PLACEHOLDER\'', criteriasJSON);
+    // Minifiers can rewrite the placeholder's quotes so match any quote style
+    const functionWithCriterias = functionAsString.replace(/(['"`])DATA_PLACEHOLDER\1/, criteriasJSON);
     return functionWithCriterias;
   }
 
