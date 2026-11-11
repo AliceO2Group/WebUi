@@ -47,14 +47,6 @@ const start = async () => {
     // Vite ends unmatched requests with 404, so API calls must skip it
     http.routerStatics.use((req, res, next) =>
       req.path.startsWith('/api/') ? next() : vite.middlewares(req, res, next));
-  } else {
-    const distPath = path.join(__dirname, 'dist');
-    if (!fs.existsSync(distPath)) {
-      logger.errorMessage(`Frontend build not found at ${distPath}, run "npm run build" first`);
-    } else {
-      logger.infoMessage(`Serving frontend files from ${distPath}`);
-    }
-    http.addStaticPath(distPath);
   }
 
   // Attach services to web server

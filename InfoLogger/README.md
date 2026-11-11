@@ -91,6 +91,8 @@ The development image is approx. 500MB and the test image is approx 1.5GB, about
 
 For services with a cross, point `config.js` at a remote host and port and change the credentials accordingly. For services with a checkmark, the script will start a local container for you.
 
+For nginx use `npm run docker:dev:nginx`.  To edit and apply without rebuilding: `docker compose exec nginx nginx -s reload`
+
 Run `npm run docker:cleanup` to remove all containers created by the above and their data.
 
 ## Backend
