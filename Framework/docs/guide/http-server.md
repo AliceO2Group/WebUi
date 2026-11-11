@@ -9,7 +9,7 @@
 #### Instance
 ```js
 const {HttpServer} = require('@aliceo2/web-ui');
-HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT, autoListen: AUTO_LISTEN}, JWT_CONF, OPENID_CONF);
+HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT, autoListen: AUTO_LISTEN, apiAuthRoutes: API_AUTH_ROUTES}, JWT_CONF, OPENID_CONF);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:
@@ -21,8 +21,14 @@ Where:
      * [`TLS_CERT`] - certificate filepath, TLS must be enabled
      * [`AUTO_LISTEN`] - flag that enables/disables automatic listening (default: `true`)
      * [`LIMIT`] - controls the maximum request body size. Defaults to '100kb'. 
+     * [`API_AUTH_ROUTES`] - registers the authentication routes under `/api` (see below) (default: `false`)
  * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)
+
+#### Authentication routes
+Registered only when `apiAuthRoutes` is `true`, so a reverse proxy can forward a single `/api` rule:
+ * `GET /api/login` - always starts a fresh login, ignoring any `token` in the query. With OpenID it redirects to the SSO, otherwise to `/` with a new anonymous session. The rest of the query is passed back to `/`.
+ * `GET /api/callback` - OpenID callback under `/api`, used when the SSO "Redirect URI" points to it (see [OpenID Connect module](openid.md))
 
 
 #### Public methods
