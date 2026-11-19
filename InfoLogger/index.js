@@ -40,7 +40,7 @@ const start = async () => {
     const { createServer } = require('vite');
 
     const vite = await createServer({
-      server: { middlewareMode: true, hmr: { port: VITE_HMR_PORT } },
+      server: { middlewareMode: true, ws: { port: VITE_HMR_PORT } },
       appType: 'mpa',
     });
 
