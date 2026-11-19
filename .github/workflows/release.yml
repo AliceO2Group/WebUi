@@ -65,9 +65,6 @@ jobs:
     - name: Run build
       run: npm run build --if-present
       working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
-    - name: Remove dev deps
-      run: npm prune --omit=dev
-      working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
     - name: Create package tarball
       run:  echo "tgz_name=$(npm pack)" >> $GITHUB_OUTPUT
       working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
