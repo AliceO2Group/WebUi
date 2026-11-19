@@ -56,5 +56,11 @@
   },
   "bundleDependencies": [
     "@aliceo2/web-ui"
+  ],
+  "files": [
+    "dist",
+    "lib",
+    "index.js",
+    "config-default.js"
   ]
 }
