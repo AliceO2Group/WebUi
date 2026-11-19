@@ -23,7 +23,8 @@ Where:
      * [`LIMIT`] - controls the maximum request body size. Defaults to '100kb'. 
      * [`iframeCsp`] - list of URLs allowed in the `frame-src` CSP directive (default: `[]`)
      * [`allow`] - adds `'unsafe-eval'` to `script-src` (default: `false`)
-     * [`allowIframeCsp`] - adds `blob:` to `img-src` so blob-based images can be previewed/downloaded; despite the name, unrelated to iframes (default: `false`)
+     * [`allowBlobImages`] - adds `blob:` to `img-src` so blob-based images can be previewed/downloaded (default: `false`)
+     * [`allowIframeCsp`] - **deprecated**, use `allowBlobImages`;
      * [`extraConnectSrc`] - sources appended to the default `connect-src` CSP directive (default: `[]`)
  * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)

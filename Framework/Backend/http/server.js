@@ -151,7 +151,7 @@ class HttpServer {
    * @param {boolean} [config.allowIframeCsp] - Deprecated: Use `allowBlobImages` instead
    * @param {string[]} [config.extraConnectSrc] - sources appended to the default connect-src CSP
    */
-  configureHelmet({ hostname, port, iframeCsp = [], allow = false, allowBlobImages = false, allowIframeCsp = false, extraConnectSrc = [] }) {
+  configureHelmet({ hostname, port, iframeCsp = [], allow = false, allowBlobImages, allowIframeCsp, extraConnectSrc = [] }) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({ action: 'deny' }));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
