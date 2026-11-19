@@ -146,7 +146,7 @@ class HttpServer {
    * @param {number} config.port secure port number
    * @param {list} config.iframeCsp list of URLs for frame-src CSP
    * @param {boolean} config.allow allow unsafe-eval in CSP
-   * @param {boolean} config.allowIframeCsp allow iframe embedding from given URLs
+   * @param {boolean} config.allowIframeCsp allow blob: URLs in img-src (image previews/downloads)
    * @param {list} [config.extraConnectSrc] sources appended to the default connect-src CSP
    */
   configureHelmet({ hostname, port, iframeCsp = [], allow = false, allowIframeCsp = false, extraConnectSrc = [] }) {
