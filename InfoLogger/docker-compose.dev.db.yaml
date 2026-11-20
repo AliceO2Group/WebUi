@@ -51,7 +51,6 @@ services:
         condition: service_healthy
 
     environment:
-      NODE_ENV: development
       MYSQL_HOST: database
       MYSQL_PORT: 3306
       MYSQL_USER: root

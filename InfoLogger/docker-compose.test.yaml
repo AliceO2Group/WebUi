@@ -5,6 +5,3 @@ services:
       target: test
     
     restart: "no"
-
-    environment:
-      NODE_ENV: development

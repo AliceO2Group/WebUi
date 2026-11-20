@@ -12,8 +12,5 @@ services:
     # Fail the stack
     restart: "no"
 
-    environment:
-      NODE_ENV: development
-
     ports:
       - "6102:6102"
