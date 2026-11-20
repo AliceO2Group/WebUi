@@ -22,12 +22,16 @@ const api = require('./lib/api.js');
 // -------------------------------------------------------
 
 const isDev = process.env.NODE_ENV === 'development';
-const VITE_HMR_PORT = 5173;
+// Vite's own middleware-mode default
+const VITE_HMR_PORT = Number(process.env.ILG_HMR_PORT) || 24678;
 
-// Start server HTTP and bind WebSocket to it; the HMR port is only allowed in CSP during development
+// Create server HTTP and bind WebSocket to it; the HMR port is only allowed in CSP during development
+// No request is accepted before all routes are attached
 const http = new HttpServer({
   ...config.http,
-  ...isDev && { extraConnectSrc: [`ws://${config.http.hostname ?? 'localhost'}:${VITE_HMR_PORT}`] },
+  autoListen: false,
+  // The Vite HMR client connects to whatever host the page was opened on (localhost, 127.0.0.1, ...)
+  ...isDev && { extraConnectSrc: [`ws://*:${VITE_HMR_PORT}`] },
 }, config.jwt, config.openId);
 const ws = new WebSocket(http);
 
@@ -40,13 +44,14 @@ const start = async () => {
     const { createServer } = require('vite');
 
     const vite = await createServer({
+      root: __dirname,
       server: { middlewareMode: true, ws: { port: VITE_HMR_PORT } },
       appType: 'mpa',
     });
 
     // Vite ends unmatched requests with 404, so API calls must skip it
     http.routerStatics.use((req, res, next) =>
-      req.path.startsWith('/api/') ? next() : vite.middlewares(req, res, next));
+      /^\/api(\/|$)/.test(req.path) ? next() : vite.middlewares(req, res, next));
   } else {
     const distPath = path.join(__dirname, 'dist');
     if (!fs.existsSync(distPath)) {
@@ -59,9 +64,11 @@ const start = async () => {
 
   // Attach services to web server
   api.attachTo(http, ws);
+
+  await http.listen();
 };
 
 start().catch((error) => {
-  logger.errorMessage(`Failed to start InfoLogger GUI: ${error.message}`);
+  logger.errorMessage(`Failed to start InfoLogger GUI: ${error.stack ?? error}`);
   process.exit(1);
 });

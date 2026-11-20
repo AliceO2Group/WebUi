@@ -7,11 +7,12 @@ services:
     restart: "no"
 
     environment:
-      NODE_ENV: development
+      ILG_HMR_PORT: ${ILG_HMR_PORT:-24678}
 
     ports:
       - "8080:8080"
-      - "5173:5173" # Vite HMR WS
+      # Vite HMR WS; host and container ports must match, since the browser connects to the port Vite advertises
+      - "${ILG_HMR_PORT:-24678}:${ILG_HMR_PORT:-24678}"
 
     volumes:
       - type: bind
