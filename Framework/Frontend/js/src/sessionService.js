@@ -21,7 +21,7 @@ const { history } = window;
  * These are the parameters coming from the server only and represent
  * the current session
  */
-const authentificationParametersNames = ['personid', 'name', 'token', 'username', 'access'];
+const authenticationParametersNames = ['personid', 'name', 'token', 'username', 'access'];
 
 /**
  * Class to store authenticated users's session and provide session-related services
@@ -37,15 +37,24 @@ export class SessionService {
   /**
    * Load parameters from the query string inside sessionService
    * and remove them from the query string.
+   * @param {object} [options] - optional settings
+   * @param {string} [options.loginUrl] - where to send the browser if there is no token
+   * @return {boolean} true if loaded, false if redirecting
    */
-  loadAndHideParameters() {
+  loadAndHideParameters({ loginUrl } = {}) {
     if (this.session) {
       throw new Error('the session is already loaded');
     }
     const url = new URL(location);
+
+    if (loginUrl && !url.searchParams.get('token')) {
+      location.assign(`${loginUrl}${url.search}`);
+      return false;
+    }
+
     this.session = {};
 
-    for (const authenticationParameterName of authentificationParametersNames) {
+    for (const authenticationParameterName of authenticationParametersNames) {
       const authenticationParameter = url.searchParams.get(authenticationParameterName);
 
       if (!authenticationParameter) {
@@ -60,6 +69,7 @@ export class SessionService {
     }
 
     history.replaceState({}, '', url);
+    return true;
   }
 
   /**
