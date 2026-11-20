@@ -33,7 +33,7 @@ const http = new HttpServer({
   // The Vite HMR client connects to whatever host the page was opened on (localhost, 127.0.0.1, ...)
   ...isDev && { extraConnectSrc: [`ws://*:${VITE_HMR_PORT}`] },
 }, config.jwt, config.openId);
-const ws = new WebSocket(http);
+const ws = new WebSocket(http, { path: '/ws' });
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/index`);
 
