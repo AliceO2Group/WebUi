@@ -21,20 +21,54 @@ const api = require('./lib/api.js');
 
 // -------------------------------------------------------
 
-// Start server HTTP and bind WebSocket to it
-const http = new HttpServer(config.http, config.jwt, config.openId);
+const isDev = process.env.NODE_ENV === 'development';
+// Vite's own middleware-mode default
+const VITE_HMR_PORT = Number(process.env.ILG_HMR_PORT) || 24678;
+
+// Create server HTTP and bind WebSocket to it; the HMR port is only allowed in CSP during development
+// No request is accepted before all routes are attached
+const http = new HttpServer({
+  ...config.http,
+  autoListen: false,
+  // The Vite HMR client connects to whatever host the page was opened on (localhost, 127.0.0.1, ...)
+  ...isDev && { extraConnectSrc: [`ws://*:${VITE_HMR_PORT}`] },
+}, config.jwt, config.openId);
 const ws = new WebSocket(http);
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/index`);
 
 // Expose application to /
-const distPath = path.join(__dirname, 'dist');
-if (!fs.existsSync(distPath)) {
-  logger.errorMessage(`Frontend build not found at ${distPath}, run "npm run build" first`);
-} else {
-  logger.infoMessage(`Serving frontend files from ${distPath}`);
-}
-http.addStaticPath(distPath);
+const start = async () => {
+  if (isDev) {
+    logger.infoMessage(`Serving frontend files through Vite middleware, HMR on port ${VITE_HMR_PORT}`);
+    const { createServer } = require('vite');
 
-// Attach services to web server
-api.attachTo(http, ws);
+    const vite = await createServer({
+      root: __dirname,
+      server: { middlewareMode: true, ws: { port: VITE_HMR_PORT } },
+      appType: 'mpa',
+    });
+
+    // Vite ends unmatched requests with 404, so API calls must skip it
+    http.routerStatics.use((req, res, next) =>
+      /^\/api(\/|$)/.test(req.path) ? next() : vite.middlewares(req, res, next));
+  } else {
+    const distPath = path.join(__dirname, 'dist');
+    if (!fs.existsSync(distPath)) {
+      logger.errorMessage(`Frontend build not found at ${distPath}, run "npm run build" first`);
+    } else {
+      logger.infoMessage(`Serving frontend files from ${distPath}`);
+    }
+    http.addStaticPath(distPath);
+  }
+
+  // Attach services to web server
+  api.attachTo(http, ws);
+
+  await http.listen();
+};
+
+start().catch((error) => {
+  logger.errorMessage(`Failed to start InfoLogger GUI: ${error.stack ?? error}`);
+  process.exit(1);
+});
