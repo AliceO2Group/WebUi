@@ -38,6 +38,8 @@ class HttpServer {
    * @param {object} [connectIdConfig] - configuration of OpenID Connect
    */
   constructor(httpConfig, jwtConfig, connectIdConfig = null) {
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/server`);
+
     assert(httpConfig, 'Missing config');
     assert(httpConfig.port, 'Missing config value: port');
     httpConfig.tls = !httpConfig.tls ? false : httpConfig.tls;
@@ -89,7 +91,6 @@ class HttpServer {
      * @value {object.lastLoggedTimestamp} - timestamp of the last log of the same error by the same key
      */
     this._jwtErrorsByIp = new Map();
-    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/server`);
   }
 
   /**
@@ -142,14 +143,15 @@ class HttpServer {
   /**
    * Configures Helmet rules to increase web app security
    * @param {object} config - configuration of HTTP server
-   * @param {string} config.hostname whitelisted hostname for websocket connection
-   * @param {number} config.port secure port number
-   * @param {list} config.iframeCsp list of URLs for frame-src CSP
-   * @param {boolean} config.allow allow unsafe-eval in CSP
-   * @param {boolean} config.allowIframeCsp allow blob: URLs in img-src (image previews/downloads)
-   * @param {list} [config.extraConnectSrc] sources appended to the default connect-src CSP
+   * @param {string} config.hostname - whitelisted hostname for websocket connection
+   * @param {number} config.port - secure port number
+   * @param {string[]} [config.iframeCsp] - list of URLs for frame-src CSP
+   * @param {boolean} [config.allow] - allow unsafe-eval in CSP
+   * @param {boolean} [config.allowBlobImages] - allow blob: URLs in img-src (image previews/downloads)
+   * @param {boolean} [config.allowIframeCsp] - Deprecated: Use `allowBlobImages` instead
+   * @param {string[]} [config.extraConnectSrc] - sources appended to the default connect-src CSP
    */
-  configureHelmet({ hostname, port, iframeCsp = [], allow = false, allowIframeCsp = false, extraConnectSrc = [] }) {
+  configureHelmet({ hostname, port, iframeCsp = [], allow = false, allowBlobImages, allowIframeCsp, extraConnectSrc = [] }) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({ action: 'deny' }));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -164,12 +166,18 @@ class HttpServer {
     this.app.use(helmet.hidePoweredBy());
     // Disable DNS prefetching
     this.app.use(helmet.dnsPrefetchControl());
+
+    if (allowIframeCsp !== undefined) {
+      this.logger.warnMessage('http.allowIframeCsp is deprecated, use http.allowBlobImages');
+    }
+    const blobImages = allowBlobImages ?? allowIframeCsp ?? false;
+
     // Disables external resources
     this.app.use(helmet.contentSecurityPolicy({
       directives: {
         /* eslint-disable */
         defaultSrc: ["'self'", "data:", hostname + ':*'],
-        ...(allowIframeCsp && { imgSrc: ["'self'", "data:", "blob:"] }),
+        ...(blobImages && { imgSrc: ["'self'", "data:", "blob:"] }),
         scriptSrc: ["'self'", ...(allow ? ["'unsafe-eval'"] : [])],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port,
