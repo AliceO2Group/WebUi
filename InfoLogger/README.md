@@ -145,15 +145,13 @@ Edit `config.js` for the setup you're using below.
 
 The bundled [fake InfoLoggerServer](test/live-simulator/) emits a log every 0-100 ms, shuffling through [test/fake-data/fakeData.json](test/fake-data/fakeData.json).
 
-1. Point `infoLoggerServer` in `config.js` at `simulator`.
-2. `npm run docker:dev:local-ilg`.
-3. Open [http://localhost:8080](http://localhost:8080) and click **Live**.
+1. `npm run docker:dev:local-ilg` (sets `INFOLOGGER_HOST=simulator` for the application).
+2. Open [http://localhost:8080](http://localhost:8080) and click **Live**.
 
 ### Query against a local DB
 
-1. Point `mysql` in `config.js` at `database`.
-2. `npm run docker:dev:local-db`.
-3. Open [http://localhost:8080](http://localhost:8080) and click **Query**.
+1. `npm run docker:dev:local-db` (sets `MYSQL_HOST=database` for the application).
+2. Open [http://localhost:8080](http://localhost:8080) and click **Query**.
 
 The schema in [test/db/INFOLOGGER.sql](test/db/INFOLOGGER.sql) is applied once, when the database volume is
 first created. The `seeder` service then runs [test/db/seed-messages.js](test/db/seed-messages.js) on **every**
