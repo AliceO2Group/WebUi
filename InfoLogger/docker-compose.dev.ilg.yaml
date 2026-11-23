@@ -1,6 +1,8 @@
 # Local InfoLogger server simulator, streaming fake logs on port 6102.
 services:
   application:
+    environment:
+      INFOLOGGER_HOST: simulator
     # Ordering only, no healthcheck: InfoLoggerReceiver retries the connection every 5s
     depends_on:
       - simulator

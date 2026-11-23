@@ -1,6 +1,8 @@
 # Local MariaDB to query, plus a one-shot seeder.
 services:
   application:
+    environment:
+      MYSQL_HOST: database
     depends_on:
       database:
         condition: service_healthy
