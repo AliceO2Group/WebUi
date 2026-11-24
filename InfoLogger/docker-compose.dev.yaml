@@ -19,10 +19,6 @@ services:
         target: /home/node/app/lib
       - type: bind
         read_only: true
-        source: ./public
-        target: /home/node/app/public
-      - type: bind
-        read_only: true
         source: ./src
         target: /home/node/app/src
       - type: bind
