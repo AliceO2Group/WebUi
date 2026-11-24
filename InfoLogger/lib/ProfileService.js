@@ -74,12 +74,12 @@ class ProfileService {
       logger.info(`User profile ${profile} fetched successfully`);
       res.status(200).json({ user: profile,
         content:
-        { colsHeader: this.defaultUserConfig, criterias: this.defaultCriterias } });
+          { colsHeader: this.defaultUserConfig, criterias: this.defaultCriterias } });
     } else {
       logger.warn(`User profile ${profile} not found, sending default instead`);
       res.status(200).json({ user: 'default',
         content:
-        { colsHeader: this.defaultUserConfig, criterias: this.defaultCriterias } });
+          { colsHeader: this.defaultUserConfig, criterias: this.defaultCriterias } });
     }
   }
 
