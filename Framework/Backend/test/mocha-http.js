@@ -131,7 +131,11 @@ describe('REST API', () => {
       assert.strictEqual(body.error.message, 'Some unexpected error');
       assert.ok(body.error.stack.includes('Some unexpected error'));
     } finally {
-      process.env.NODE_ENV = prevNodeEnv;
+      if (prevNodeEnv === undefined) {
+        delete process.env.NODE_ENV;
+      } else {
+        process.env.NODE_ENV = prevNodeEnv;
+      }
     }
   });
 
