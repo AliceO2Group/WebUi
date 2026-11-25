@@ -3,6 +3,9 @@ on:
   release:
     types: [published]
 
+env:
+  PUPPETEER_SKIP_DOWNLOAD: true
+
 permissions:
   id-token: write # Needed for OIDC
   contents: write # Needed to attach assets to releases
