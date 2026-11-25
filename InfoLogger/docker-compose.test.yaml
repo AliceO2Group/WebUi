@@ -1,0 +1,7 @@
+name: infologger-test
+services:
+  application:
+    build:
+      target: test
+    
+    restart: "no"
