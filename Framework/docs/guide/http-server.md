@@ -9,7 +9,7 @@
 #### Instance
 ```js
 const {HttpServer} = require('@aliceo2/web-ui');
-HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT, autoListen: AUTO_LISTEN, apiAuthRoutes: API_AUTH_ROUTES}, JWT_CONF, OPENID_CONF);
+HttpServer({port: PORT, hostname: HOSTNAME, tls: TLS_ENABLED, portSecure: HTTPS_PORT, key: TLS_KEY, cert: TLS_CERT, autoListen: AUTO_LISTEN}, JWT_CONF, OPENID_CONF);
 ```
 Where:
  * `HTTP_CONF` consists of following fields:
@@ -25,15 +25,15 @@ Where:
      * [`allow`] - adds `'unsafe-eval'` to `script-src` (default: `false`)
      * [`allowIframeCsp`] - adds `blob:` to `img-src` so blob-based images can be previewed/downloaded; despite the name, unrelated to iframes (default: `false`)
      * [`extraConnectSrc`] - sources appended to the default `connect-src` CSP directive (default: `[]`)
-     * [`API_AUTH_ROUTES`] - registers the authentication routes under `/api` (see below) (default: `false`)
  * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)
 
 #### Authentication routes
-Registered only when `apiAuthRoutes` is `true`, so a reverse proxy can forward a single `/api` rule:
- * `GET /api/login` - always starts a fresh login, ignoring any `token` in the query. With OpenID it redirects to the SSO, otherwise to `/` with a new anonymous session. The rest of the query is passed back to `/`.
- * `GET /api/callback` - OpenID callback under `/api`, used when the SSO "Redirect URI" points to it (see [OpenID Connect module](openid.md))
+Registered under `/api/auth` so a reverse proxy serving the frontend only needs to forward `/api`, and skip JWT verification:
+ * `GET /api/auth/login` - always starts a fresh login, ignoring any session parameters (`token`, `personid`, `name`, `username`, `access`) in the query. With OpenID it redirects to the SSO, otherwise to `/` with a new anonymous session. The rest of the query is passed back to `/`.
+ * `GET /api/auth/callback` - OpenID callback, used when the SSO "Redirect URI" points to it (see [OpenID Connect module](openid.md)). `/callback` is still available.
 
+The frontend `sessionService.loadAndHideParameters()` redirects to `/api/auth/login` when the page has no token, so a frontend served without going through `/` logs in by itself.
 
 #### Public methods
 ```js

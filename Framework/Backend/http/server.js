@@ -26,6 +26,11 @@ const { LogManager } = require('../log/LogManager');
 const { buildUrl } = require('./buildUrl.js');
 
 /**
+ * Query parameters set only by the server
+ */
+const AUTH_QUERY_PARAMS = ['personid', 'name', 'username', 'access', 'token'];
+
+/**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.
  * Each request is authenticated with JWT token.
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
@@ -34,7 +39,6 @@ class HttpServer {
   /**
    * Sets up the server, routes and binds HTTP and HTTPS sockets.
    * @param {object} httpConfig - configuration of HTTP server
-   * @param {boolean} [httpConfig.apiAuthRoutes] - registers "/api/login" and "/api/callback" when true
    * @param {object} [jwtConfig] - configuration of JWT
    * @param {object} [connectIdConfig] - configuration of OpenID Connect
    */
@@ -44,7 +48,6 @@ class HttpServer {
     httpConfig.tls = !httpConfig.tls ? false : httpConfig.tls;
     httpConfig.hostname = !httpConfig.hostname ? 'localhost' : httpConfig.hostname;
     this.limit = !httpConfig.limit ? '100kb' : httpConfig.limit;
-    this.apiAuthRoutes = Boolean(httpConfig.apiAuthRoutes);
 
     this.app = express();
 
@@ -195,16 +198,13 @@ class HttpServer {
       this.app.get('/', (req, res, next) => this.addDefaultUserData(req, res, next));
     }
 
-    if (this.apiAuthRoutes) {
-      if (this.openid) {
-        this.app.get('/api/callback', (req, res) => this.identCallback(req, res));
-      }
-
-      this.app.get('/api/login', (req, res) => {
-        delete req.query.token;
-        return this.openid ? this.ident(req, res) : this.addDefaultUserData(req, res);
-      });
+    // Mounted before the API routers so these routes skip JWT verification
+    this.routerAuth = express.Router();
+    this.routerAuth.get('/login', (req, res) => this.startLogin(req, res));
+    if (this.openid) {
+      this.routerAuth.get('/callback', (req, res) => this.identCallback(req, res));
     }
+    this.app.use('/api/auth', this.routerAuth);
 
     // Router for static files (can grow with addStaticPath)
 
@@ -292,6 +292,24 @@ class HttpServer {
       return res.redirect(buildUrl('/', query));
     }
     return this.ident(req, res, next);
+  }
+
+  /**
+   * Starts a fresh login (/api/auth/login), ignoring any session parameters in the query.
+   * The rest of the query is passed back to "/" once logged in.
+   * @param {Request} req - Express Request object
+   * @param {Response} res - Express Response object
+   * @return {object} redirection
+   */
+  startLogin(req, res) {
+    const query = Object.fromEntries(Object.entries(req.query)
+      .filter(([key]) => !AUTH_QUERY_PARAMS.includes(key)));
+
+    if (this.openid) {
+      const state = Buffer.from(JSON.stringify(query)).toString('base64');
+      return res.redirect(this.openid.getAuthUrl(state));
+    }
+    return this.addDefaultUserData({ query }, res);
   }
 
   /**
@@ -501,10 +519,8 @@ class HttpServer {
       // Read back user params from state
       const userQuery = JSON.parse(Buffer.from(req.query.state, 'base64').toString('ascii'));
 
-      // Concatenates with user query
-      Object.assign(query, userQuery);
-
-      res.redirect(buildUrl('/', query));
+      // Session parameters set by the server take precedence over the user's
+      res.redirect(buildUrl('/', { ...userQuery, ...query }));
     }).catch((reason) => {
       this.logger.errorMessage(`OpenId failed: ${reason}`);
       res.status(401).send('OpenId failed');
