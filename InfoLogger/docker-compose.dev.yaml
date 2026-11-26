@@ -7,10 +7,12 @@ services:
     restart: "no"
 
     environment:
-      NODE_ENV: development
+      ILG_HMR_PORT: ${ILG_HMR_PORT:-24678}
 
     ports:
       - "8080:8080"
+      # Vite HMR WS; host and container ports must match, since the browser connects to the port Vite advertises
+      - "${ILG_HMR_PORT:-24678}:${ILG_HMR_PORT:-24678}"
 
     volumes:
       - type: bind
@@ -37,3 +39,8 @@ services:
         read_only: true
         source: ./index.js
         target: /home/node/app/index.js
+        # Use the local Framework source to allow edits from it to come through before it gets released
+      - type: bind
+        read_only: true
+        source: ../Framework
+        target: /home/node/app/node_modules/@aliceo2/web-ui
