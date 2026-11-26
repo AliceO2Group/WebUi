@@ -235,7 +235,7 @@ class HttpServer {
 
     /**
      * Ensures important information is saved in an error.
-     * @param {*} err - The error to serialize.
+     * @param {Error} err - The error to serialize.
      */
     function serializeError(err) {
       if (err && typeof err === 'object') {
