@@ -21,6 +21,11 @@ Where:
      * [`TLS_CERT`] - certificate filepath, TLS must be enabled
      * [`AUTO_LISTEN`] - flag that enables/disables automatic listening (default: `true`)
      * [`LIMIT`] - controls the maximum request body size. Defaults to '100kb'. 
+     * [`iframeCsp`] - list of URLs allowed in the `frame-src` CSP directive (default: `[]`)
+     * [`allow`] - adds `'unsafe-eval'` to `script-src` (default: `false`)
+     * [`allowBlobImages`] - adds `blob:` to `img-src` so blob-based images can be previewed/downloaded (default: `false`)
+     * [`allowIframeCsp`] - **deprecated**, use `allowBlobImages`;
+
  * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)
 
