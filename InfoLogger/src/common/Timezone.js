@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-/* global moment */
-
+// Use the 1970–2030 build to reduce data whilst receiving updates (130 KB vs. 730 KB)
+import moment from 'moment-timezone/builds/moment-timezone-with-data-1970-2030.js';
 import { Observable } from '/js/src/index.js';
 
 export const TIME_MS = 'time-ms';

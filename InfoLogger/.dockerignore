@@ -4,8 +4,10 @@
 # Project
 !lib/
 !package*.json
-!public/
+!src/
+!index.html
 !index.js
+!vite.config.mjs
 !test/
 !eslint.config.js
 !config.js
