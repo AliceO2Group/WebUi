@@ -30,7 +30,7 @@ describe('websocket', () => {
     token = tokenService.generateToken(0, 'test', 'Test', 'admin');
 
     http = new HttpServer(config.http, config.jwt);
-    ws = new WebSocket(http, config.jwt, 'localhost');
+    ws = new WebSocket(http);
     ws.bind('test', (message) => {
       const res = new WebSocketMessage().setCommand(message.getCommand());
       return res;
@@ -183,5 +183,49 @@ describe('websocket', () => {
   after(() => {
     ws.shutdown();
     http.close();
+  });
+});
+
+describe('websocket with path option', () => {
+  const port = config.http.port + 1;
+  let pathHttp = null;
+  let pathWs = null;
+
+  before(() => {
+    pathHttp = new HttpServer({ ...config.http, port }, config.jwt);
+    pathWs = new WebSocket(pathHttp, { path: '/ws' });
+  });
+
+  it('should accept a connection on the passed path', (done) => {
+    const connection = new WebSocketClient(`ws://localhost:${port}/ws?token=${token}`);
+    connection.on('message', (message) => {
+      const { command } = JSON.parse(message);
+      assert.strictEqual(command, 'authed');
+      connection.terminate();
+      done();
+    });
+  });
+
+  it('should reject the handshake with 400 on any other path', (done) => {
+    const connection = new WebSocketClient(`ws://localhost:${port}/?token=${token}`);
+    connection.on('unexpected-response', (req, res) => {
+      assert.strictEqual(res.statusCode, 400);
+      req.destroy();
+      done();
+    });
+  });
+
+  it('should reject the handshake on a sub-path of the passed path', (done) => {
+    const connection = new WebSocketClient(`ws://localhost:${port}/ws/other?token=${token}`);
+    connection.on('unexpected-response', (req, res) => {
+      assert.strictEqual(res.statusCode, 400);
+      req.destroy();
+      done();
+    });
+  });
+
+  after(() => {
+    pathWs.shutdown();
+    pathHttp.close();
   });
 });
