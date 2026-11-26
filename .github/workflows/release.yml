@@ -3,6 +3,9 @@ on:
   release:
     types: [published]
 
+env:
+  PUPPETEER_SKIP_DOWNLOAD: true
+
 permissions:
   id-token: write # Needed for OIDC
   contents: write # Needed to attach assets to releases
@@ -45,7 +48,7 @@ jobs:
         echo "project=$PROJECT" >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "tag=$TAG" >> $GITHUB_OUTPUT
-    - run: (cd $PROJECT; npm publish)
+    - run: (cd $PROJECT; npm ci && npm run build --if-present && npm publish)
   upload-asset:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -59,8 +62,11 @@ jobs:
       with:
         node-version: '22.x'
         registry-url: 'https://registry.npmjs.org'
-    - name: Install production deps
-      run: npm install --only=production
+    - name: Install deps
+      run: npm ci
+      working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
+    - name: Run build
+      run: npm run build --if-present
       working-directory: ${{ needs.deploy-npm-module.outputs.PROJECT }}
     - name: Create package tarball
       run:  echo "tgz_name=$(npm pack)" >> $GITHUB_OUTPUT
