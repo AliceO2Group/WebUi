@@ -117,6 +117,28 @@ describe('REST API', () => {
       }, done);
   });
 
+  it('Error route should respond with message and stack when NODE_ENV = development', async () => {
+    const prevNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+    try {
+      httpServer.get('/get-error', (req, res, next) => next(new Error('Some unexpected error')));
+      const { body } = await request(httpServer)
+        .get(`/api/get-error?token=${token}`)
+        .expect('Content-Type', /json/)
+        .expect(500);
+
+      assert.strictEqual(body.error.name, 'Error');
+      assert.strictEqual(body.error.message, 'Some unexpected error');
+      assert.ok(body.error.stack.includes('Some unexpected error'));
+    } finally {
+      if (prevNodeEnv === undefined) {
+        delete process.env.NODE_ENV;
+      } else {
+        process.env.NODE_ENV = prevNodeEnv;
+      }
+    }
+  });
+
   it('GET with token should respond 200/JSON', (done) => {
     request(httpServer)
       .get(`/api/get-request?token=${token}`)

@@ -233,21 +233,41 @@ class HttpServer {
       res.status(404).sendFile(path.join(__dirname, '../../Frontend/404.html'));
     });
 
+    /**
+     * Ensures important information is saved in an error.
+     * @param {Error} err - The error to serialize.
+     */
+    function serializeError(err) {
+      if (err && typeof err === 'object') {
+        return {
+          ...err, // Keeps any custom enumerable properties
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        };
+      }
+      return { message: String(err) };
+    }
+
     // Error handler when an API controller crashes
     this.app.use('/api', (err, req, res, next) => {
       this.logger.errorMessage(`Request ${this._parseOriginalUrl(req)} failed: ${err.message || err}`);
       this.logger.trace(err);
 
+      if (res.headersSent) {
+        return next(err);
+      }
+
       if (process.env.NODE_ENV === 'development') {
-        res.status(500).json({
-          error: err,
-        });
-      } else {
-        res.status(500).json({
-          error: '500 - Server error',
-          message: 'Something went wrong, please try again or contact an administrator.',
+        return res.status(500).json({
+          error: serializeError(err),
         });
       }
+
+      res.status(500).json({
+        error: '500 - Server error',
+        message: 'Something went wrong, please try again or contact an administrator.',
+      });
     });
 
     // Error handler when a controller crashes
