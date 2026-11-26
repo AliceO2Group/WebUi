@@ -28,6 +28,12 @@ Where:
  * [`JWT_CONF`] - JWT module config, see [JWT module](json-tokens.md)
  * [`OPENID_CONF`] - OpenID config, see [OpenID Connect module](openid.md)
 
+#### Authentication routes
+Registered under `/api/auth` so a reverse proxy serving the frontend only needs to forward `/api`, and skip JWT verification:
+ * `GET /api/auth/login` - always starts a fresh login, ignoring any session parameters (`token`, `personid`, `name`, `username`, `access`) in the query. With OpenID it redirects to the SSO, otherwise to `/` with a new anonymous session. The rest of the query is passed back to `/`.
+ * `GET /api/auth/callback` - OpenID callback, used when the SSO "Redirect URI" points to it (see [OpenID Connect module](openid.md)). `/callback` is still available.
+
+The frontend `sessionService.loadAndHideParameters()` redirects to `/api/auth/login` when the page has no token, so a frontend served without going through `/` logs in by itself.
 
 #### Public methods
 ```js

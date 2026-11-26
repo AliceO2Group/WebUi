@@ -87,6 +87,76 @@ describe('REST API', () => {
       });
   });
 
+  it('GET "/api/auth/login" should redirect to "/" with the session and the given query', async () => {
+    const res = await request(httpServer)
+      .get('/api/auth/login?q=HelloTest')
+      .expect(302);
+
+    const parsedUrl = new url.URL(res.headers.location, 'http://localhost');
+    assert.strictEqual(parsedUrl.pathname, '/');
+    assert.strictEqual(parsedUrl.searchParams.get('q'), 'HelloTest');
+    assert.strictEqual(parsedUrl.searchParams.get('personid'), '0');
+    assert.ok(tokenService.verify(parsedUrl.searchParams.get('token')));
+  });
+
+  it('GET "/api/auth/login" with a valid token should ignore it and start a new session', async () => {
+    const res = await request(httpServer)
+      .get(`/api/auth/login?token=${token}&personid=42&username=spoofed&access=spoofed&q=HelloTest`)
+      .expect(302);
+
+    const parsedUrl = new url.URL(res.headers.location, 'http://localhost');
+    assert.strictEqual(parsedUrl.pathname, '/');
+    assert.notStrictEqual(parsedUrl.searchParams.get('token'), token);
+    assert.strictEqual(tokenService.verify(parsedUrl.searchParams.get('token')).username, 'anonymous');
+    assert.strictEqual(parsedUrl.searchParams.get('personid'), '0');
+    assert.strictEqual(parsedUrl.searchParams.get('username'), 'anonymous');
+    assert.strictEqual(parsedUrl.searchParams.get('access'), 'admin');
+    assert.strictEqual(parsedUrl.searchParams.get('q'), 'HelloTest');
+  });
+
+  it('GET "/api/auth/login" with an invalid token should ignore it and start a new session', async () => {
+    const res = await request(httpServer)
+      .get('/api/auth/login?token=invalid')
+      .expect(302);
+
+    const parsedUrl = new url.URL(res.headers.location, 'http://localhost');
+    assert.strictEqual(parsedUrl.pathname, '/');
+    assert.ok(tokenService.verify(parsedUrl.searchParams.get('token')));
+  });
+
+  it('GET "/api/auth/login" with OpenID should keep only the user query in the state', async () => {
+    const server = new HttpServer({ ...config.http, autoListen: false }, config.jwt);
+    server.openid = { getAuthUrl: (state) => `https://sso.example/auth?state=${state}` };
+
+    const res = await request(server.app)
+      .get(`/api/auth/login?token=${token}&personid=42&name=Spoofed&username=spoofed&access=admin&q=HelloTest`)
+      .expect(302);
+
+    const state = new url.URL(res.headers.location).searchParams.get('state');
+    assert.deepStrictEqual(JSON.parse(Buffer.from(state, 'base64').toString()), { q: 'HelloTest' });
+  });
+
+  it('OpenID callback should not let the state override the session set by the server', async () => {
+    const server = new HttpServer({ ...config.http, autoListen: false }, config.jwt);
+    server.openid = {
+      callback: async () => ({
+        claims: () => ({ cern_person_id: 7, cern_upn: 'real', name: 'Real', cern_roles: ['guest'] }),
+      }),
+    };
+    const state = Buffer.from(JSON.stringify({ personid: '42', access: 'admin', q: 'HelloTest' })).toString('base64');
+
+    const location = await new Promise((resolve, reject) => server.identCallback(
+      { query: { state }, headers: {} },
+      { redirect: resolve, status: () => ({ send: reject }) },
+    ));
+
+    const parsedUrl = new url.URL(location, 'http://localhost');
+    assert.strictEqual(parsedUrl.searchParams.get('personid'), '7');
+    assert.strictEqual(parsedUrl.searchParams.get('username'), 'real');
+    assert.strictEqual(parsedUrl.searchParams.get('access'), 'guest');
+    assert.strictEqual(parsedUrl.searchParams.get('q'), 'HelloTest');
+  });
+
   it('GET without token should respond 200/JSON', (done) => {
     request(httpServer)
       .get('/api/get-insecure')

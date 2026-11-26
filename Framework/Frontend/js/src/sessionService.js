@@ -21,7 +21,7 @@ const { history } = window;
  * These are the parameters coming from the server only and represent
  * the current session
  */
-const authentificationParametersNames = ['personid', 'name', 'token', 'username', 'access'];
+const authenticationParametersNames = ['personid', 'name', 'token', 'username', 'access'];
 
 /**
  * Class to store authenticated users's session and provide session-related services
@@ -37,15 +37,27 @@ export class SessionService {
   /**
    * Load parameters from the query string inside sessionService
    * and remove them from the query string.
+   * Without a token, redirects to the login and throws to stop the caller while the page unloads.
+   * @return {void}
+   * @throws {Error} when there is no token (redirecting) or a session parameter is missing
    */
   loadAndHideParameters() {
     if (this.session) {
       throw new Error('the session is already loaded');
     }
     const url = new URL(location);
+
+    if (!url.searchParams.has('token')) {
+      const loginUrl = new URL('/api/auth/login', location.origin);
+      loginUrl.search = url.search; // The server drops any stale session parameters
+      // Replace so the page without a token is not left in the history, where "back" would redirect again
+      location.replace(loginUrl);
+      throw new Error('No session token, redirecting to login');
+    }
+
     this.session = {};
 
-    for (const authenticationParameterName of authentificationParametersNames) {
+    for (const authenticationParameterName of authenticationParametersNames) {
       const authenticationParameter = url.searchParams.get(authenticationParameterName);
 
       if (!authenticationParameter) {

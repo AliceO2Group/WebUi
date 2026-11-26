@@ -372,6 +372,70 @@ describe('Framework Frontend', function() {
     });
   });
 
+  describe('sessionService login redirect', function() {
+    let loginPage; // Separate page as the redirect reloads it, which would lose the state of the other tests
+
+    beforeEach(async () => {
+      loginPage = await browser.newPage();
+    });
+
+    afterEach(async () => {
+      await loginPage.close();
+    });
+
+    it('should redirect to the login without a token and come back with a new session', async () => {
+      // "/index.html" is served statically, so the page loads without a token and sessionService redirects
+      await loginPage.goto(`http://localhost:${port}/index.html?personid=9&q=HelloTest`, {waitUntil: 'networkidle0'});
+
+      const {pathname, search, personid} = await loginPage.evaluate(() => ({
+        pathname: location.pathname,
+        search: location.search,
+        personid: window.sessionService.get().personid,
+      }));
+      assert.strictEqual(pathname, '/');
+      assert.strictEqual(search, '?q=HelloTest');
+      assert.strictEqual(personid, '0');
+    });
+
+    it('should not keep the page without a token in the history', async () => {
+      await loginPage.goto(`http://localhost:${port}`, {waitUntil: 'networkidle0'});
+      const initialLength = await loginPage.evaluate(() => history.length);
+      await loginPage.goto(`http://localhost:${port}/index.html`, {waitUntil: 'networkidle0'});
+
+      // One entry for the logged in page; the page without a token was replaced
+      const historyLength = await loginPage.evaluate(() => history.length);
+      assert.strictEqual(historyLength, initialLength + 1);
+    });
+
+    it('should load the session without redirecting when there is a token', async () => {
+      await loginPage.goto(`http://localhost:${port}`, {waitUntil: 'networkidle0'});
+
+      const token = await loginPage.evaluate(() => {
+        history.replaceState({}, '', '/?personid=1&name=Test&token=abc&username=test&access=admin');
+        const service = new window.sessionService.constructor();
+        service.loadAndHideParameters();
+        return service.get().token;
+      });
+
+      assert.strictEqual(token, 'abc');
+    });
+
+    it('should throw when a session parameter is missing', async () => {
+      await loginPage.goto(`http://localhost:${port}`, {waitUntil: 'networkidle0'});
+
+      const message = await loginPage.evaluate(() => {
+        history.replaceState({}, '', '/?token=abc');
+        try {
+          new window.sessionService.constructor().loadAndHideParameters();
+        } catch (error) {
+          return error.message;
+        }
+      });
+
+      assert.strictEqual(message, 'query string should contain the parameter personid');
+    });
+  });
+
   describe('BrowserStorage class', function() {
     it('should successfully set (key,value) in localStorage & sessionStorage', async () => {
       const storage = await page.evaluate(async () => {
