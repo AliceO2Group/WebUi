@@ -29,35 +29,95 @@ option java_package = "ch.cern.alice.o2.apricot.rpcserver";
 option go_package = "github.com/AliceO2Group/Control/apricot/protos;apricotpb";
 
 service Apricot {
+    // Increments the persistent run number counter and returns the new value.
+    // Not safe for concurrent callers: a lost compare-and-set race returns an error instead of retrying.
     rpc NewRunNumber(Empty) returns (RunNumberResponse) {}
+
+    // Returns the key-value pairs stored under o2/runtime/aliecs/defaults, extended with computed entries:
+    // consul_base_uri, consul_hostname, consul_port, consul_endpoint, framework_id, core_hostname.
+    // Computed entries override stored ones with the same key.
+    // A backend failure yields a map without stored entries, not an error.
     rpc GetDefaults(Empty) returns (StringMap) {}
+
+    // Returns the key-value pairs stored under o2/runtime/aliecs/vars.
+    // A backend failure yields an empty map, not an error.
     rpc GetVars(Empty) returns (StringMap) {}
+
+    // Dumps the raw key-value subtree under rawPath as a JSON string, with no template processing.
     rpc RawGetRecursive(RawGetRecursiveRequest) returns (ComponentResponse) {}
 
     // Detectors and host inventories
+
     rpc ListDetectors(DetectorsRequest) returns (DetectorsResponse) {}
+
+    // Returns FLP hostnames of the given detector, or of all FLPs if the detector is empty.
     rpc GetHostInventory(HostGetRequest) returns (HostEntriesResponse) {}
+
+    // Includes private detectors (e.g. TRG).
     rpc GetDetectorsInventory(Empty) returns (DetectorEntriesResponse) {}
+
+    // Fails if the host is not assigned to any detector.
     rpc GetDetectorForHost(HostRequest) returns (DetectorResponse) {}
+
+    // Returns a sorted list of unique detectors. Fails if any of the hosts is not assigned to a detector.
     rpc GetDetectorsForHosts(HostsRequest) returns (DetectorsResponse) {}
+
+    // Returns serials of the host's CRU cards as a JSON-encoded list, in no particular order.
     rpc GetCRUCardsForHost(HostRequest) returns (CRUCardsResponse) {}
+
+    // Returns endpoints as a single space-separated string.
     rpc GetEndpointsForCRUCard(CardRequest) returns (CRUCardEndpointResponse) {}
+
+    // Links without an explicit "enabled" field in the card configuration are never returned.
+    // Results are in no particular order.
     rpc GetLinkIDsForCRUEndpoint(LinkIDsRequest) returns (LinkIDsResponse) {}
+
+    // Returns sorted link aliases across all FLPs of the detector.
+    // Fails if an alias is missing for any (enabled, if onlyEnabled) link.
     rpc GetAliasedLinkIDsForDetector(AliasedLinkIDsRequest) returns (AliasedLinkIDsResponse) {}
 
     // Runtime KV calls
+    // Entries live under o2/runtime/<component>/<key>.
+
+    // Fails if the entry does not exist.
     rpc GetRuntimeEntry(GetRuntimeEntryRequest) returns (ComponentResponse) {}
+
+    // Creates or overwrites the entry.
     rpc SetRuntimeEntry(SetRuntimeEntryRequest) returns (Empty) {}
+
+    // Fails as a whole (returning no entries) if reading any single entry fails.
     rpc GetRuntimeEntries(GetRuntimeEntriesRequest) returns (StringMap) {}
+
+    // Returns keys relative to the component, possibly nested (e.g. "a/b").
     rpc ListRuntimeEntries(ListRuntimeEntriesRequest) returns (ComponentEntriesResponse) {}
 
     // Component configuration calls
+    // Entries are addressed as <component>/<RUNTYPE>/<role>/<entry>, either as a path
+    // or as a structured query. If both are given, the path takes precedence.
+
+    // Returns component names, in no particular order.
     rpc ListComponents(Empty) returns (ComponentEntriesResponse) {}
+
+    // Returns sorted entries of the component as <RUNTYPE>/<role>/<entry>.
+    // Only the component of the query is used; run type and machine role are not filtered on.
+    // Fails if the component has no entries.
     rpc ListComponentEntries(ListComponentEntriesRequest) returns (ComponentEntriesResponse) {}
+
+    // Reads exactly the addressed entry, without falling back to ANY run type or "any" role (see ResolveComponentQuery).
     rpc GetComponentConfiguration(ComponentRequest) returns (ComponentResponse) {}
+
+    // Same as GetComponentConfiguration, plus the Consul modify index of the entry.
+    // processTemplate is not supported and results in an error.
     rpc GetComponentConfigurationWithLastIndex(ComponentRequest) returns (ComponentResponseWithLastIndex) {}
+
+    // Finds the entry that would be used for the query. Tries, in order: the exact query,
+    // run type ANY, role "any", run type ANY with role "any". Fails if none exists.
     rpc ResolveComponentQuery(ComponentQuery) returns (ComponentQuery) {}
+
+    // Creates or overwrites an entry. Does not invalidate the template cache.
     rpc ImportComponentConfiguration(ImportComponentConfigurationRequest) returns (ImportComponentConfigurationResponse) {}
+
+    // Drops cached parsed templates, so that subsequent processed reads see changed entries.
     rpc InvalidateComponentTemplateCache(Empty) returns (Empty) {}
 }
 
@@ -105,7 +165,7 @@ message ComponentRequest {
         string path = 1;
         ComponentQuery query = 2;
     }
-    bool processTemplate = 3;
+    bool processTemplate = 3; // if true, the entry is rendered as a template using varStack
     map<string, string> varStack = 4;
 }
 
@@ -208,7 +268,7 @@ message HostEntriesResponse {
 message ImportComponentConfigurationRequest {
     ComponentQuery query = 1;
     string payload = 2;
-    bool newComponent = 3;
+    bool newComponent = 3; // must be true if the component does not exist yet, and false if it already exists
 }
 
 message ImportComponentConfigurationResponse {
