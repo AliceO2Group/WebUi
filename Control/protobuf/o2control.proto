@@ -32,46 +32,91 @@ import public "protos/events.proto";
 
 // The Control service is the main interface to AliECS
 service Control {
+    // If the detector list cannot be retrieved, detectorsInInstance is ["NIL"] and the other detector lists are empty.
     rpc GetFrameworkInfo (GetFrameworkInfoRequest) returns (GetFrameworkInfoReply) {}
 
     rpc GetEnvironments (GetEnvironmentsRequest) returns (GetEnvironmentsReply) {}
+
     // Creates a new environment which automatically follows one STANDBY->RUNNING->DONE cycle in the state machine.
-    // It returns only once the environment reaches the CONFIGURED state or upon any earlier failure.
+    // The call returns immediately; the progress and outcome (including failure) are reported
+    // only through Subscribe called with the same id as in the request.
     rpc NewAutoEnvironment (NewAutoEnvironmentRequest) returns (NewAutoEnvironmentReply) {}
+
     // Creates a new environment.
     // It returns only once the environment reaches the CONFIGURED state or upon any earlier failure.
+    // On failure, the error details contain an EnvironmentInfo with the ID of the failed environment.
     rpc NewEnvironment (NewEnvironmentRequest) returns (NewEnvironmentReply) {}
+
+    // Returns NOT_FOUND for unknown environment IDs.
     rpc GetEnvironment (GetEnvironmentRequest) returns (GetEnvironmentReply) {}
+
+    // Performs the requested transition synchronously.
+    // If the transition fails, the environment is moved to ERROR and the call returns ABORTED
+    // together with a reply describing the resulting state.
     rpc ControlEnvironment (ControlEnvironmentRequest) returns (ControlEnvironmentReply) {}
+
+    // Without force, a CONFIGURED environment is first RESET, and a RUNNING one is first stopped
+    // if allowInRunningState is set. An environment in any other state (including RUNNING without
+    // allowInRunningState), or one for which any of these steps fails, is destroyed as if force was set.
     rpc DestroyEnvironment (DestroyEnvironmentRequest) returns (DestroyEnvironmentReply) {}
+
+    // Detectors used by any environment.
     rpc GetActiveDetectors (Empty) returns (GetActiveDetectorsReply) {}
+
+    // Detectors not used by any environment.
     rpc GetAvailableDetectors (Empty) returns (GetAvailableDetectorsReply) {}
 
     // Creates a new environment.
     // It returns once an environment ID is created and continues the creation asynchronously to the call.
     // The environment will be listed in GetEnvironments() only once the workflow is loaded and deployment starts.
+    // A failure is reported only as an environment event with state ERROR.
     rpc NewEnvironmentAsync (NewEnvironmentRequest) returns (NewEnvironmentReply) {}
 
 //    rpc SetEnvironmentProperties (SetEnvironmentPropertiesRequest) returns (SetEnvironmentPropertiesReply) {}
 //    rpc GetEnvironmentProperties (GetEnvironmentPropertiesRequest) returns (GetEnvironmentPropertiesReply) {}
 
+    // Returns all tasks known to AliECS, regardless of the environment they belong to (if any).
     rpc GetTasks (GetTasksRequest) returns (GetTasksReply) {}
+
+    // Channels and the task path are filled in only if the task is locked, i.e. belongs to an environment.
     rpc GetTask(GetTaskRequest) returns (GetTaskReply) {}
+
+    // Only tasks not locked by an environment can be killed; requesting a locked task is an error.
+    // The reply lists which tasks were killed and which are still running.
     rpc CleanupTasks(CleanupTasksRequest) returns (CleanupTasksReply) {}
 
     rpc GetRoles (GetRolesRequest) returns (GetRolesReply) {}
 
+    // Default values of variables are overridden by matching Apricot vars.
     rpc GetWorkflowTemplates (GetWorkflowTemplatesRequest) returns (GetWorkflowTemplatesReply) {}
 
+    // Repos are ordered alphabetically. The index used in the repo calls below refers to this order,
+    // and is thus invalidated by adding or removing a repo.
     rpc ListRepos(ListReposRequest) returns (ListReposReply) {}
+
+    // Adds the repo, cloning it unless it is local.
     rpc AddRepo(AddRepoRequest) returns (AddRepoReply) {}
+
+    // Deletes the local clone. If the removed repo was the default one, the first repo in the list becomes the default.
     rpc RemoveRepo(RemoveRepoRequest) returns (RemoveRepoReply) {}
+
     rpc RefreshRepos(RefreshReposRequest) returns (Empty) {}
+
+    // Fails if the repo is already the default one.
     rpc SetDefaultRepo(SetDefaultRepoRequest) returns (Empty) {}
+
     rpc SetGlobalDefaultRevision(SetGlobalDefaultRevisionRequest) returns (Empty) {}
+
+    // Does not return an error if the revision does not exist. Instead, the default revision is left unchanged
+    // and the available revisions are returned in info. An empty info means the revision was changed.
     rpc SetRepoDefaultRevision(SetRepoDefaultRevisionRequest) returns (SetRepoDefaultRevisionReply) {}
+
+    // Streams events of an environment created with NewAutoEnvironment, identified by the id
+    // given in that request. The stream ends when the environment's event stream is closed.
+    // If no NewAutoEnvironment call uses the id, the call never returns and waits for one (busy-looping).
     rpc Subscribe(SubscribeRequest) returns (stream events.Event) {}
 
+    // Plugins which are registered but not loaded are listed with empty fields.
     rpc GetIntegratedServices(Empty) returns (ListIntegratedServicesReply) {}
 
     // Reserved and not implemented:
@@ -121,7 +166,7 @@ message TeardownReply {}
 // Environment
 ////////////////////////////////////////
 message GetEnvironmentsRequest {
-    bool showAll = 1;
+    bool showAll = 1; // if false (default), only public environments are returned
     bool showTaskInfos = 2;
     bool showDetailedIntegratedServices = 3; // integratedServices are returned everytime, setting this flag gives detailed report
 }
@@ -187,12 +232,12 @@ message GetEnvironmentReply {
 message ControlEnvironmentRequest {
     string id = 1;
     enum Optype {
-        NOOP = 0;
+        NOOP = 0;           // not accepted
         START_ACTIVITY = 1;
         STOP_ACTIVITY = 2;
         CONFIGURE = 3;
         RESET = 4;
-        GO_ERROR = 5;
+        GO_ERROR = 5;       // not accepted
         DEPLOY = 6;
     }
     Optype type = 2;
@@ -231,9 +276,9 @@ message ModifyEnvironmentReply {
 
 message DestroyEnvironmentRequest {
     string id = 1;
-    bool keepTasks = 2;
-    bool allowInRunningState = 3;
-    bool force = 4;
+    bool keepTasks = 2; // if false (default), the environment's tasks are killed after its destruction; ignored if the destruction falls back to force
+    bool allowInRunningState = 3; // if true, a RUNNING environment is stopped before its destruction; if false, it is destroyed as if force was set
+    bool force = 4; // if true, the environment is torn down immediately regardless of its state
     common.User requestUser = 5;
 }
 message DestroyEnvironmentReply {
@@ -335,7 +380,7 @@ message TaskInfo {
 }
 
 message CleanupTasksRequest {
-    repeated string taskIds = 1;
+    repeated string taskIds = 1; // if empty, all tasks are killed (best effort)
 }
 message CleanupTasksReply {
     repeated ShortTaskInfo killedTasks = 1;
@@ -348,7 +393,7 @@ message CleanupTasksReply {
 ////////////////////////////////////////
 message GetRolesRequest {
     string envId = 1;
-    string pathSpec = 2;
+    string pathSpec = 2; // dot-separated role path to look for, e.g. "a.b"; "*" stands for any text within one path element, "**" for any text across elements
 }
 
 message RoleInfo {
@@ -371,11 +416,11 @@ message GetRolesReply {
 }
 
 message GetWorkflowTemplatesRequest{
-    string repoPattern = 1;
-    string revisionPattern = 2;
-    bool allBranches = 3;
-    bool allTags = 4;
-    bool allWorkflows = 5;
+    string repoPattern = 1; // repo name, or its index as in ListRepos; "*" stands for any text. Empty means all repos
+    string revisionPattern = 2; // branch, tag or commit hash; "*" stands for any text. Empty means the default revision of each repo
+    bool allBranches = 3; // if true, templates of all branches are returned; cannot be combined with revisionPattern
+    bool allTags = 4; // if true, templates of all tags are returned; cannot be combined with revisionPattern
+    bool allWorkflows = 5; // if false (default), only public templates are returned
 }
 
 message VarSpecMessage {
@@ -446,7 +491,7 @@ message ListReposReply {
 
 message AddRepoRequest {
     string name = 1;
-    string defaultRevision = 2;
+    string defaultRevision = 2; // if empty, the global default revision is used
 }
 
 message AddRepoReply {
@@ -465,7 +510,7 @@ message RemoveRepoReply {
 }
 
 message RefreshReposRequest {
-    int32 index = 1;
+    int32 index = 1; // -1 refreshes all repos
 }
 
 message SetDefaultRepoRequest {
